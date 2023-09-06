@@ -76,7 +76,7 @@ It’s extremely important for the development team to closely follow the archit
 6. **SLA**: 98%
 
 ## Executive Summary
-This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br>The information will be used by NYC to make decisions regarding transportation budgets, timing of municipal construction work, advertising fees, and more.<br><br>
+This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br>The information that will be collected by the system will be used by NYC to make decisions regarding transportation budgets, timing of municipal construction work, advertising fees, and more.<br><br>
 When designing the architecture, a strong emphasis was put on the following qualities:
 -	The application should be reliable and support very high load (per the population of NYC, specifically during rush hours).
 -	The application should be fast.
