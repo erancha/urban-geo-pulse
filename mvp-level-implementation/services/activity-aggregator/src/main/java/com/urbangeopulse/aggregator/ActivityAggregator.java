@@ -118,7 +118,7 @@ public class ActivityAggregator {
                         }
                     });
 
-                    // consume, with poll interval between 1 and 1000 ms - when there're no records, the interval doubles the next time (up to 1000 ms).
+                    // consume, with poll interval between 1,000 and 1 ms, depending on whether records were consumed or not.
                     short pollIntervalInMS = 1000;
                     ZoneId zoneId = ZoneId.systemDefault();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
