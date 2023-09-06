@@ -84,9 +84,9 @@ When designing the architecture, a strong emphasis was put on the following qual
 
 Here is a high-level overview of the architecture:
      ![Lucid](https://lucid.app/publicSegments/view/2931220a-1f70-4aaf-b625-87ea76985332/image.jpeg "System diagram")
-<p>As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled microservices, each has its own task, and each communicate with the other services using standard protocols.
+As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicate with the other services using standard protocols.
 
-All the services are built as stateless services, allowing to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting it from cases of shutdown.
+All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
 
 <p>This architecture, in conjunction with a modern development platform (JAVA Spring Boot), will help create a modern, robust, scalable, easy to maintain, and reliable system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
