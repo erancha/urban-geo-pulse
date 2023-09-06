@@ -84,7 +84,7 @@ When designing the architecture, a strong emphasis was put on the following qual
 
 Here is a high-level overview of the architecture:
      ![Lucid](https://lucid.app/publicSegments/view/2931220a-1f70-4aaf-b625-87ea76985332/image.jpeg "System diagram")
-As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicate with the other services using standard protocols.
+As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
 All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
 
