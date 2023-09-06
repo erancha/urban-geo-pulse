@@ -151,14 +151,14 @@ The following tech stack was preferred, primarily **due to current experience of
 <p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
 
 As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
-Note: **Consumer groups rebalancing** must be handled properly by the services (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service)) service.
+Note: **Consumer groups rebalancing** must be handled properly by the services (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
 ### Scalability
 <p>(Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system))</p>
 
 This architecture allows to easily scale services as needed:
 1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
-2. For example, the [Mobilization-sorter service](#mobilization-sorter-service) is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
+2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
 ### Security
