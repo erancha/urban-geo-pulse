@@ -94,7 +94,7 @@ public class MobilizationSorter {
                     //1. Each **first** location from a person (UUID) is **cached** into Redis.
                     //2. The **second** location from the same person (UUID) is **compared** with the cached location.
                     //3. The **speed** is calculated by dividing the **distance** between the two locations (using a JAVA-based spatial functionality: org.locationtech.jts.io.WKTReader) by the **time** delta between the two messages.
-                    short pollIntervalInMS = 1000; // consume, with poll interval between 1 and 1000 ms - when there're no records, the interval doubles the next time (up to 1000 ms).
+                    short pollIntervalInMS = 1000; // consume, with poll interval between 1,000 and 1 ms, depending on whether records were consumed or not.
                     while (true) {
                         logger.finer(String.format("poll interval = %d MS", pollIntervalInMS));
                         ConsumerRecords<String, String> kafkaRecords = consumer.poll(Duration.ofMillis(pollIntervalInMS));

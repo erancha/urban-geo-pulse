@@ -99,7 +99,7 @@ public class LocationsFinder {
                     }
                 };
                 try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(INPUT_TOPIC_NAME, CONSUMER_CONFIGS, rebalanceListener)) {
-                    // consume, with poll interval between 1 and 1000 ms - when there're no records, the interval doubles the next time (up to 1000 ms).
+                    // consume, with poll interval between 1,000 and 1 ms, depending on whether records were consumed or not.
                     short pollIntervalInMS = 1000;
                     while (true) {
                         logger.finer(String.format("poll interval = %d MS", pollIntervalInMS));
