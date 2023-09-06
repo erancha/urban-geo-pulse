@@ -196,7 +196,8 @@ In addition, the development team should take into consideration best practices 
 
 ### Mobile application
 #### Role:
-- To collect geospatial data, e.g. from cell phones, and send messages to the [Receiver service](#receiver-service).
+- To **collect geospatial data**, e.g. from cell phones, and send messages to the [Receiver service](#receiver-service).
+- Each message is a geospatial **point** of the location in which the data was collected.
 
 <hr>
 
