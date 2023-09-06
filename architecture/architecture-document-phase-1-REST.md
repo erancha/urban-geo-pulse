@@ -151,7 +151,7 @@ The following tech stack was preferred, primarily **due to current experience of
 <p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
 
 As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
-Note: **Consumer groups rebalancing** must be handled properly by the services (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service)) service.
+Note: **Consumer groups rebalancing** must be handled properly by the services (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
 ### Scalability
 <p>(Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system))</p>
