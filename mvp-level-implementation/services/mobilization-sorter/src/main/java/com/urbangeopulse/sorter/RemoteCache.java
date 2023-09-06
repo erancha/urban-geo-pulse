@@ -9,11 +9,12 @@ import java.util.logging.Logger;
 /**
  * Basic, non-threads-safe, redis-based remote cache.
  * TODO: Handle Garbage Collection!
- * 127.0.0.1:6379> keys *
- *      ..
- *      39533) "7c65ae98-0642-4d92-aef4-e23c38dae3f0"
- *      39534) "42683486-179a-4021-b75c-8eac2ad2823f"
- * 127.0.0.1:6379> flushall
+ *      Docker Desktop:
+ *      1. development-redis-server-1
+ *      2. Open in terminal
+ *      3. /data # redis-cli
+ *      4. keys *
+ *      5. flushall
  */
 public class RemoteCache implements Cache {
     private static final Logger logger = Logger.getLogger(RemoteCache.class.getName());
