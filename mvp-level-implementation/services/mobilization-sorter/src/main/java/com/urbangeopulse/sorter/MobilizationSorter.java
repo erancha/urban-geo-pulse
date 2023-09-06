@@ -5,6 +5,7 @@ import com.urbangeopulse.utils.kafka.KafkaUtils;
 import com.urbangeopulse.utils.serialization.JavaSerializer;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -85,7 +86,7 @@ public class MobilizationSorter {
                     }
                 };
                 try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, CONSUMER_CONFIGS, rebalanceListener)) {
-                    WKTReader reader = new WKTReader();
+                    WKTReader wktReader = new WKTReader();
 
                     //Note! When using a local cache, if the process crashes and restarts, messages already committed and not yet forwarded (i.e. the first message for a uuid) will be lost.
                     Cache cache = MOBILIZATION_SORTER_DEBUG_USE_LOCAL_CACHE ? new LocalCache() : new RemoteCache();
@@ -112,10 +113,10 @@ public class MobilizationSorter {
                                 if (prevKafkaRecordValue == null) cache.put(currUuid, currKafkaRecordValue);
                                 else {
                                     Map prevEvent = JavaSerializer.read(prevKafkaRecordValue, HashMap.class);
-                                    double distanceBetweenPoints = Math.abs(reader.read((String) currEvent.get("point")).distance(reader.read((String) prevEvent.get("point"))));
-                                    long timeBetweenPointsInMS = Math.abs((Long) currEvent.get("eventTimeInMS") - (Long) prevEvent.get("eventTimeInMS"));
-                                    logger.fine(String.format("currUuid '%s' : distance %.0f meters(?) in %3.1f sec", currUuid, distanceBetweenPoints, (double)timeBetweenPointsInMS / 1000));
-                                    KafkaUtils.send(distanceBetweenPoints / ((double) timeBetweenPointsInMS / 1000) <= 10 // <= 10 meter/sec is assumed to be pedestrian
+                                    double distanceBetweenPointsInMeter = getDistanceBetweenPointsInMeter(wktReader, currEvent, prevEvent);
+                                    double timeBetweenPointsInSec = getTimeBetweenPointsInSec(currEvent, prevEvent);
+                                    logger.fine(String.format("currUuid '%s' : distance %.0f meters(?) in %3.1f sec", currUuid, distanceBetweenPointsInMeter, timeBetweenPointsInSec));
+                                    KafkaUtils.send(distanceBetweenPointsInMeter / timeBetweenPointsInSec <= 7 // <= 7 meter/sec is assumed to be a pedestrian (== 25 km/h).
                                                     ? PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME
                                                     : MOBILIZED_GEO_LOCATIONS_TOPIC_NAME
                                             , currKafkaRecordValue, currUuid);
@@ -155,5 +156,13 @@ public class MobilizationSorter {
         } catch (Exception ex) {
             com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
         }
+    }
+
+    private static double getDistanceBetweenPointsInMeter(WKTReader wktReader, Map currEvent, Map prevEvent) throws ParseException {
+        return Math.abs(wktReader.read((String) currEvent.get("point")).distance(wktReader.read((String) prevEvent.get("point"))));
+    }
+
+    private static double getTimeBetweenPointsInSec(Map currEvent, Map prevEvent) {
+        return (double) (Math.abs((Long) currEvent.get("eventTimeInMS") - (Long) prevEvent.get("eventTimeInMS"))) / 1000;
     }
 }
