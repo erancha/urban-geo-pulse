@@ -164,12 +164,12 @@ This architecture allows to easily scale services as needed:
 ### Security
 <p>(Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.)</p>
 
-This external services ([Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service)) should support the OAuth2 (Open Authorization 2.0) JWT (JSON Web Tokens) and  [JWT](https://jwt.io) authentication protocols.
-Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a User Management component requiring to create a user, define a password, etc..
-- OAuth2 is the primary authentication protocol used to grant access to user accounts without sharing the actual login credentials. It allows third-party applications to request access to user data on their behalf.
+This external services ([Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service)) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and  [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
+Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
+- [OAuth2](https://oauth.net/2/) is the primary authentication protocol used to grant access to user accounts without sharing the actual login credentials. It allows third-party applications to request access to user data on their behalf.
 During the OAuth2 authentication flow, the Gmail API uses JWT to generate and sign the access tokens. 
-- JSON Web Tokens (JWT) are a compact, URL-safe means of representing claims between two parties. The access token contains information about the user and the permissions granted to the third-party application.
-In summary, OAuth2 is used for the overall authentication process, while JWT is used for generating and signing the access tokens that grant access to user data.
+- [JWT](https://jwt.io/) (JSON Web Tokens) are a compact, URL-safe means of representing claims between two parties. The access token contains information about the user and the permissions granted to the third-party application.
+- In summary, OAuth2 is used for the overall authentication process, while JWT is used for generating and signing the access tokens that grant access to user data.
 
 **Implementation Instructions**:
 - Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies.
