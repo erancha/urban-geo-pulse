@@ -7,6 +7,7 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 2. Create additional tables for the UrbanGeoPulse application: [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd)
 3. Maven build [workspace/pom.xml](workspace/pom.xml) (either from an IDE or from command line),
 4. Start Docker Desktop. The implementation requires a Docker engine, e.g. Docker Desktop, at least for 3rd party services (Kafka, PostgreSQL, Redis)
+5. In [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd), set PG_CONTAINER_ID to the current id of the docker container *development-postgis-server-nyc-1*.
 5. Execute [scripts/development/start-all.cmd](scripts/development/start-all.cmd).
 6. The folder [scripts/deployment](scripts/deployment) contains necessary files for a fully containerized deployment.
 
