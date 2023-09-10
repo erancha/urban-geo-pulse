@@ -15,11 +15,12 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 The [Receiver](services/receiver/architecture.md) service can also be instructed to simulate a message for each point in one or more streets of the [data bundle](https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip) of the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.<br>
 Each two adjacent points are automatically associated with the same person (i.e. have the same uuid), to simulate a movement.
 
-### Contribution ideas: 
+### Contribution suggestions: 
 1. **Web App** for:
    1. Showing results from the [Info](services/info/architecture.md) service, potentially with web-sockets to automatically refresh the UI when the order of higher concentration streets or neighborhood changes.
    2. **Visualizing** the activity data aggregated by the [Activity-aggregator](services/activity-aggregator/architecture.md) service on top of the NYC streets and neighborhood using **vector tiles**.
-2. Preparing a **Kubernetes** configuration.
+2. Adding [MQTT messaging](../architecture/architecture-document-phase-1-REST.md#messaging).
+3. Preparing a **Kubernetes** configuration.
 3. Hardening the implementation for production.
 4. ..
 
