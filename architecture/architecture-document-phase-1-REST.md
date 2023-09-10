@@ -133,7 +133,7 @@ The following tech stack was preferred, primarily **due to current experience of
 
 2. **Kafka**:
     - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
-    - Real-time data processing: Kafka enables real-time event streaming and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
+    - Real-time data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
 
 3. **PostgreSQL**:
     - Reliability and stability: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
@@ -283,7 +283,7 @@ For better [scalability](#scaling) it is advisable to configure **read-only repl
 ### Info service
 #### Role:
 - This service should provide the ability to retrieve information on streets and neighborhoods with the highest number of pedestrians or mobilized individuals.
-- This retrieval should be possible on-demand, allowing users to specify the desired timeframe (in minutes resolution) within the last 24 hours.
+- This retrieval should be possible **in real time**, allowing users to specify the desired timeframe (in minutes resolution) within the last 24 hours.
 - The results should be returned in descending order based on the number of pedestrians or mobilized individuals.
 - Users should be able to specify the number of streets (N1) and neighborhoods (N2) they want to retrieve.
 

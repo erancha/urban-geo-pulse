@@ -1,8 +1,8 @@
 ## <font color="LightSeaGreen">UrbanGeoPulse</font>
 #### A Big Data Geospatial Application.
-(This is a hypothetical **big data** exercise for **software architects**, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop)<br>
 
 ## Background:
+(This is a **big data streaming** exercise for **software architects**, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop)<br><br>
 The city of New York (NYC) requires real-time information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any given time of day. 
 <p>This information will be used to make decisions regarding transportation budgets, timing of municipal construction work, advertising fees, and more.</p>
 
@@ -14,7 +14,7 @@ These messages can be sent by **pedestrians** as well as **mobilized** individua
 
 2. Identify pedestrians and mobilized individuals messages based on the speed calculated between the last two messages sent from the same device.
 
-3. Retrieve streets and neighborhoods activity information.
+3. Retrieve streets and neighborhoods activity information **in real time**, allowing users to specify a desired timeframe within the last 24 hours.
 
 ## Solution:
 Here is the proposed solution for the given requirements:
