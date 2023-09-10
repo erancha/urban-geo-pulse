@@ -68,13 +68,14 @@ services:
       - 6379:6379
 
   postgis-server-nyc:
-    image: postgis/postgis:12-3.3
+    image: postgis/postgis:15-3.4
     ports:
       - 5433:5432
     networks:
       - urbangeopulse-net
     volumes:
       - ${LOCALAPPDATA}\Temp\postgreSQL_nyc:/var/lib/postgresql/data
+      # - D:\Temp\postgreSQL_nyc:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
@@ -83,7 +84,7 @@ services:
   # pgadmin-server:
     # image: dpage/pgadmin4
     # ports:
-      # - 8081:80
+      # - 8082:80
     # networks:
       # - urbangeopulse-net
     # volumes:

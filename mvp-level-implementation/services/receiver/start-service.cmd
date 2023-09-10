@@ -24,8 +24,10 @@
 
 	REM set URL_TO_EXECUTE_AFTER_STARTUP="http://localhost:8080/urbangeopulse/api/simulator/streets/points?streetName=Duffield St&iterationsCount=10&saveToBackup=true"
 	set PEOPLE_GEO_LOCATIONS_CSV=people-geo-locations--Duffield_St.csv
-	set COPY_FROM_BACKUP=1*1000
-	set TIME_TO_WAIT_IN_SEC=1050
+	set COPY_FROM_BACKUP=1*1
+	set TIME_TO_WAIT_IN_SEC=120
+	REM set COPY_FROM_BACKUP=1*1000
+	REM set TIME_TO_WAIT_IN_SEC=1050
 	REM set COPY_FROM_BACKUP=1*10000
 	REM set TIME_TO_WAIT_IN_SEC=5500
 	REM set COPY_FROM_BACKUP=5*2000
