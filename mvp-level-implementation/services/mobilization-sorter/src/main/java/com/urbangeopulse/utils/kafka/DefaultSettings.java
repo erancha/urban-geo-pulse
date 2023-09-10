@@ -16,6 +16,7 @@ public class DefaultSettings implements ISettings {
         return KAFKA_BROKER_PORT != null ? Short.parseShort(KAFKA_BROKER_PORT) : 29092;
     }
 
+    @Override
     public String getKafkaBroker() {
         return String.format("%s:%d", getKafkaBrokerHost(), getKafkaBrokerPort());
     }
