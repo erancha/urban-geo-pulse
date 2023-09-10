@@ -1,7 +1,7 @@
 	start /B docker-compose-up
 
 	call set-sql-env.cmd
-	REM copy delete-from-agg_x_activity.sql %LOCALAPPDATA%\Temp\postgreSQL_nyc\urbangeopulse
+	REM copy delete-from-agg_x_activity.sql %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc\urbangeopulse
 	REM docker exec -i %PG_CONTAINER_ID% psql --dbname=nyc --file=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.sql --username=user --output=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.out
 
 	call set-log-env.cmd
