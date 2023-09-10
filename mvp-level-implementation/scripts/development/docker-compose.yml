@@ -68,7 +68,7 @@ services:
       - 6379:6379
 
   postgis-server-nyc:
-    image: postgis/postgis:12-3.3
+    image: postgis/postgis:15-3.4
     ports:
       - 5433:5432
     networks:
