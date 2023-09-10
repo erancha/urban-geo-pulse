@@ -75,6 +75,7 @@ services:
       - urbangeopulse-net
     volumes:
       - ${LOCALAPPDATA}\Temp\postgreSQL_nyc:/var/lib/postgresql/data
+      # - D:\Temp\postgreSQL_nyc:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
