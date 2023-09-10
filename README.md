@@ -1,8 +1,8 @@
 ## <font color="LightSeaGreen">UrbanGeoPulse</font>
 #### A Big Data Geospatial Application.
-( This is a hypothetical **big data streaming** exercise for **software architects**, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop, which focuses on spatial database management using PostGIS )<br>
 
 ## Background:
+(This is a **big data streaming** exercise for **software architects**, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop)<br><br>
 The city of New York (NYC) requires real-time information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any given time of day. 
 <p>This information will be used to make decisions regarding transportation budgets, timing of municipal construction work, advertising fees, and more.</p>
 
