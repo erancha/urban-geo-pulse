@@ -1,5 +1,11 @@
+# <font color="LightSeaGreen">UrbanGeoPulse</font>
+#### A Big Data Geospatial Application.
 # Architecture Document
 
+Note: This document is based on the Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
+The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com).
+
+### Table Of Content
 <!-- toc -->
 
 - [Background](#background)
@@ -42,16 +48,13 @@
 
 <!-- tocstop -->
 
-This document is based on the Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
-The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com). 
-
 
 ## Background
 This document describes the **UrbanGeoPulse**'s architecture, a system requested by the city of New York (NYC).<br>
 (This system is a **showcase** of a **software architecture** definition process. The requirements are hypothetical, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.)
 
 NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any given time of day. <br>
-This information will be used to make decisions regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
+This information **will be used to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
 
 The architecture comprises technology and modeling decisions, that will ensure the final product will be fast, reliable and easy to maintain.
 The document outlines the thought process for every aspect of the architecture, and explains why specific decisions were made.
@@ -60,14 +63,16 @@ It’s extremely important for the development team to closely follow the archit
 ## Requirements
 
 ### Functional Requirements
-1. [Receive](#receiver-service) messages containing geospatial data, e.g. from cell phones.
+1. [Receive](#receiver-service) messages containing **geospatial locations**, e.g. from cell phones.<br>
+These messages can be sent by **pedestrians** as well as **mobilized** individuals.
 
-2. [Identify](#mobilization-sorter-service) pedestrians and mobilized individuals messages.
+2. [Identify](#mobilization-sorter-service) pedestrians and mobilized messages, based on the speed calculated between the last two messages from the same device.
 
-3. [Retrieve](#info-service) streets and neighborhoods activity information.
+3. [Retrieve](#info-service) streets and neighborhoods activity information **in real time**, allowing users to specify a desired timeframe within the last 24 hours.
+
 
 ### Non-Functional Requirements
-1. Performance: **Response time** of streets and neighborhoods activity [retrieval](#info-service) should be no more than **3 seconds**.
+1. Performance: **Response time** of streets and neighborhoods activity [retrieval](#info-service) should not exceed **3 seconds**.
 2. **Data volume**:
    - PostgreSQL: ~**10 GB** per **24 hours**  [ * 60 minutes * (~20,000 streets + ~150 neighborhoods) * ~0.3 KB per aggregated activity record ].
    - Kafka: TBD (depending on Data Retention configuration).
@@ -77,7 +82,7 @@ It’s extremely important for the development team to closely follow the archit
 6. **SLA**: 98%
 
 ## Executive Summary
-This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br>The information that will be collected by the system will be used by NYC to make decisions regarding transportation budgets, timing of municipal construction work, advertising fees, and more.<br><br>
+This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br>The information that will be collected by the system **will be used by NYC to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.<br><br>
 When designing the architecture, a strong emphasis was put on the following qualities:
 -	The application should be reliable and support very high load (per the population of NYC, specifically during rush hours).
 -	The application should be fast.
@@ -89,7 +94,7 @@ As can be seen in the diagram, the application comprises a few separate, indepen
 
 All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
 
-<p>This architecture, in conjunction with a modern development platform (JAVA Spring Boot), will help create a modern, robust, scalable, easy to maintain, and reliable system, that can serve NYC successfully for years to come, and help achieve its financial goals.
+This architecture, in conjunction with a modern development platform (JAVA Spring Boot), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
 ## Overall Architecture
 ### Diagram
@@ -98,8 +103,8 @@ https://lucid.app/documents/view/f63cb019-73ed-40cd-bbc8-c3dde290141b
 
 ### Services
 The architecture comprises the following services:
-* [Mobile application](#mobile-application) - will collect geospatial data and send messages to the [Receiver service](#receiver-service).
-* [Receiver](#receiver-service) service - will receive messages containing geospatial data and produce them **immediately** into a Kafka topic *people_geo_locations* (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
+* [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service).
+* [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic *people_geo_locations* (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
 * [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - *pedestrians_geo_locations*
   - *mobilized_geo_locations*
@@ -116,7 +121,7 @@ The architecture comprises the following services:
 ### Messaging
 The various services communicate with each other using various messaging methods. Each method was selected based on the specific requirements from the services. Here are the various messaging methods used in the system:
 
--	The [Receiver](#receiver-service) service exposes a REST API. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md) MQTT will be considered as a second messaging method.
+-	The [Receiver](#receiver-service) service exposes a REST API. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md), MQTT will be considered as a alternate messaging method.
 
 -	The pipeline services ([Mobilization-sorter](#mobilization-sorter-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru Kafka. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 
@@ -126,27 +131,27 @@ The various services communicate with each other using various messaging methods
 The following tech stack was preferred, primarily **due to current experience of the development team**:
 
 1. JAVA **Spring Boot**:
-    - Rapid Development: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
+    - **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
 
-    - Robust Ecosystem: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
+    - Robust **Ecosystem**: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
 
-    - Production-Ready Features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
+    - **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
 
 2. **Kafka**:
     - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
-    - Real-time data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
+    - **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
 
 3. **PostgreSQL**:
-    - Reliability and stability: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
-    - Advanced features: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
+    - **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
+    - **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
 
 4. **Redis**:
-    - High performance: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
+    - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
     - Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
 
 5. **React**:
     - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
-    - React Native: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
+    - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
 
 ### Reliability
 <p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
@@ -197,14 +202,14 @@ In addition, the development team should take into consideration best practices 
 
 ### Mobile application
 #### Role:
-- To **collect geospatial data**, e.g. from cell phones, and send messages to the [Receiver](#receiver-service) service.
+- To **collect geospatial locations**, e.g. from cell phones, and send messages to the [Receiver](#receiver-service) service.
 - Each message is a geospatial **point** of the location in which the data was collected.
 
 <hr>
 
 ### Receiver service
 #### Role:
-- To receive messages containing geospatial data, e.g. from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
+- To receive messages containing geospatial locations, e.g. from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
   1. UUID (Universal Unique Identifier).
   2. Coordinates (geospatial point).
   3. Timestamp.
@@ -252,7 +257,7 @@ Each instance of this service should handle one and only one combination of mobi
 
 #### Deployment Instructions
 
-The geospatial points are located within a geometries of streets and neighborhoods of the NYC database (refer to the acknowledgment in [PostgreSQL GIS workshop](../README.md)).
+The geospatial points are located within a geometries of streets and neighborhoods of the NYC database.
 For better [scalability](#scaling) it is advisable to configure **read-only replicas** of the NYC database, to isolate these queries from the database used for aggregations (by the [Activity-aggregator](#activity-aggregator-service) service).
 
 <hr>
@@ -265,19 +270,12 @@ For better [scalability](#scaling) it is advisable to configure **read-only repl
     2. *agg_neighborhoods_activity*.
 
 #### Implementation Instructions
-1. Each instance of this service should aggregate and persist data for one and only **one of the following combinations**:
-    1. **Pedestrians** activity in **streets**.
-    2. **Pedestrians** activity in **neighborhoods**.
-    3. **mobilized** activity in **streets**.
-    4. **mobilized** activity in **neighborhoods**.
-2. The combination should be configured by two environment variables, that together decide the input topic (one of the output topics of the [Locations-finder service](#locations-finder-service)):
-    1. ACTIVITY_AGGREGATOR_MOBILITY_TYPE - **pedestrians** or **mobilized**.
-    2. ACTIVITY_AGGREGATOR_LOCATION_TYPE - **street** or **neighborhood**.
-3. This will allow [scaling](#scalability) specific combinations according to the load, as explained in the [Locations-finder](#locations-finder-service) service.
-4. The persistence interval and number of records should be configurable by environment variables: ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC and ACTIVITY_AGGREGATOR_PERSISTENCE_MAX_RECORDS. This will provide a way to control the memory consumption and database persistence time. 
-5. Each service instance should further allow spawning a few consumer threads, using an environment variable: ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT.
-6. The number of partitions in the input topic should be greater or equal to the number of consumer threads. The reason for that is to ensure that all consumers will actually consume and process messages.
-7. **Consumer groups rebalancing must be handled** properly by this service, otherwise messages aggregated in-memory might be lost when the service will attempt to commit the uncommitted offsets associated with these messages.
+1. Each instance of this service should aggregate and persist data for one and only **one combination** of **Pedestrians**/**mobilized** and **streets**/**neighborhoods**.
+2. The combination should be configured by two environment variables, that together decide the input topic (one of the output topics of the [Locations-finder service](#locations-finder-service)). This will allow [scaling](#scalability) specific combinations according to the load, as explained in the [Locations-finder](#locations-finder-service) service.
+3. The persistence interval and number of records should be configurable by environment variables. This should provide a way to control the memory consumption and database persistence time. 
+4. **Consumer groups rebalancing must be handled** properly by this service, otherwise messages aggregated in-memory might be lost when the service will attempt to commit the uncommitted offsets associated with these messages.
+
+Further details can be found in the [mvp-level implementation](../mvp-level-implementation/services/activity-aggregator/architecture.md).
 
 <hr>
 

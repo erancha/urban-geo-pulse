@@ -9,7 +9,7 @@ This information **will be used to make decisions** regarding transportation bud
 ## Functional Requirements:
 The **UrbanGeoPulse** system should fulfill the following functional requirements:
 
-1. **Receive** messages containing geospatial data, e.g. from cell phones.<br>
+1. **Receive** messages containing **geospatial locations**, e.g. from cell phones.<br>
 These messages can be sent by **pedestrians** as well as **mobilized** individuals.
 
 2. **Identify** pedestrians and mobilized individuals messages based on the speed calculated between the last two messages sent from the same device.
