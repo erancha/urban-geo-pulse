@@ -59,10 +59,13 @@ public class LocationsFinder {
     @Value("${LOCATIONS_FINDER_LOCATION_TYPE:street}")
     private String LOCATIONS_FINDER_LOCATION_TYPE;
 
-    @Autowired
-    LocationFinderDataService dataService;
-
     static final AtomicLong counter = new AtomicLong();
+
+    private final LocationFinderDataService dataService;
+
+    public LocationsFinder(LocationFinderDataService dataService) {
+        this.dataService = dataService;
+    }
 
     @PostConstruct
     void startBackgroundConsumers() {

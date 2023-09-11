@@ -18,10 +18,13 @@ import java.util.logging.Logger;
  */
 @Component
 public class AggregatorDataService {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private static final Logger logger = Logger.getLogger(AggregatorDataService.class.getName());
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public AggregatorDataService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     /**
      * persist minuteResolutionMap

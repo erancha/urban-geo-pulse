@@ -34,8 +34,11 @@ public class SimulatorController {
     @Value("${URL_TO_EXECUTE_AFTER_STARTUP:#{null}}")
     private String URL_TO_EXECUTE_AFTER_STARTUP;
 
-    @Autowired
-    SimulatorDataService dataService;
+    private final SimulatorDataService dataService;
+
+    public SimulatorController(SimulatorDataService dataService) {
+        this.dataService = dataService;
+    }
 
     /**
      * @param streetName - street name for which to generate points. if null - generate for all streets.

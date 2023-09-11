@@ -14,8 +14,11 @@ public class InfoDataService {
 
     private final static Logger logger = Logger.getLogger(InfoDataService.class.getName());
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public InfoDataService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     /**
      * @param startTimestamp - start time stamp.

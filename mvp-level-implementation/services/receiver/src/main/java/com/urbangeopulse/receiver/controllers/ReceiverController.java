@@ -13,8 +13,11 @@ public class ReceiverController {
 
     private static final Logger logger = Logger.getLogger(ReceiverController.class.getName());
 
-    @Autowired
-    ReceiverDataService dataService;
+    private final ReceiverDataService dataService;
+
+    public ReceiverController(ReceiverDataService dataService) {
+        this.dataService = dataService;
+    }
 
     /** process a geospatial point.
      * @param uuid - Universal Unique Identifier of the device that sent the point.

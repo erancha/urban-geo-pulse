@@ -19,8 +19,11 @@ public class InfoController {
 
     private static final Logger logger = Logger.getLogger(InfoController.class.getName());
 
-    @Autowired
-    InfoDataService dataService;
+    private final InfoDataService dataService;
+
+    public InfoController(InfoDataService dataService) {
+        this.dataService = dataService;
+    }
 
     /**
      * @param startTimestamp - start time stamp.

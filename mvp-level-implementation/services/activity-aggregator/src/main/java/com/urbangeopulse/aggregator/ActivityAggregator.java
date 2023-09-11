@@ -62,12 +62,15 @@ public class ActivityAggregator {
     @Value("${ACTIVITY_AGGREGATOR_LOCATION_TYPE:street}")
     private String ACTIVITY_AGGREGATOR_LOCATION_TYPE;
 
-    @Autowired
-    AggregatorDataService dataService;
-
     private String INPUT_TOPIC_NAME;
     private final AtomicLong counter = new AtomicLong();
     private final AtomicInteger maxRecordsToAggregate = new AtomicInteger();
+
+    private final AggregatorDataService dataService;
+
+    public ActivityAggregator(AggregatorDataService dataService) {
+        this.dataService = dataService;
+    }
 
     @PostConstruct
     void startBackgroundConsumers() {

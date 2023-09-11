@@ -14,10 +14,13 @@ import java.util.stream.Collectors;
  */
 @Component
 public class LocationFinderDataService {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private static final Logger logger = Logger.getLogger(LocationFinderDataService.class.getName());
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public LocationFinderDataService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     /**
      * @param pointGeom - point to locate.
