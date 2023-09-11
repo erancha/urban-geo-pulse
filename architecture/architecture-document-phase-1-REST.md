@@ -99,7 +99,7 @@ This architecture, in conjunction with a modern development platform (JAVA Sprin
 
 ## Overall Architecture
 ### Diagram
-![Lucid](https://lucid.app/publicSegments/view/fe3f96c3-2e63-4cf1-b23a-03835ab8bf11/image.jpeg "System diagram")
+![Lucid](https://lucid.app/publicSegments/view/6c1d67c3-295f-4106-9f45-3d574458b0aa/image.jpeg "System diagram")
 https://lucid.app/documents/view/f63cb019-73ed-40cd-bbc8-c3dde290141b
 
 ### Services
