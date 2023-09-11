@@ -1,11 +1,13 @@
 # <font color="LightSeaGreen">UrbanGeoPulse</font>
 #### A Big Data Geospatial Application.
+
 # Architecture Document
 
 Note: This document is based on the Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
 The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com).
 
 ### Table Of Content
+
 <!-- toc -->
 
 - [Background](#background)
@@ -21,10 +23,10 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   * [Reliability](#reliability)
   * [Scalability](#scalability)
   * [Security](#security)
-  * [Maintainability](#maintainability)
   * [Testability](#testability)
     + [Logging](#logging)
     + [System level testing](#system-level-testing)
+  * [Maintainability](#maintainability)
 - [Services Drill Down](#services-drill-down)
   * [Mobile application](#mobile-application)
     + [Role:](#role)
@@ -48,10 +50,9 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 
 <!-- tocstop -->
 
-
 ## Background
 This document describes the **UrbanGeoPulse**'s architecture, a system requested by the city of New York (NYC).<br>
-(This system is a **showcase** of a **software architecture** definition process. The requirements are hypothetical, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.)
+(This is a **showcase** of a **software architecture** definition process. The requirements are hypothetical, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.)
 
 NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any given time of day. <br>
 This information **will be used to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
@@ -68,7 +69,7 @@ These messages can be sent by **pedestrians** as well as **mobilized** individua
 
 2. [Identify](#mobilization-sorter-service) pedestrians and mobilized messages, based on the speed calculated between the last two messages from the same device.
 
-3. [Retrieve](#info-service) streets and neighborhoods activity information **in real time**, allowing users to specify a desired timeframe within the last 24 hours.
+3. Allow users to [retrieve](#info-service) streets and neighborhoods activity information **in real time** for a desired timeframe within the last 24 hours.
 
 
 ### Non-Functional Requirements
