@@ -2,7 +2,6 @@ package com.urbangeopulse.receiver.controllers;
 
 import com.urbangeopulse.receiver.services.SimulatorDataService;
 import com.urbangeopulse.receiver.services.Writer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;

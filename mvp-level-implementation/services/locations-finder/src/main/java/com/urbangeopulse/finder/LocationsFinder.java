@@ -7,7 +7,6 @@ import com.urbangeopulse.utils.serialization.JavaSerializer;
 import com.urbangeopulse.utils.serialization.JsonException;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
