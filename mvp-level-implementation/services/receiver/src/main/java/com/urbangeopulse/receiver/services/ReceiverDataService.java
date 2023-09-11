@@ -4,7 +4,6 @@ import com.urbangeopulse.exceptions.InitializationException;
 import com.urbangeopulse.utils.kafka.KafkaUtils;
 import com.urbangeopulse.utils.serialization.JavaSerializer;
 import com.urbangeopulse.utils.serialization.JsonException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

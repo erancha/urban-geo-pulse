@@ -1,6 +1,5 @@
 package com.urbangeopulse.aggregator.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -34,7 +33,7 @@ public class AggregatorDataService {
      * @param locationType        - street or neighborhood.
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    private void persist(Map<String, Integer> minuteResolutionMap, String mobilityType, String locationType) {
+    public void persist(Map<String, Integer> minuteResolutionMap, String mobilityType, String locationType) {
         if (!minuteResolutionMap.isEmpty()) {
             // persist:
             String upsertQuery = String.format("INSERT INTO agg_%ss_activity (" +
