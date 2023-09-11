@@ -1,8 +1,8 @@
 ## <font color="LightSeaGreen">UrbanGeoPulse</font>
 #### A Big Data Geospatial Application.
+(This is a **showcase** of a **software architecture** definition process. The requirements are hypothetical.)
 
 ## Background:
-(This application is a **big data streaming** showcase of **software architecture**, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop)<br><br>
 The city of New York (NYC) requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at **any given time of day**.<br> 
 This information **will be used to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
 
