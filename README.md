@@ -14,7 +14,7 @@ These messages can be sent by **pedestrians** as well as **mobilized** individua
 
 2. **Identify** pedestrians and mobilized individuals messages based on the speed calculated between the last two messages sent from the same device.
 
-3. **Retrieve** streets and neighborhoods activity information **in real time**, allowing users to specify a desired timeframe within the last 24 hours.
+3. Allow users to **retrieve** streets and neighborhoods activity information **in real time** for a desired timeframe within the last 24 hours.
 
 ## Solution:
 Here is the proposed solution for the given requirements:
