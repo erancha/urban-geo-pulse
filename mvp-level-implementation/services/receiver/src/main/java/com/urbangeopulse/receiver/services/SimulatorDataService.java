@@ -35,8 +35,8 @@ public class SimulatorDataService {
 
     private final static Logger logger = Logger.getLogger(SimulatorDataService.class.getName());
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final ReceiverDataService receiverDataService;
+    private final JdbcTemplate jdbcTemplate;
 
     @Value("${PEOPLE_GEO_LOCATIONS_TOPIC_NAME:people_geo_locations__default}")
     private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
@@ -44,10 +44,10 @@ public class SimulatorDataService {
     @Value("${COPY_FROM_BACKUP:#{null}}")
     private String COPY_FROM_BACKUP;
 
-    private Writer DEFAULT_WRITER = null;
-
-    @Autowired
-    ReceiverDataService receiverDataService;
+    public SimulatorDataService(ReceiverDataService receiverDataService, JdbcTemplate jdbcTemplate) {
+        this.receiverDataService = receiverDataService;
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @PostConstruct
     private void initialize() {
@@ -59,7 +59,6 @@ public class SimulatorDataService {
                 final boolean isBackupFileExist =  new File(FileWriter.BACKUP_FILENAME).exists();
                 if (!isBackupFileExist) logger.severe(String.format("Backup file '%s' does not exist!", FileWriter.BACKUP_FILENAME));
                 else {
-                    DEFAULT_WRITER = createWriter(false);
                     final String[] parts = COPY_FROM_BACKUP.split("\\*");
                     final short THREADS_COUNT = Short.parseShort(parts[0]);
                     final int ITERATIONS_COUNT = Integer.parseInt(parts[1]);

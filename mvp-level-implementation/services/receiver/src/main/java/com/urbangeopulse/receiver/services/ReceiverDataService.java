@@ -6,7 +6,6 @@ import com.urbangeopulse.utils.serialization.JavaSerializer;
 import com.urbangeopulse.utils.serialization.JsonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -20,9 +19,6 @@ import static com.urbangeopulse.utils.misc.Logger.logException;
 public class ReceiverDataService {
 
     private final static Logger logger = Logger.getLogger(ReceiverDataService.class.getName());
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Value("${PEOPLE_GEO_LOCATIONS_TOPIC_NAME:people_geo_locations__default}")
     private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
