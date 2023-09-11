@@ -1,5 +1,5 @@
 ## MVP-level implementation
-This is a functional (MVP-level) JAVA spring-boot implementation of the [**UrbanGeoPulse** software architect big-data exercise](../README.md).
+This is a functional (MVP-level) JAVA spring-boot implementation of the [**UrbanGeoPulse** software architect big-data showcase](../README.md).
 It serves as a starting point for building the UrbanGeoPulse application. The implementation includes the basic functionality required to identify messages from pedestrians or non-pedestrians (referred to as **mobilized** individuals) and retrieve information on streets and neighborhoods based on specified timeframes.
 
 ### Getting Started:
