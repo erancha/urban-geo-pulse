@@ -98,9 +98,8 @@ All the services are stateless, allowing them to [scale](#scalability) easily an
 This architecture, in conjunction with a modern development platform (JAVA Spring Boot), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
 ## Overall Architecture
-### Diagram
+### [Diagram](https://lucid.app/documents/view/f63cb019-73ed-40cd-bbc8-c3dde290141b)
 ![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg "System diagram")
-https://lucid.app/documents/view/f63cb019-73ed-40cd-bbc8-c3dde290141b
 
 ### Services
 The architecture comprises the following services:
