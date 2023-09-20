@@ -103,7 +103,7 @@ This architecture, in conjunction with a modern development platform (JAVA Sprin
 
 ### Services
 The architecture comprises the following services:
-* [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service).
+* [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 * [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic *people_geo_locations* (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
 * [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - *pedestrians_geo_locations*
@@ -203,7 +203,8 @@ In addition, the development team should take into consideration best practices 
 ### Mobile application
 #### Role:
 - To **collect geospatial locations**, e.g. from cell phones, and send messages to the [Receiver](#receiver-service) service.
-- Each message is a geospatial **point** of the location in which the data was collected.
+- Each message contains a geospatial **point** of the location in which the data was collected.
+- Each message also contains a city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 
 <hr>
 
@@ -213,6 +214,7 @@ In addition, the development team should take into consideration best practices 
   1. UUID (Universal Unique Identifier).
   2. Coordinates (geospatial point).
   3. Timestamp.
+  4. City code (e.g. NYC). This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 - To push (produce) these messages into a Kafka topic *people_geo_locations* (from which they will be consumed and processed by the pipeline services).
 
 #### Implementation Instructions
@@ -244,7 +246,7 @@ In addition, the development team should take into consideration best practices 
 1. To consume from one of the following topics:
     1. *pedestrians_geo_locations*
     2. *mobilized_geo_locations*
-2. To find a street or neighborhood name by the consumed point on the street's or neighborhood's geometry.
+2. To find a street or neighborhood name by the consumed point on the street's or neighborhood's geometry. This step depends on loading the relevant maps into the database according to the city code contained in each message (refer to the [Receiver](#receiver-service) service for further details). 
 3. To produce the location (street or neighborhood) into one of the following topics:
     1. *pedestrians_streets* - each message is a pedestrian and a street name.
     2. *pedestrians_neighborhoods* - each message is a pedestrian and a neighborhood name.
