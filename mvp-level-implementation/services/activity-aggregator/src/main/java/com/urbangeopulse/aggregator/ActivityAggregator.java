@@ -229,9 +229,10 @@ public class ActivityAggregator {
                             elapsedTimeInMS / 1000, warnOnElapsedTime ? String.format(" (%d%% from ACTIVITY_AGGREGATOR_MAX_POLL_INTERVAL_MINUTES_CONFIG, maxRecordsToAggregate: %3d)", elapsedTimeInMS * 100 / maxPollIntervalInMS, this.maxRecordsToAggregate.get()) : "",
                             offsetsToCommit.size(), offsetsToCommitSize, minuteResolutionMap.size()));
             if (elapsedTimeInMS >= maxPollIntervalInMS * 0.75) {
-                logger.warning(String.format("Threshold exceeded, maxRecordsToAggregate reduced from %d to %d items.",
-                        this.maxRecordsToAggregate.get(), minuteResolutionMap.size()));
+                final int prevMaxRecordsToAggregateSize = this.maxRecordsToAggregate.get();
                 this.maxRecordsToAggregate.set(Math.min(this.maxRecordsToAggregate.get(), minuteResolutionMap.size()));
+                logger.warning(String.format("Threshold exceeded, maxRecordsToAggregate reduced from %d to %d items.",
+                        prevMaxRecordsToAggregateSize, this.maxRecordsToAggregate.get()));
             }
 			minuteResolutionMap.clear();
         } catch (Exception ex) {

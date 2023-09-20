@@ -1,8 +1,8 @@
    REM git remote add upstream https://github.com/erancha/urban-geo-pulse.git
-   git fetch upstream
-   git merge upstream/master
+   REM git fetch upstream
+   REM git merge upstream/master
 
-   REM git pull
+   git pull
 
    REM git fetch
    REM git merge origin/master
