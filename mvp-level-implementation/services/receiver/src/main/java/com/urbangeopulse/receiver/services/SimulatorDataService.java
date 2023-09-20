@@ -101,6 +101,7 @@ public class SimulatorDataService {
                             if (deltaFromCurrentTime == 0)
                                 deltaFromCurrentTime = System.currentTimeMillis() - currEventTimeInMS;
                             currEvent.put("eventTimeInMS", currEventTimeInMS + deltaFromCurrentTime);
+                            currEvent.put("cityCode", "NYC");
 
                             KafkaUtils.send(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, JavaSerializer.write(currEvent), key);
                         } catch (InitializationException | ExecutionException | InterruptedException | JsonException e) {
@@ -196,7 +197,7 @@ public class SimulatorDataService {
             // save an event:
             final String currUuid = runningUuid.get().toString()/*String.valueOf(runningUuid.get())*/;  // String.valueOf(runningUuid.get()) - only for debugging
             logger.finer(String.format("#%-3d: uuid = %s, currPointAsText = %s", counter.get(), currUuid, currPointAsText));
-            Map<String, Object> geoLocationEvent = receiverDataService.prepareGeoPointEvent(currUuid, currPointAsText, runningEventTimeInMS.get());
+            Map<String, Object> geoLocationEvent = receiverDataService.prepareGeoPointEvent("NYC", currUuid, currPointAsText, runningEventTimeInMS.get());
             try {
                 writer.save(JavaSerializer.write(geoLocationEvent), currUuid);
             } catch (JsonException e) {

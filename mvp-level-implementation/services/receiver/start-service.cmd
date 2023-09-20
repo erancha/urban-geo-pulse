@@ -6,7 +6,7 @@
 	call set-env.cmd
 	
 	REM set URL_TO_EXECUTE_AFTER_STARTUP="http://localhost:8080/urbangeopulse/api/simulator/streets/points?saveToBackup=true"
-	REM set PEOPLE_GEO_LOCATIONS_CSV=people-geo-locations--all.csv
+	REM set PEOPLE_GEO_LOCATIONS_CSV=NYC_people-geo-locations--all.csv
 	REM set COPY_FROM_BACKUP=1*1
 	REM set TIME_TO_WAIT_IN_SEC=900
 	REM set COPY_FROM_BACKUP=1*3
@@ -23,7 +23,7 @@
 	REM set TIME_TO_WAIT_IN_SEC=20000
 
 	REM set URL_TO_EXECUTE_AFTER_STARTUP="http://localhost:8080/urbangeopulse/api/simulator/streets/points?streetName=Duffield St&iterationsCount=10&saveToBackup=true"
-	set PEOPLE_GEO_LOCATIONS_CSV=people-geo-locations--Duffield_St.csv
+	set PEOPLE_GEO_LOCATIONS_CSV=NYC_people-geo-locations--Duffield_St.csv
 	set COPY_FROM_BACKUP=1*1
 	set TIME_TO_WAIT_IN_SEC=120
 	REM set COPY_FROM_BACKUP=1*1000
