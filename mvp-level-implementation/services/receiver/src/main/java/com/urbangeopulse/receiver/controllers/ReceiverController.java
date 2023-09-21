@@ -19,12 +19,14 @@ public class ReceiverController {
     }
 
     /** process a geospatial point.
+     * @param cityCode - city code, e.g. NYC for New York City.
      * @param uuid - Universal Unique Identifier of the device that sent the point.
      * @param point - the point to process.
      */
     @GetMapping("/urbangeopulse/api/receiver/point")
-    public void processGeoPoint(@RequestParam String uuid,
+    public void processGeoPoint(@RequestParam String cityCode,
+                                @RequestParam String uuid,
                                 @RequestParam String point) {
-        dataService.processGeoPoint(uuid, point);
+        dataService.processGeoPoint(cityCode, uuid, point);
     }
 }

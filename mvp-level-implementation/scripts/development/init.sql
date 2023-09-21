@@ -54,6 +54,8 @@ select count(*) from nyc_streets
 --	--name is not null
 --	name like 'West%'
 ;
+DELETE from nyc_neighborhoods;
+DELETE from nyc_streets
 
 --------------------------------------------
 -- streets intersecting with a neighborhood:

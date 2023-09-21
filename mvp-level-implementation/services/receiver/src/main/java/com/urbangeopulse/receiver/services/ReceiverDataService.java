@@ -23,14 +23,15 @@ public class ReceiverDataService {
     private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
 
     /** process a geospatial point.
+     * @param cityCode - city code, e.g. NYC for New York City.
      * @param uuid - Universal Unique Identifier of the device that sent the point.
      * @param point - the point to process.
      */
-    public void processGeoPoint(String uuid, String point) {
-        processGeoPoint(uuid, point, System.currentTimeMillis());
+    public void processGeoPoint(String cityCode, String uuid, String point) {
+        processGeoPoint(cityCode, uuid, point, System.currentTimeMillis());
     }
-    public void processGeoPoint(String uuid, String point, long currentTimeMillis) {
-        Map<String, Object> geoLocationEvent = prepareGeoPointEvent(uuid, point, currentTimeMillis);
+    public void processGeoPoint(String cityCode, String uuid, String point, long currentTimeMillis) {
+        Map<String, Object> geoLocationEvent = prepareGeoPointEvent(cityCode, uuid, point, currentTimeMillis);
         try {
             KafkaUtils.send(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, JavaSerializer.write(geoLocationEvent), uuid);
         } catch (JsonException | InitializationException | ExecutionException | InterruptedException e) {
@@ -38,9 +39,10 @@ public class ReceiverDataService {
         }
     }
 
-    public Map<String, Object> prepareGeoPointEvent(String uuid, String point, long currentTimeMillis) {
+    public Map<String, Object> prepareGeoPointEvent(String cityCode, String uuid, String point, long currentTimeMillis) {
         Map<String, Object> geoLocationEvent = new HashMap<String, Object>() {
             {
+                put("cityCode", cityCode);
                 put("uuid", uuid);
                 put("point", point);
                 put("eventTimeInMS", currentTimeMillis);

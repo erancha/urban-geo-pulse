@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "257e11a3-0f4b-4d6a-b440-df3969566c8d",
+		"_postman_id": "4f3b5e9e-fda4-48c7-b647-21294a19ff2d",
 		"name": "UrbanGeoPulse - receiver",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "9394726"
@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/urbangeopulse/api/receiver/point?uuid=4c9d55c2-e51f-4d3f-93e1-35412dffe35d&point=POINT(585836.5580994898 4505775.3274659)",
+					"raw": "http://localhost:8080/urbangeopulse/api/receiver/point?cityCode=NYC&uuid=4c9d55c2-e51f-4d3f-93e1-35412dffe35d&point=POINT(585836.5580994898 4505775.3274659)",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -25,6 +25,10 @@
 						"point"
 					],
 					"query": [
+						{
+							"key": "cityCode",
+							"value": "NYC"
+						},
 						{
 							"key": "uuid",
 							"value": "4c9d55c2-e51f-4d3f-93e1-35412dffe35d"
