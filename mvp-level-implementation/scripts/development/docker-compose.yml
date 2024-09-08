@@ -47,18 +47,18 @@ services:
       LOGGING_LEVEL_COM_PROVECTUS: error
     restart: unless-stopped
 
-  # kafdrop:
-    # image: obsidiandynamics/kafdrop
-    # networks:
-      # - urbangeopulse-net
-    # ports:
-      # - 9000:9000
-    # depends_on:
-      # - kafka-broker
-    # environment:
-      # KAFKA_BROKERCONNECT: PLAINTEXT://kafka-broker:9092
-      # JVM_OPTS: -Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify
-      # SCHEMAREGISTRY_CONNECT: http://schema-registry:8081
+#  kafdrop:
+#    image: obsidiandynamics/kafdrop
+#    networks:
+#      - urbangeopulse-net
+#    ports:
+#      - 9000:9000
+#    depends_on:
+#      - kafka-broker
+#    environment:
+#      KAFKA_BROKERCONNECT: PLAINTEXT://kafka-broker:9092
+#      JVM_OPTS: -Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify
+#      SCHEMAREGISTRY_CONNECT: http://schema-registry:8081
 
   redis-server:
     image: redis:7.0-alpine
@@ -81,17 +81,17 @@ services:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_DB=nyc
 
-  # pgadmin-server:
-    # image: dpage/pgadmin4
-    # ports:
-      # - 8082:80
-    # networks:
-      # - urbangeopulse-net
-    # volumes:
-      # - ${LOCALAPPDATA}\Temp\pgadmin:/var/lib/pgadmin
-    # environment:
-      # - PGADMIN_DEFAULT_EMAIL=user@gmail.com
-      # - PGADMIN_DEFAULT_PASSWORD=pgadminpass
+#  pgadmin-server:
+#    image: dpage/pgadmin4
+#    ports:
+#      - 8082:80
+#    networks:
+#      - urbangeopulse-net
+#    volumes:
+#      - ${LOCALAPPDATA}\Temp\pgadmin:/var/lib/pgadmin
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=user@gmail.com
+#      - PGADMIN_DEFAULT_PASSWORD=pgadminpass
 
 networks:
   urbangeopulse-net:

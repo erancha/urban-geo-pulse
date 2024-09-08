@@ -8,9 +8,11 @@
 	REM   otherwise a few consumers will not be assigned to any partition, i.e. will be useless.
 
 	REM set LOCATIONS_FINDER_INPUT_SRID=26918
-	REM set LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG=earliest
+	set LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG=earliest
 	REM set LOCATIONS_FINDER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES=3
 
+	call ../delay-manager/set-env.cmd
+	set LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC=120
 	set POSTGIS_SERVER_HOST_NAME=localhost
 	set POSTGIS_SERVER_PORT=5433
 
