@@ -103,11 +103,11 @@ As can be seen in the diagram, the application comprises a few separate, indepen
 
 All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
 
-This architecture, in conjunction with a modern development platform (JAVA Spring Boot), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
+This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](mvp-level-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
 ## Overall Architecture
 
-### [Diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
+### [Detailed diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
 
 ![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')
 
