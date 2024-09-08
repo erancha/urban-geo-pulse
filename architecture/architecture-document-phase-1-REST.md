@@ -60,7 +60,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 This document describes the **UrbanGeoPulse**'s architecture, a system requested by the city of New York (NYC).<br>
 (This is a **showcase** of a **software architecture** definition process. The requirements are hypothetical, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.)
 
-NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any given time of day. <br>
+NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any requested timeframe within the last 24 hours. <br><br>
 This information **will be used to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
 
 The architecture comprises technology and modeling decisions, that will ensure the final product will be fast, reliable and easy to maintain.
@@ -71,12 +71,11 @@ It’s extremely important for the development team to closely follow the archit
 
 ### Functional Requirements
 
-1. [Receive](#receiver-service) messages containing **geospatial locations**, e.g. from cell phones.<br>
-   These messages can be sent by **pedestrians** as well as **mobilized** individuals.
+1. [Receive](#receiver-service) messages containing **geospatial locations**, e.g. from cell phones of **pedestrians** and **mobilized** individuals.
 
-2. [Identify](#mobilization-sorter-service) pedestrians and mobilized messages, based on the speed calculated between the last two messages from the same device.
+2. [Identify](#mobilization-sorter-service) each message's source (**pedestrian** vs **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
-3. Allow users to [retrieve](#info-service) streets and neighborhoods activity information **in real time** for a desired timeframe within the last 24 hours.
+3. Allow users to [retrieve](#info-service) streets and neighborhoods activity information **in real time** for any requested timeframe within the last 24 hours.
 
 ### Non-Functional Requirements
 
@@ -91,7 +90,7 @@ It’s extremely important for the development team to closely follow the archit
 
 ## Executive Summary
 
-This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br>The information that will be collected by the system **will be used by NYC to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.<br><br>
+This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br><br>
 When designing the architecture, a strong emphasis was put on the following qualities:
 
 - The application should be reliable and support very high load (per the population of NYC, specifically during rush hours).
@@ -99,7 +98,7 @@ When designing the architecture, a strong emphasis was put on the following qual
 <p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring high-availability and performance.</p>
 
 Here is a high-level overview of the architecture:
-![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/e27c2f23-c6ec-4091-a0ff-324d2729a915/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
 All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
@@ -133,13 +132,11 @@ The architecture comprises the following services:
 
 ### Messaging
 
-The various services communicate with each other using various messaging methods. Each method was selected based on the specific requirements from the services. Here are the various messaging methods used in the system:
+- The [Receiver](#receiver-service) service exposes a **REST API**. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md), **MQTT** will be considered as a alternate messaging method.
 
-- The [Receiver](#receiver-service) service exposes a REST API. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md), MQTT will be considered as a alternate messaging method.
+- The pipeline services ([Mobilization-sorter](#mobilization-sorter-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru **Kafka**. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 
-- The pipeline services ([Mobilization-sorter](#mobilization-sorter-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru Kafka. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
-
-- The [Info](#info-service) service exposes a REST API for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
+- The [Info](#info-service) service also exposes a **REST API** for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
 
 ### Technology Stack
 
@@ -342,7 +339,7 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 #### Role
 
 - This service should provide the ability to retrieve information on streets and neighborhoods with the highest number of pedestrians or mobilized individuals.
-- This retrieval should be possible **in real time**, allowing users to specify the desired timeframe (in minutes resolution) within the last 24 hours.
+- This retrieval should be possible **in real time**, allowing users to specify any requested timeframe (in minutes resolution) within the last 24 hours.
 - The results should be returned in descending order based on the number of pedestrians or mobilized individuals.
 - Users should be able to specify the number of streets (N1) and neighborhoods (N2) they want to retrieve.
 

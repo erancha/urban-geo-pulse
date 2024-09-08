@@ -15,7 +15,7 @@ This information **will be used to make decisions** regarding transportation bud
 
 2. **Identify** each message's source (**pedestrian** vs **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
-3. Allow users to **retrieve** streets and neighborhoods activity information **in real time** for a desired timeframe within the last 24 hours.
+3. Allow users to **retrieve** streets and neighborhoods activity information **in real time** for any requested timeframe within the last 24 hours.
 
 ## Solution:
 
