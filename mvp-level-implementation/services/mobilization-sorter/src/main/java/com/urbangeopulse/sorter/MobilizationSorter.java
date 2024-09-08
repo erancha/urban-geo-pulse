@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+import static com.urbangeopulse.utils.misc.Logger.logException;
 
 @Service
 public class MobilizationSorter {
@@ -123,7 +124,7 @@ public class MobilizationSorter {
                                     cache.remove(currUuid);
                                 }
                             } catch (Exception ex) {
-                                com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                                logException(ex, logger);
                                 //TODO:
                                 // (1) Error handling for cache.put,get and remove.
                                 // (2) Upgrade jedis version.
@@ -133,7 +134,7 @@ public class MobilizationSorter {
                     }
                 }
             } catch (InitializationException ex) {
-                com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                logException(ex, logger);
             }
             logger.warning("'peopleGeoLocationsConsumerThread' completed");
         };
@@ -154,7 +155,7 @@ public class MobilizationSorter {
             }
             logger.info(String.format("Started %2d consumer threads from topic '%s' to topics '%s' and '%s'.", MOBILIZATION_SORTER_CONSUMER_THREADS_COUNT, PEOPLE_GEO_LOCATIONS_TOPIC_NAME, PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME, MOBILIZED_GEO_LOCATIONS_TOPIC_NAME));
         } catch (Exception ex) {
-            com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+            logException(ex, logger);
         }
     }
 

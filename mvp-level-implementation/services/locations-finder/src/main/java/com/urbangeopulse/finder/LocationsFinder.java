@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+import static com.urbangeopulse.utils.misc.Logger.logException;
 
 @Service
 public class LocationsFinder {
@@ -34,7 +35,7 @@ public class LocationsFinder {
     private short LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT;
 
     @Value("${LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG:latest}")
-    private String LOCATIONS_FINDER_SORTER_AUTO_OFFSET_RESET_CONFIG;
+    private String LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG;
 
     @Value("${LOCATIONS_FINDER_MAX_POLL_INTERVAL_MINUTES_CONFIG:5}")
     private short LOCATIONS_FINDER_MAX_POLL_INTERVAL_MINUTES_CONFIG;
@@ -58,6 +59,12 @@ public class LocationsFinder {
     @Value("${LOCATIONS_FINDER_LOCATION_TYPE:street}")
     private String LOCATIONS_FINDER_LOCATION_TYPE;
 
+    @Value("${DELAY_MANAGER_TOPIC_NAME:delays__default}")
+    private String DELAY_MANAGER_TOPIC_NAME;
+
+    @Value("${LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC:60}")
+    private short LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC;
+
     static final AtomicLong counter = new AtomicLong();
 
     private final LocationFinderDataService dataService;
@@ -70,17 +77,17 @@ public class LocationsFinder {
     void startBackgroundConsumers() {
         final String INPUT_TOPIC_NAME = String.format("%s_geo_locations", LOCATIONS_FINDER_MOBILITY_TYPE);
         final String OUTPUT_TOPIC_NAME = String.format("%s_%ss", LOCATIONS_FINDER_MOBILITY_TYPE, LOCATIONS_FINDER_LOCATION_TYPE);
+        final String FROM_MESSAGE = String.format("from topic '%s' for '%ss' ..", INPUT_TOPIC_NAME, LOCATIONS_FINDER_LOCATION_TYPE);
         final Map<String, Object> CONSUMER_CONFIGS =
                 new HashMap<String, Object>() {{
                     put(ConsumerConfig.GROUP_ID_CONFIG, String.format("locations-finder-%s-%ss-cg", LOCATIONS_FINDER_MOBILITY_TYPE, LOCATIONS_FINDER_LOCATION_TYPE));
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-                    put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, LOCATIONS_FINDER_SORTER_AUTO_OFFSET_RESET_CONFIG);
+                    put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG);
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, LOCATIONS_FINDER_MAX_POLL_INTERVAL_MINUTES_CONFIG * 60000);
                     put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, LOCATIONS_FINDER_SESSION_TIMEOUT_SECONDS_CONFIG * 1000);
                 }};
 
         Runnable locationsFinderConsumerThread = () -> {
-            final String FROM_MESSAGE = String.format("from topic '%s' for '%ss' ..", INPUT_TOPIC_NAME, LOCATIONS_FINDER_LOCATION_TYPE);
             final Thread currentThread = Thread.currentThread();
             logger.fine(String.format("Starting '%s' of class '%s' %s..", currentThread.getName(), currentThread.getStackTrace()[1].getClassName(), FROM_MESSAGE));
 
@@ -118,26 +125,42 @@ public class LocationsFinder {
 
                                 // get all locations (streets or neighborhoods) for the event's point, and produce events into OUTPUT_TOPIC_NAME for each location.
                                 List<String> locationNames = dataService.findLocation((String) currEvent.get("point"), LOCATIONS_FINDER_LOCATION_TYPE, LOCATIONS_FINDER_INPUT_SRID);
-                                currEvent.remove("point"); // produced events will have the location instead of the point.
-                                locationNames.forEach(locationName -> {
-                                    if (locationName != null) { // having a null name returned for a point is a valid scenario, e.g. for 'motorway_link' type:  select * from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(599559.4836523728 4507255.523744515)'),26918),geom);
-                                        currEvent.put("location", locationName);
-                                        try {
-                                            KafkaUtils.send(OUTPUT_TOPIC_NAME, JavaSerializer.write(currEvent));
-                                        } catch (InitializationException | ExecutionException | InterruptedException | JsonException ex) {
-                                            com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                                if (!locationNames.isEmpty()) {
+                                    currEvent.remove("point"); // produced events will have the location instead of the point.
+                                    locationNames.forEach(locationName -> {
+                                        if (locationName != null) { // having a null name returned for a point is a valid scenario, e.g. for 'motorway_link' type:  select * from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(599559.4836523728 4507255.523744515)'),26918),geom);
+                                            currEvent.put("location", locationName);
+                                            try {
+                                                KafkaUtils.send(OUTPUT_TOPIC_NAME, JavaSerializer.write(currEvent));
+                                            } catch (InitializationException | ExecutionException | InterruptedException | JsonException ex) {
+                                                logException(ex, logger);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                } else {
+                                    // send the event to the delay-manager
+                                    Map<String, Object> delayEvent = new HashMap<String, Object>() {
+                                        {
+                                            put("eventToDelay", JavaSerializer.write(currEvent)); // the content of the event to be delayed.
+                                            put("delayStartTimestamp", System.currentTimeMillis()); // the timestamp from which the event should be delayed.
+                                            put("delayInSec", LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC); // the time, in seconds, that the event should be delayed
+                                            put("returnToTopic", INPUT_TOPIC_NAME); // the topic name to which the event should be returned after the delay.
+                                            put("partitionKey", kafkaRecord.key()); // the key to use when the delay-manager will return the message back to 'returnToTopic'.
+                                        }
+                                    };
+                                    KafkaUtils.send(DELAY_MANAGER_TOPIC_NAME, JavaSerializer.write(delayEvent));
+
+                                    //TODO: send a command to load the city data
+                                }
                             } catch (Exception ex) {
-                                com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                                logException(ex, logger);
                             }
                             consumer.commitSync();
                         }
                     }
                 }
             } catch (InitializationException ex) {
-                com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                logException(ex, logger);
             }
             logger.warning("'locationsFinderConsumerThread' completed");
         };
@@ -146,6 +169,7 @@ public class LocationsFinder {
             // create topics:
             KafkaUtils.checkAndCreateTopic(INPUT_TOPIC_NAME, LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT);
             KafkaUtils.checkAndCreateTopic(OUTPUT_TOPIC_NAME);
+            KafkaUtils.checkAndCreateTopic(DELAY_MANAGER_TOPIC_NAME);
 
             // start consumers:
             ExecutorService threadPool = Executors.newFixedThreadPool(LOCATIONS_FINDER_CONSUMER_THREADS_COUNT);
@@ -155,7 +179,7 @@ public class LocationsFinder {
             }
             logger.info(String.format("Started %2d consumer threads from topic '%s' to topic '%s'.", LOCATIONS_FINDER_CONSUMER_THREADS_COUNT, INPUT_TOPIC_NAME, OUTPUT_TOPIC_NAME));
         } catch (Exception ex) {
-            com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+            logException(ex, logger);
         }
     }
 }

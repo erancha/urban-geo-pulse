@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static com.urbangeopulse.utils.misc.Logger.logException;
 
 /**
  * data required by the service.
@@ -78,7 +79,7 @@ public class AggregatorDataService {
                 logger.warning(String.format("%s", ex.getMessage()));
                 try {
                     Thread.sleep((long) (Math.random() * MAX_RETRY_TIME_IN_MS / 3));
-                } catch (InterruptedException e) { com.urbangeopulse.utils.misc.Logger.logException(ex, logger); }
+                } catch (InterruptedException e) { logException(ex, logger); }
             }
         } while (!isOK && Duration.between(startTime, Instant.now()).toMillis() < MAX_RETRY_TIME_IN_MS);
         logger.finer(String.format("Persisted in %d ms%s", Duration.between(startTime, Instant.now()).toMillis(), retriesCount > 0 ? String.format(", after %d retries", retriesCount) : ""));

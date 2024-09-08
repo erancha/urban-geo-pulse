@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static com.urbangeopulse.utils.misc.Logger.logException;
 
 @Service
 public class ActivityAggregator {
@@ -163,13 +164,13 @@ public class ActivityAggregator {
                                 }
                                 if (minuteResolutionMap.size() >= this.maxRecordsToAggregate.get()) persistUncommitted(consumer, offsetsToCommit, minuteResolutionMap);
                             } catch (Exception ex) {
-                                com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                                logException(ex, logger);
                             }
                         }
                     }
                 }
             } catch (InitializationException ex) {
-                com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+                logException(ex, logger);
             }
             logger.warning("'aggregatorConsumerThread' completed");
         };
@@ -193,7 +194,7 @@ public class ActivityAggregator {
             }
             logger.info(String.format("Started %2d consumer threads from topic '%s', persisting every %d seconds.", ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT, INPUT_TOPIC_NAME, ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC));
         } catch (Exception ex) {
-            com.urbangeopulse.utils.misc.Logger.logException(ex, logger);
+            logException(ex, logger);
         }
     }
 
@@ -203,7 +204,7 @@ public class ActivityAggregator {
      * @param offsetsToCommit
      * @param minuteResolutionMap
      */
-    private static ThreadLocal<Boolean> warningIssuedPerThread = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> warningIssuedPerThread = new ThreadLocal<>();
     private void persistUncommitted(KafkaConsumer<String, String> consumer, Map<TopicPartition, OffsetAndMetadata> offsetsToCommit, Map<String, Integer> minuteResolutionMap) {
         assert (!minuteResolutionMap.isEmpty()); // both offsetsToCommit and minuteResolutionMap must always be assigned and cleared together.
         logger.finer(String.format("Persisting, offsetsToCommit: %s, minuteResolutionMap: %s ..", offsetsToCommit, minuteResolutionMap));

@@ -1,4 +1,4 @@
-	start /B docker-compose-up
+	call start-3rd-party-stack.cmd
 
 	call set-sql-env.cmd
 	REM copy delete-from-agg_x_activity.sql %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc\urbangeopulse
@@ -11,6 +11,7 @@
 	call start-a-service locations-finder
 	call start-a-service activity-aggregator
 	call start-a-service info 	
+	call start-a-service delay-manager
 
 	REM pause
 	timeout /t 5 >nul
