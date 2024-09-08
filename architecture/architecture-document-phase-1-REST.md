@@ -4,8 +4,8 @@
 
 # Architecture Document
 
-Note: This document is based on the Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
-The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com).
+<small>Note: This document is based on the Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
+The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com).</small>
 
 ### Table Of Content
 
@@ -31,26 +31,26 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
     + [Maintainability](#maintainability)
 - [Services Drill Down](#services-drill-down)
   * [Mobile application](#mobile-application)
-    + [Role:](#role)
+    + [Role](#role)
   * [Receiver service](#receiver-service)
-    + [Role:](#role-1)
+    + [Role](#role-1)
     + [Implementation Instructions](#implementation-instructions)
     + [APIs](#apis)
   * [Mobilization-sorter service](#mobilization-sorter-service)
-    + [Role:](#role-2)
+    + [Role](#role-2)
     + [Implementation Instructions](#implementation-instructions-1)
   * [Locations-finder service](#locations-finder-service)
-    + [Role:](#role-3)
+    + [Role](#role-3)
     + [Implementation Instructions](#implementation-instructions-2)
     + [Deployment Instructions](#deployment-instructions)
   * [Delay service](#delay-service)
-    + [Role:](#role-4)
-  * [Diagram](#diagram-1)
+    + [Role](#role-4)
+    + [Diagram](#diagram-1)
   * [Activity-aggregator service](#activity-aggregator-service)
-    + [Role:](#role-5)
+    + [Role](#role-5)
     + [Implementation Instructions](#implementation-instructions-3)
   * [Info service](#info-service)
-    + [Role:](#role-6)
+    + [Role](#role-6)
     + [APIs:](#apis)
 
 <!-- tocstop -->
@@ -233,7 +233,7 @@ In addition, the development team should take into consideration best practices 
 
 ### Mobile application
 
-#### Role:
+#### Role
 
 - To **collect geospatial locations**, e.g. from cell phones, and send messages to the [Receiver](#receiver-service) service.
 - Each message contains a geospatial **point** of the location in which the data was collected.
@@ -243,7 +243,7 @@ In addition, the development team should take into consideration best practices 
 
 ### Receiver service
 
-#### Role:
+#### Role
 
 - To receive messages containing geospatial locations, e.g. from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
   1. UUID (Universal Unique Identifier).
@@ -264,7 +264,7 @@ In addition, the development team should take into consideration best practices 
 
 ### Mobilization-sorter service
 
-#### Role:
+#### Role
 
 - To consume geospatial messages from the topic _people_geo_locations_.
 - To determine whether a message is from a **pedestrian** or **mobilized** individual based on the speed calculated between the last two points with the same UUID. If the calculated speed is less than 25 km/h, the message should be classified as coming from a pedestrian, otherwise as coming from a mobilized individual.
@@ -281,7 +281,7 @@ In addition, the development team should take into consideration best practices 
 
 ### Locations-finder service
 
-#### Role:
+#### Role
 
 1. To consume from one of the following topics:
    1. _pedestrians_geo_locations_
@@ -306,20 +306,20 @@ For better [scalability](#scaling) it is advisable to configure **read-only repl
 
 ### Delay service
 
-#### Role:
+#### Role
 
 To process messages containing events that should be:
 1. Delayed for a required duration, and then,
 2. Produced to a target topic described in each message.
 
-### [Diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
+#### [Diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
 ![Lucid](https://lucid.app/publicSegments/view/6da4c3f1-3886-4dc8-baea-45d8ade5daac/image.jpeg 'System diagram')
 
 <hr>
 
 ### Activity-aggregator service
 
-#### Role:
+#### Role
 
 1. To aggregate in-memory the number of pedestrians and mobilized per 1 minute.
 2. To periodically persist the aggregated data into the following PostgreSQL tables:
@@ -339,7 +339,7 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 
 ### Info service
 
-#### Role:
+#### Role
 
 - This service should provide the ability to retrieve information on streets and neighborhoods with the highest number of pedestrians or mobilized individuals.
 - This retrieval should be possible **in real time**, allowing users to specify the desired timeframe (in minutes resolution) within the last 24 hours.
