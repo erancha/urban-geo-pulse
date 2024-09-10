@@ -4,7 +4,7 @@
 
 # Architecture Document
 
-<small>Note: This document is based on the Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
+<small>Note: This document is based on an Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
 The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com).</small>
 
 ### Table Of Content
@@ -75,7 +75,7 @@ It’s extremely important for the development team to closely follow the archit
 
 2. [Identify](#mobilization-sorter-service) each message's source (**pedestrian** vs **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
-3. Allow users to [retrieve](#info-service) streets and neighborhoods activity information **in real time** for any requested timeframe within the last 24 hours.
+3. Allow users to [retrieve](#info-service) streets and neighborhoods activity **in real time** for any requested timeframe within the last 24 hours.
 
 ### Non-Functional Requirements
 
@@ -110,6 +110,8 @@ This architecture, in conjunction with a modern development platform (refer to [
 ### [Detailed diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
 
 ![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')
+
+- The architecture follows the [**12-Factor App methodology**](https://12factor.net).
 
 ### Services
 
