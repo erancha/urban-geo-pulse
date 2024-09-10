@@ -60,8 +60,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 This document describes the **UrbanGeoPulse**'s architecture, a system requested by the city of New York (NYC).<br>
 (This is a **showcase** of a **software architecture** definition process. The requirements are hypothetical, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.)
 
-NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any requested timeframe within the last 24 hours.
-
+NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any requested timeframe within the last 24 hours.<br>
 This information will be used to **make decisions** regarding **real-time** needs such as the deployment of police resources and traffic control, as well as **long-term** considerations like transportation budgets, timing of municipal construction work, and advertising fees.
 
 The architecture comprises technology and modeling decisions that will ensure the final product will be fast, reliable and easy to maintain.
