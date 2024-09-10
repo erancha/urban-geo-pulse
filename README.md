@@ -7,7 +7,8 @@
 ## Background:
 
 The city of New York (NYC) requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at **any desired timeframe**.<br>
-This information **will be used to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
+
+This information will be used to **make decisions** regarding **real-time** needs such as the deployment of police resources and traffic control, as well as **long-term** considerations like transportation budgets, timing of municipal construction work, and advertising fees.
 
 ## Functional Requirements:
 

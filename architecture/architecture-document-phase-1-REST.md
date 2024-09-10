@@ -60,10 +60,11 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 This document describes the **UrbanGeoPulse**'s architecture, a system requested by the city of New York (NYC).<br>
 (This is a **showcase** of a **software architecture** definition process. The requirements are hypothetical, inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.)
 
-NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any requested timeframe within the last 24 hours. <br><br>
-This information **will be used to make decisions** regarding transportation budgets, timing of municipal construction work, advertising fees, and more.
+NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any requested timeframe within the last 24 hours.
 
-The architecture comprises technology and modeling decisions, that will ensure the final product will be fast, reliable and easy to maintain.
+This information will be used to **make decisions** regarding **real-time** needs such as the deployment of police resources and traffic control, as well as **long-term** considerations like transportation budgets, timing of municipal construction work, and advertising fees.
+
+The architecture comprises technology and modeling decisions that will ensure the final product will be fast, reliable and easy to maintain.
 The document outlines the thought process for every aspect of the architecture, and explains why specific decisions were made.
 It’s extremely important for the development team to closely follow the architecture depicted in this document. In any case of doubt please consult the Software Architect.
 
@@ -173,6 +174,8 @@ The following tech stack was preferred, primarily **due to current experience of
 
 ### Non-Functional Attributes
 
+#### Performance
+
 #### Reliability
 
 <p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
@@ -194,7 +197,7 @@ This architecture allows to easily scale services as needed:
 
 <p>(Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.)</p>
 
-This external services ([Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service)) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
+The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
 
 - [OAuth2](https://oauth.net/2/) is the primary authentication protocol used to grant access to user accounts without sharing the actual login credentials. It allows third-party applications to request access to user data on their behalf.
@@ -202,9 +205,7 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 - [JWT](https://jwt.io/) (JSON Web Tokens) are a compact, URL-safe means of representing claims between two parties. The access token contains information about the user and the permissions granted to the third-party application.
 - In summary, OAuth2 is used for the overall authentication process, while JWT is used for generating and signing the access tokens that grant access to user data.
 
-**Implementation Instructions**:
-
-- Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies.
+(Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
 #### Testability
 
