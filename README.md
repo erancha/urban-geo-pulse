@@ -22,8 +22,6 @@ This information will be used to **make decisions** regarding **real-time** need
 1. [**Architecture Document**](architecture/architecture-document-phase-1-REST.md):
    - An architecture document has been prepared to outline the proposed system architecture. It provides an overview of the system components, their interactions, and the technologies involved. You can find the document **[here](architecture/architecture-document-phase-1-REST.md)**.
    - The architecture follows the [**12-Factor App methodology**](https://12factor.net).<br><br>
-   - Architecture diagram:
-     ![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')<br><br>
 2. [**MVP-level JAVA Spring Boot implementation**](mvp-level-implementation/README.md):
    - A Minimum Viable Product (MVP)-level implementation using JAVA and Spring Boot has been developed. It serves as a starting point for building the UrbanGeoPulse application. The implementation includes the basic functionality required to identify messages from pedestrians or mobilized individuals and retrieve information on streets and neighborhoods based on specified timeframes.<br>
    - The design and implementation follow the [**12-Factor App methodology**](https://12factor.net).
