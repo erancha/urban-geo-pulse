@@ -13,7 +13,7 @@ This information will be used to **make decisions** regarding **real-time** need
 
 1. **Receive** messages containing **geospatial locations**, e.g. from cell phones of **pedestrians** and **mobilized** individuals.
 
-2. **Identify** each message's source (**pedestrian** vs **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
+2. **Identify** each message's source (**pedestrian** or **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
 3. Allow users to **retrieve** streets and neighborhoods activity **in real time** for any requested timeframe within the last 24 hours.
 

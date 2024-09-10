@@ -17,18 +17,23 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   * [Non-Functional Requirements](#non-functional-requirements)
 - [Executive Summary](#executive-summary)
 - [Overall Architecture](#overall-architecture)
-  * [Diagram](#diagram)
+  * [Detailed diagram](#detailed-diagram)
   * [Services](#services)
   * [Messaging](#messaging)
   * [Technology Stack](#technology-stack)
   * [Non-Functional Attributes](#non-functional-attributes)
-    + [Reliability](#reliability)
-    + [Scalability](#scalability)
-    + [Security](#security)
-    + [Testability](#testability)
-      - [Logging](#logging)
-      - [System level testing](#system-level-testing)
-    + [Maintainability](#maintainability)
+    + [High-Performance:](#high-performance)
+      - [Performance](#performance)
+      - [Scalability](#scalability)
+    + [Resiliency:](#resiliency)
+      - [High Availability](#high-availability)
+      - [Fault Tolerance](#fault-tolerance)
+    + [Security:](#security)
+    + [Maintainability:](#maintainability)
+      - [Testability:](#testability)
+        * [Logging](#logging)
+        * [System level testing](#system-level-testing)
+    + [Extensibility](#extensibility)
 - [Services Drill Down](#services-drill-down)
   * [Mobile application](#mobile-application)
     + [Role](#role)
@@ -45,7 +50,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
     + [Deployment Instructions](#deployment-instructions)
   * [Delay service](#delay-service)
     + [Role](#role-4)
-    + [Diagram](#diagram-1)
+    + [Diagram](#diagram)
   * [Activity-aggregator service](#activity-aggregator-service)
     + [Role](#role-5)
     + [Implementation Instructions](#implementation-instructions-3)
@@ -73,7 +78,7 @@ It’s extremely important for the development team to closely follow the archit
 
 1. [Receive](#receiver-service) messages containing **geospatial locations**, e.g. from cell phones of **pedestrians** and **mobilized** individuals.
 
-2. [Identify](#mobilization-sorter-service) each message's source (**pedestrian** vs **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
+2. [Identify](#mobilization-sorter-service) each message's source (**pedestrian** or **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
 3. Allow users to [retrieve](#info-service) streets and neighborhoods activity **in real time** for any requested timeframe within the last 24 hours.
 
@@ -93,9 +98,9 @@ It’s extremely important for the development team to closely follow the archit
 This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br><br>
 When designing the architecture, a strong emphasis was put on the following qualities:
 
-- The application should be reliable and support very high load (per the population of NYC, specifically during rush hours).
-- The application should be fast.
-<p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring high-availability and performance.</p>
+- The application should be fast (to support real-time needs such as the deployment of police resources and traffic control).
+- The application should be reliable and support very high load (to support the population of NYC, specifically the number of active mobile devices during rush hours).
+<p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring performance and high-availability.</p>
 
 Here is a high-level overview of the architecture:
 ![Lucid](https://lucid.app/publicSegments/view/e27c2f23-c6ec-4091-a0ff-324d2729a915/image.jpeg 'System diagram')
@@ -173,16 +178,11 @@ The following tech stack was preferred, primarily **due to current experience of
 
 ### Non-Functional Attributes
 
-#### Performance
+#### High-Performance:
 
-#### Reliability
+##### Performance
 
-<p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
-
-As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
-Note: **Consumer groups rebalancing** must be handled properly by the services (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
-
-#### Scalability
+##### Scalability
 
 <p>(Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system))</p>
 
@@ -192,7 +192,18 @@ This architecture allows to easily scale services as needed:
 2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
-#### Security
+#### Resiliency:
+
+<p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
+
+##### High Availability
+
+##### Fault Tolerance
+
+As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
+Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
+
+#### Security:
 
 <p>(Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.)</p>
 
@@ -206,27 +217,30 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 
 (Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
-#### Testability
-
-<p>(Definition: The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues)</p>
-
-##### Logging
-
-- Every step in the services should be logged. Since there is no UI for the services, logging is almost the only way of figuring out what’s going on (consumer groups lags can also shed some light on the progress).
-- All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
-
-##### System level testing
-
-- Each service should be runnable **on its own**, with pre-prepared data, and have functionality to compare its output to the given input.
-- For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
-- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
-
-#### Maintainability
+#### Maintainability:
 
 <p>(Definition: The software should be designed in a way that makes it easy to understand, modify, and maintain over time. This includes considerations for code readability, proper documentation, and adherence to coding best practices.)</p>
 
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
+
+##### Testability:
+
+<p>(Definition: The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues)</p>
+
+###### Logging
+
+- Every step in the services should be logged. Since there is no UI for the services, logging is almost the only way of figuring out what’s going on (consumer groups lags can also shed some light on the progress).
+- All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
+
+###### System level testing
+
+- Each service should be runnable **on its own**, with pre-prepared data, and have functionality to compare its output to the given input.
+- For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
+- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
+
+#### Extensibility 
+(Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system).
 
 ## Services Drill Down
 
