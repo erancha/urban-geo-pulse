@@ -11,58 +11,61 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 
 <!-- toc -->
 
-- [Background](#background)
-- [Requirements](#requirements)
-  * [Functional Requirements](#functional-requirements)
-  * [Non-Functional Requirements](#non-functional-requirements)
-- [Executive Summary](#executive-summary)
-- [Overall Architecture](#overall-architecture)
-  * [Detailed diagram](#detailed-diagram)
-  * [Services](#services)
-  * [Messaging](#messaging)
-  * [Technology Stack](#technology-stack)
-    + [JAVA Spring Boot](#java-spring-boot)
-    + [Kafka](#kafka)
-    + [PostgreSQL](#postgresql)
-    + [MongoDB](#mongodb)
-    + [Redis](#redis)
-    + [React](#react)
-  * [Non-Functional Attributes](#non-functional-attributes)
-    + [High-Performance:](#high-performance)
-      - [Performance](#performance)
-      - [Scalability](#scalability)
-    + [Resiliency:](#resiliency)
-      - [High Availability](#high-availability)
-      - [Fault Tolerance](#fault-tolerance)
-    + [Security:](#security)
-    + [Maintainability:](#maintainability)
-      - [Testability:](#testability)
-        * [Logging](#logging)
-        * [System level testing](#system-level-testing)
-    + [Extensibility](#extensibility)
-- [Services Drill Down](#services-drill-down)
-  * [Mobile application](#mobile-application)
-    + [Role](#role)
-  * [Receiver service](#receiver-service)
-    + [Role](#role-1)
-    + [Implementation Instructions](#implementation-instructions)
-    + [APIs](#apis)
-  * [Mobilization-sorter service](#mobilization-sorter-service)
-    + [Role](#role-2)
-    + [Implementation Instructions](#implementation-instructions-1)
-  * [Locations-finder service](#locations-finder-service)
-    + [Role](#role-3)
-    + [Implementation Instructions](#implementation-instructions-2)
-    + [Deployment Instructions](#deployment-instructions)
-  * [Delay service](#delay-service)
-    + [Role](#role-4)
-    + [Diagram](#diagram)
-  * [Activity-aggregator service](#activity-aggregator-service)
-    + [Role](#role-5)
-    + [Implementation Instructions](#implementation-instructions-3)
-  * [Info service](#info-service)
-    + [Role](#role-6)
-    + [APIs:](#apis)
+  * [Background](#background)
+  * [Requirements](#requirements)
+    + [Functional Requirements](#functional-requirements)
+    + [Non-Functional Requirements](#non-functional-requirements)
+  * [Executive Summary](#executive-summary)
+  * [Overall Architecture](#overall-architecture)
+    + [Detailed diagram](#detailed-diagram)
+    + [Services](#services)
+    + [Messaging](#messaging)
+    + [Technology Stack](#technology-stack)
+      - [JAVA Spring Boot](#java-spring-boot)
+      - [Kafka](#kafka)
+      - [PostgreSQL](#postgresql)
+      - [MongoDB](#mongodb)
+      - [Redis](#redis)
+      - [React](#react)
+    + [Non-Functional Attributes](#non-functional-attributes)
+      - [High-Performance:](#high-performance)
+        * [Performance](#performance)
+        * [Scalability](#scalability)
+      - [Resiliency:](#resiliency)
+        * [High Availability](#high-availability)
+        * [Fault Tolerance](#fault-tolerance)
+      - [Security:](#security)
+      - [Maintainability:](#maintainability)
+        * [Testability:](#testability)
+          + [Logging](#logging)
+          + [System level testing](#system-level-testing)
+      - [Extensibility](#extensibility)
+  * [Services Drill Down](#services-drill-down)
+    + [Mobile application](#mobile-application)
+      - [Role](#role)
+    + [Receiver service](#receiver-service)
+      - [Role](#role-1)
+      - [Implementation Instructions](#implementation-instructions)
+      - [APIs](#apis)
+    + [Mobilization-sorter service](#mobilization-sorter-service)
+      - [Role](#role-2)
+      - [Implementation Instructions](#implementation-instructions-1)
+    + [Locations-finder service](#locations-finder-service)
+      - [Role](#role-3)
+      - [Implementation Instructions](#implementation-instructions-2)
+      - [Deployment Instructions](#deployment-instructions)
+    + [Delay service](#delay-service)
+      - [Role](#role-4)
+      - [Diagram](#diagram)
+    + [Activity-aggregator service](#activity-aggregator-service)
+      - [Role](#role-5)
+      - [Implementation Instructions](#implementation-instructions-3)
+    + [Info service](#info-service)
+      - [Role](#role-6)
+      - [APIs:](#apis)
+- [Appendices](#appendices)
+  * [Non-Functional Attributes - definitions](#non-functional-attributes---definitions)
+    + [Scalability](#scalability-1)
 
 <!-- tocstop -->
 
@@ -195,9 +198,7 @@ The following tech stack was preferred, primarily **due to current experience of
 
 ##### Performance
 
-##### Scalability
-
-<p>(Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system))</p>
+##### [Scalability](#scalability-1)
 
 This architecture allows to easily scale services as needed:
 
@@ -248,8 +249,7 @@ In addition, the development team should take into consideration best practices 
 
 ###### System level testing
 
-- Each service should be runnable **on its own**, with pre-prepared data, and have functionality to compare its output to the given input.
-- For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
+- Each service should be **runnable on its own**, with pre-prepared data, and have functionality to compare its output to the given input. For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
 - In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
 
 #### Extensibility 
@@ -377,3 +377,11 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 [postman-collection.json](../mvp-level-implementation/services/info/postman-collection.json)
 
 <hr>
+
+# Appendices
+
+## Non-Functional Attributes - definitions
+This section explains the meaning of each non-functional attribute referred in this document. 
+
+### Scalability
+The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system).
