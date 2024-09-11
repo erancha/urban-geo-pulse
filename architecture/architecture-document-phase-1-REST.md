@@ -175,7 +175,9 @@ The following tech stack was preferred, primarily **due to current experience of
 
 #### MongoDB
 
-   - **Scalability** - <<TODO!! explain>> 
+   - **Scalability** 
+      - NoSQL databases are designed for **horizontal scaling**, which means they can handle increased loads by adding more servers or nodes to the system. This allows them to distribute data and workload across multiple machines.
+      - **Sharding**: NoSQL databases can implement sharding, where data is divided into smaller, more manageable pieces distributed across multiple servers. Each shard can be queried independently, allowing for parallel processing of requests, which increases throughput and reduces latency.
 
 #### Redis
 
