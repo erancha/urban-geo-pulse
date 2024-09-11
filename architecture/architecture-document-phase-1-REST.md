@@ -21,6 +21,12 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   * [Services](#services)
   * [Messaging](#messaging)
   * [Technology Stack](#technology-stack)
+    + [JAVA Spring Boot](#java-spring-boot)
+    + [Kafka](#kafka)
+    + [PostgreSQL](#postgresql)
+    + [MongoDB](#mongodb)
+    + [Redis](#redis)
+    + [React](#react)
   * [Non-Functional Attributes](#non-functional-attributes)
     + [High-Performance:](#high-performance)
       - [Performance](#performance)
@@ -106,7 +112,7 @@ Here is a high-level overview of the architecture:
 ![Lucid](https://lucid.app/publicSegments/view/e56b4eaa-3f1a-4631-9af4-5b4dabd2b592/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
-All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
+All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
 This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](mvp-level-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
@@ -149,7 +155,7 @@ The architecture comprises the following services:
 
 The following tech stack was preferred, primarily **due to current experience of the development team**:
 
-1. JAVA **Spring Boot**:
+#### JAVA Spring Boot
 
    - **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
 
@@ -157,24 +163,29 @@ The following tech stack was preferred, primarily **due to current experience of
 
    - **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
 
-2. **Kafka**:
+#### Kafka
 
-   - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
-   - **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
+      - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
+      - **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
 
-3. **PostgreSQL**:
+#### PostgreSQL
 
-   - **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
-   - **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
+      - **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
+      - **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
 
-4. **Redis**:
+#### MongoDB
 
-   - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
-   - Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
+     - **Scalability** - <<TODO!! explain>> 
 
-5. **React**:
-   - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
-   - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
+#### Redis
+
+      - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
+      - Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
+
+#### React
+
+      - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
+      - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
 
 ### Non-Functional Attributes
 
