@@ -336,8 +336,8 @@ To process messages containing events that should be:
 1. Delayed for a required duration, and then,
 2. Produced to a target topic described in each message.
 
-#### [Diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
-![Lucid](https://lucid.app/publicSegments/view/6da4c3f1-3886-4dc8-baea-45d8ade5daac/image.jpeg 'System diagram')
+#### Diagram
+![Lucid](https://lucid.app/publicSegments/view/9c0665c8-059f-4c56-8271-f1709c643624/image.jpeg 'System diagram')
 
 <hr>
 
