@@ -36,10 +36,8 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
         * [Fault Tolerance](#fault-tolerance)
       - [Security:](#security)
       - [Maintainability:](#maintainability)
-        * [Testability:](#testability)
           + [Logging](#logging)
           + [System level testing](#system-level-testing)
-      - [Extensibility](#extensibility)
   * [Services Drill Down](#services-drill-down)
     + [Mobile application](#mobile-application)
       - [Role](#role)
@@ -66,6 +64,15 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 - [Appendices](#appendices)
   * [Non-Functional Attributes - definitions](#non-functional-attributes---definitions)
     + [Scalability](#scalability-1)
+    + [Resiliency:](#resiliency-1)
+      - [High Availability](#high-availability-1)
+      - [Fault Tolerance](#fault-tolerance-1)
+    + [Security:](#security-1)
+    + [Maintainability:](#maintainability-1)
+      - [Testability:](#testability)
+      - [Logging](#logging-1)
+        * [System level testing](#system-level-testing-1)
+    + [Extensibility](#extensibility)
 
 <!-- tocstop -->
 
@@ -208,19 +215,13 @@ This architecture allows to easily scale services as needed:
 
 #### Resiliency:
 
-<p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
-
 ##### High Availability
 
 ##### Fault Tolerance
-
 As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
 #### Security:
-
-<p>(Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.)</p>
-
 The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
 
@@ -232,28 +233,15 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 (Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
 #### Maintainability:
-
-<p>(Definition: The software should be designed in a way that makes it easy to understand, modify, and maintain over time. This includes considerations for code readability, proper documentation, and adherence to coding best practices.)</p>
-
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
 
-##### Testability:
-
-<p>(Definition: The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues)</p>
-
 ###### Logging
-
-- Every step in the services should be logged. Since there is no UI for the services, logging is almost the only way of figuring out what’s going on (consumer groups lags can also shed some light on the progress).
 - All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
 
 ###### System level testing
-
 - Each service should be **runnable on its own**, with pre-prepared data, and have functionality to compare its output to the given input. For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
 - In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
-
-#### Extensibility 
-(Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system).
 
 ## Services Drill Down
 
@@ -384,4 +372,28 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 This section explains the meaning of each non-functional attribute referred in this document. 
 
 ### Scalability
-The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system).
+The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both horizontally (adding more machines to the system) and vertically (adding more resources to a single machine).
+
+### Resiliency:
+The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.
+
+#### High Availability
+
+#### Fault Tolerance
+
+### Security:
+The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.
+
+### Maintainability:
+The software should be designed in a way that makes it easy to understand, modify, and maintain over time. This includes considerations for code readability, proper documentation, and adherence to coding best practices.
+
+#### Testability:
+The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues.
+
+#### Logging
+Every step in the services should be logged. Since there is no UI for the services, logging is almost the only way of figuring out what’s going on (consumer groups lags can also shed some light on the progress).
+
+##### System level testing
+
+### Extensibility
+The software should be designed in a way that facilitates adding new features without modifying the existing system.
