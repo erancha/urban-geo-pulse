@@ -337,7 +337,7 @@ To process messages containing events that should be:
 2. Produced to a target topic described in each message.
 
 #### Diagram
-![Lucid](https://lucid.app/publicSegments/view/9c0665c8-059f-4c56-8271-f1709c643624/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/6c202ede-1dba-4bf7-9603-1b6f48cdab2b/image.jpeg 'System diagram')
 
 <hr>
 
