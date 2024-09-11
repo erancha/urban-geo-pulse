@@ -112,7 +112,7 @@ Here is a high-level overview of the architecture:
 ![Lucid](https://lucid.app/publicSegments/view/e56b4eaa-3f1a-4631-9af4-5b4dabd2b592/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
-All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
+All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[fault Tolerant](#fault-tolerance)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the Data Store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
 This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](mvp-level-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
@@ -126,7 +126,7 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 ### Services
 
-The architecture comprises the following services:
+The architecture comprises the following key services:
 
 - [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
