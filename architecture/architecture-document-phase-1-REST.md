@@ -63,15 +63,15 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
       - [APIs:](#apis)
 - [Appendices](#appendices)
   * [Non-Functional Attributes - definitions](#non-functional-attributes---definitions)
-    + [Scalability](#scalability-1)
+    + [High-Performance:](#high-performance-1)
+      - [Performance](#performance-1)
+      - [Scalability](#scalability-1)
     + [Resiliency:](#resiliency-1)
       - [High Availability](#high-availability-1)
       - [Fault Tolerance](#fault-tolerance-1)
     + [Security:](#security-1)
     + [Maintainability:](#maintainability-1)
       - [Testability:](#testability)
-      - [Logging](#logging-1)
-        * [System level testing](#system-level-testing-1)
     + [Extensibility](#extensibility)
 
 <!-- tocstop -->
@@ -201,27 +201,26 @@ The following tech stack was preferred, primarily **due to current experience of
 
 ### Non-Functional Attributes
 
-#### High-Performance:
+#### [High-Performance:](#high-performance-1):
 
-##### Performance
+##### [Performance](#performance-1)
 
 ##### [Scalability](#scalability-1)
-
 This architecture allows to easily scale services as needed:
 
 1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
 2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
-#### Resiliency:
+#### [Resiliency:](#resiliency-1):
 
-##### High Availability
+##### [High Availability](#high-availability-1)
 
-##### Fault Tolerance
+##### [Fault Tolerance](#fault-tolerance-1)
 As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
-#### Security:
+#### [Security:](#security-1):
 The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
 
@@ -232,7 +231,7 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 
 (Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
-#### Maintainability:
+#### [Maintainability:](#maintainability-1):
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
 
@@ -371,7 +370,11 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 ## Non-Functional Attributes - definitions
 This section explains the meaning of each non-functional attribute referred in this document. 
 
-### Scalability
+### High-Performance:
+
+#### Performance
+
+#### Scalability
 The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both horizontally (adding more machines to the system) and vertically (adding more resources to a single machine).
 
 ### Resiliency:
@@ -389,11 +392,6 @@ The software should be designed in a way that makes it easy to understand, modif
 
 #### Testability:
 The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues.
-
-#### Logging
-Every step in the services should be logged. Since there is no UI for the services, logging is almost the only way of figuring out what’s going on (consumer groups lags can also shed some light on the progress).
-
-##### System level testing
 
 ### Extensibility
 The software should be designed in a way that facilitates adding new features without modifying the existing system.
