@@ -165,18 +165,25 @@ This architecture, in conjunction with a modern development platform (refer to [
 The architecture comprises the following key services:
 
 - [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
+
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
+ 
 - [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
+    <br>Note: The system uses [Redis](#redis) to increase [Performance](#performance-1).  
+  
 - [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-sorter's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the following topics:
   - _pedestrians_streets_
   - _pedestrians_neighborhoods_
   - _mobilized_streets_
   - _mobilized_neighborhoods_
+  <br>Note: The system uses PostgreSQL datasets provided by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop. The database should have read replicas, to increase read scalability.
+  
 - [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the following tables:
   - _agg_streets_activity_
   - _agg_neighborhoods_activity_
+
 - [Info](#info-service) service - will return data from the tables persisted by the Activity-aggregator service.
 
 ### Messaging
@@ -188,11 +195,9 @@ The architecture comprises the following key services:
 - The [Info](#info-service) service also exposes a **REST API** for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
 
 ### Technology Stack
-
-The following tech stack was preferred, primarily **due to current experience of the development team**:
+The following tech stack was preferred, partially **due to current experience of the development team** and partially for reasons explained below:
 
 #### JAVA Spring Boot
-
    - **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
 
    - Robust **Ecosystem**: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
@@ -200,28 +205,24 @@ The following tech stack was preferred, primarily **due to current experience of
    - **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
 
 #### Kafka
-
    - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
    - **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
 
 #### PostgreSQL
-
    - **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
    - **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
+   - As this system was inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop, the system uses PostgreSQL datasets provided by this workshop.
 
 #### MongoDB
-
    - **Scalability** 
       - NoSQL databases are designed for **horizontal scaling**, which means they can handle increased loads by adding more servers or nodes to the system. This allows them to distribute data and workload across multiple machines.
       - **Sharding**: NoSQL databases can implement sharding, where data is divided into smaller, more manageable pieces distributed across multiple servers. Each shard can be queried independently, allowing for parallel processing of requests, which increases throughput and reduces latency.
 
 #### Redis
-
    - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
    - Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
 
 #### React
-
    - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
    - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
 
@@ -392,9 +393,9 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 <hr>
 
 # Appendices
+The following sections explains the meaning of non-functional attributes and methodology referred and utilized in the preceding sections.
 
 ## Non-Functional Attributes - definitions
-This section explains the meaning of each non-functional attribute referred in this document. 
 
 ### High-Performance:
 
