@@ -73,6 +73,34 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
     + [Maintainability:](#maintainability-1)
       - [Testability:](#testability)
     + [Extensibility](#extensibility)
+  * [12-Factor App methodology](#12-factor-app-methodology)
+    + [Codebase:](#codebase)
+    + [Dependencies:](#dependencies)
+    + [Config:](#config)
+    + [Backing Services:](#backing-services)
+    + [Build, Release, Run:](#build-release-run)
+    + [Processes:](#processes)
+    + [Port Binding:](#port-binding)
+    + [Concurrency:](#concurrency)
+    + [Disposability:](#disposability)
+    + [Dev/Prod Parity:](#devprod-parity)
+    + [Logs:](#logs)
+    + [Admin Processes:](#admin-processes)
+  * ["Build to scale" and "Build to fail" methodologies](#build-to-scale-and-build-to-fail-methodologies)
+    + [Build to Scale](#build-to-scale)
+      - [Key Characteristics:](#key-characteristics)
+        * [Scalability:](#scalability)
+        * [Microservices Architecture:](#microservices-architecture)
+        * [Load Balancing:](#load-balancing)
+        * [Auto-scaling:](#auto-scaling)
+        * [Performance Testing:](#performance-testing)
+    + [Build to Fail](#build-to-fail)
+      - [Key Characteristics:](#key-characteristics-1)
+        * [Resilience:](#resilience)
+        * [Fault Tolerance:](#fault-tolerance)
+        * [Chaos Engineering:](#chaos-engineering)
+        * [Monitoring and Alerts:](#monitoring-and-alerts)
+    + [Summary](#summary)
 
 <!-- tocstop -->
 
@@ -131,8 +159,6 @@ This architecture, in conjunction with a modern development platform (refer to [
 ### [Detailed diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
 
 ![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')
-
-- The architecture follows the [**12-Factor App methodology**](https://12factor.net).
 
 ### Services
 
@@ -395,3 +421,98 @@ The software should be designed in a way that facilitates easy testing, both at 
 
 ### Extensibility
 The software should be designed in a way that facilitates adding new features without modifying the existing system.
+
+## [12-Factor App methodology](https://12factor.net)
+
+### Codebase:
+Summary: There should be a single codebase tracked in a version control system (like Git), which can be deployed to multiple environments.
+Example: A web application’s code is stored in a Git repository, and the same code is deployed to development, staging, and production environments.
+
+### Dependencies:
+Summary: All dependencies must be explicitly declared and isolated. This ensures that the application runs consistently across different environments.
+Example: A Python application lists its required libraries in a requirements.txt file and uses a virtual environment to manage dependencies.
+
+### Config:
+Summary: Configuration settings (e.g., database URLs, API keys) should be stored in the environment, not hard-coded in the codebase.
+Example: A Node.js application retrieves the database connection string from environment variables using process.env.DB_CONNECTION.
+
+### Backing Services:
+Summary: Treat backing services (like databases, message queues) as attached resources that can be swapped out easily.
+Example: A web app can use either a local SQLite database in development or a cloud-hosted PostgreSQL database in production without changing the application code.
+
+### Build, Release, Run:
+Summary: Separate the build, release, and run stages to enhance the deployment process.
+Example: Use a CI/CD pipeline to build the application, package it as a container image, and then deploy it to a cloud service.
+
+### Processes:
+Summary: Applications should be executed as stateless processes. Any data that needs to persist should be stored in a backing service.
+Example: A web server handles HTTP requests statelessly, retrieving session data from a Redis store rather than storing it in memory.
+
+### Port Binding:
+Summary: Applications should be self-contained and expose services via port binding, allowing them to be treated like services.
+Example: A web application runs on port 3000 and can be accessed via http://localhost:3000.
+
+### Concurrency:
+Summary: Scale the application by running multiple processes or instances of the application.
+Example: Using Kubernetes, multiple instances of a microservice can be deployed to handle increased load during peak traffic.
+
+### Disposability:
+Summary: Applications should start up quickly and shut down gracefully to facilitate easier scaling and maintenance.
+Example: A microservice can be terminated and redeployed in under a minute without any downtime, thanks to the use of containers.
+
+### Dev/Prod Parity:
+Summary: Keep development, staging, and production environments as similar as possible to reduce discrepancies and errors.
+Example: Using Docker, developers can replicate the production environment locally, ensuring that code runs consistently in all stages.
+
+### Logs:
+Summary: Treat logs as event streams that can be aggregated and analyzed, instead of stored in files.
+Example: A logging service like ELK Stack (Elasticsearch, Logstash, and Kibana) captures and analyzes logs from multiple microservices in real-time.
+
+### Admin Processes:
+Summary: Run admin processes (like database migrations or backup scripts) as one-off tasks in the same environment as the application.
+Example: Running a database migration command in the production environment using the same container image as the application ensures consistency.
+
+These factors collectively help create applications that are resilient, scalable, and maintainable in cloud environments. Adopting them can significantly improve the development and operational aspects of your applications.
+
+## "Build to scale" and "Build to fail" methodologies 
+The methodologies "build to scale" and "build to fail" reflect different approaches to software development and deployment within cloud-native architectures or microservices environments. Here’s a breakdown of each:
+
+### Build to Scale
+Definition:
+"Build to scale" focuses on creating applications that are designed from the ground up to handle increased loads and user demand. This involves planning for growth in terms of both performance and infrastructure.
+
+#### Key Characteristics:
+
+##### Scalability: 
+Applications are built with scalability in mind, allowing them to handle more users or data without performance degradation.
+##### Microservices Architecture: 
+Often utilizes microservices to allow individual components of the application to scale independently based on demand.
+##### Load Balancing:
+Implements load balancing to distribute traffic evenly across multiple instances of services.
+##### Auto-scaling:
+Uses cloud provider features (like AWS Auto Scaling) to automatically adjust the number of service instances based on traffic.
+##### Performance Testing:
+Involves regular performance testing and optimization to identify bottlenecks and ensure that the application can handle growth.
+
+### Build to Fail
+Definition:
+"Build to fail" embraces the idea that failures are inevitable in complex systems and focuses on building applications that are resilient and can quickly recover from failures.
+
+#### Key Characteristics:
+
+##### Resilience:
+Applications are designed to handle failures gracefully, allowing them to continue operating even when parts of the system fail.
+##### Fault Tolerance:
+Implements redundancy and fallback mechanisms to ensure that service remains available.
+##### Chaos Engineering:
+Involves intentionally injecting failures (e.g., Chaos Monkey) to test how systems respond, allowing teams to improve system resilience.
+##### Monitoring and Alerts:
+Incorporates robust monitoring and alerting to quickly identify and respond to issues.
+Graceful Degradation: Ensures that if certain features fail, the application can still provide basic functionality to users.
+
+### Summary
+**Build to Scale** emphasizes creating systems capable of handling growing demands effectively and efficiently, focusing on scalability and performance.
+
+**Build to Fail** focuses on resilience and the ability to recover from failures, accepting that failures will happen and preparing the system to handle them gracefully.
+
+Both methodologies are essential in cloud-native development, as they address different but complementary aspects of building robust applications. A well-designed cloud-native application often incorporates principles from both approaches to ensure it can scale effectively while remaining resilient to failures.
