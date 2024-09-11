@@ -24,7 +24,6 @@ This information will be used to **make decisions** regarding **real-time** need
    - The architecture follows the [**12-Factor App methodology**](https://12factor.net).<br><br>
 2. [**MVP-level JAVA Spring Boot implementation**](mvp-level-implementation/README.md):
    - A Minimum Viable Product (MVP)-level implementation using JAVA and Spring Boot has been developed. It serves as a starting point for building the UrbanGeoPulse application. The implementation includes the basic functionality required to identify messages from pedestrians or mobilized individuals and retrieve information on streets and neighborhoods based on specified timeframes.<br>
-   - The design and implementation follow the [**12-Factor App methodology**](https://12factor.net).
    - For details about the MVP-level implementation, please refer to this [README](mvp-level-implementation/README.md) file.
 
 **Acknowledgments**: [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
