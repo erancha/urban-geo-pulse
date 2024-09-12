@@ -178,7 +178,7 @@ The architecture comprises the following key services:
   - _pedestrians_neighborhoods_
   - _mobilized_streets_
   - _mobilized_neighborhoods_
-  <br><br>Note: This service uses PostgreSQL datasets provided by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop. The database should have read replicas, to increase read scalability.
+  <br><br>Note: This service uses [PostgreSQL](#postgresql) datasets provided by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop. The database should have read replicas, to increase read scalability.
   
 - [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the following tables:
   - _agg_streets_activity_
@@ -217,6 +217,12 @@ The following tech stack was preferred, partially **due to current experience of
    - **Scalability** 
       - NoSQL databases are designed for **horizontal scaling**, which means they can handle increased loads by adding more servers or nodes to the system. This allows them to distribute data and workload across multiple machines.
       - **Sharding**: NoSQL databases can implement sharding, where data is divided into smaller, more manageable pieces distributed across multiple servers. Each shard can be queried independently, allowing for parallel processing of requests, which increases throughput and reduces latency.
+      - High **Write and Read Throughput**:
+           NoSQL databases are optimized for high write and read throughput. They can efficiently handle a large number of concurrent operations, making them ideal for applications that generate lots of real-time data, such as the Activity-aggregator service.
+           Relational databases can become performance bottlenecks under high load due to their transactional nature and the overhead of maintaining ACID properties (Atomicity, Consistency, Isolation, Durability).
+   - **Schema Flexibility**:
+   NoSQL databases typically feature a schema-less or flexible schema design. This means you can store data without a predefined structure, allowing for rapid changes in data models. This is a benefit for the Activity-aggregator service, allowing it to [extend](#extensibility) for future aggregation requirements.
+   <BR>Relational databases require a strict schema, and changing this schema often involves complex migrations that can lead to downtime and performance degradation.
 
 #### Redis
    - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
