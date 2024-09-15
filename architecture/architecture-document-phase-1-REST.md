@@ -207,7 +207,7 @@ The following tech stack was preferred, partially **due to current experience of
 
   - **[Scalability](#scalability-1)**
  
-This architecture allows to easily scale services as needed:
+**Scalability**: This architecture allows to easily scale services as needed:
 
 1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
 2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
@@ -219,7 +219,7 @@ This architecture allows to easily scale services as needed:
 
   - **[Fault Tolerance](#fault-tolerance-1)**
   
-As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
+**Fault Tolerance**: As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
 - **[Security](#security-1)**
@@ -234,11 +234,9 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
 
-    Logging
-All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
+**Logging**: All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
 
-    System level testing
-Each service should be **runnable on its own**, with pre-prepared data, and have functionality to compare its output to the given input. For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
+**System level testing**: Each service should be **runnable on its own**, with pre-prepared data, and have functionality to compare its output to the given input. For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
 
 In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
 
