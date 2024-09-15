@@ -64,6 +64,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
     + [MongoDB](#mongodb)
     + [Redis](#redis)
     + [React](#react)
+  * [OAuth2 and JWT - overview](#oauth2-and-jwt---overview)
   * [12-Factor App methodology](#12-factor-app-methodology)
     + [Codebase:](#codebase)
     + [Dependencies:](#dependencies)
@@ -185,7 +186,7 @@ The architecture comprises the following key services:
 
 - The [Receiver](#receiver-service) service exposes a **REST API**. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md), **MQTT** will be considered as a alternate messaging method.
 
-- The pipeline services ([Mobilization-sorter](#mobilization-sorter-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru **Kafka**. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
+- The pipeline services ([Mobilization-sorter](#mobilization-sorter-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru **[Kafka](#kafka)**. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 
 - The [Info](#info-service) service also exposes a **REST API** for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
 
@@ -223,15 +224,8 @@ Note: **Consumer groups rebalancing** must be handled properly (refer specifical
 
 - **[Security](#security-1)**
 
-The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
+The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support [OAuth2 and JWT](#oauth2-and-jwt---overview).
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
-
-- [OAuth2](https://oauth.net/2/) is the primary authentication protocol used to grant access to user accounts without sharing the actual login credentials. It allows third-party applications to request access to user data on their behalf.
-  During the OAuth2 authentication flow, the Gmail API uses JWT to generate and sign the access tokens.
-- [JWT](https://jwt.io/) (JSON Web Tokens) are a compact, URL-safe means of representing claims between two parties. The access token contains information about the user and the permissions granted to the third-party application.
-- In summary, OAuth2 is used for the overall authentication process, while JWT is used for generating and signing the access tokens that grant access to user data.
-
-(Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
 - **[Maintainability:](#maintainability-1)**
   - **Logging**
@@ -440,6 +434,16 @@ The following tech stack was preferred, partially **due to current experience of
 - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
 - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
 
+
+## OAuth2 and JWT - overview 
+
+- [OAuth2](https://oauth.net/2/) is the primary authentication protocol used to grant access to user accounts without sharing the actual login credentials. It allows third-party applications to request access to user data on their behalf.
+  During the OAuth2 authentication flow, the Gmail API uses JWT to generate and sign the access tokens.
+- [JWT](https://jwt.io/) (JSON Web Tokens) are a compact, URL-safe means of representing claims between two parties. The access token contains information about the user and the permissions granted to the third-party application.
+
+In summary, OAuth2 is used for the overall authentication process, while JWT is used for generating and signing the access tokens that grant access to user data.
+
+(Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
 
 ## [12-Factor App methodology](https://12factor.net)
