@@ -21,23 +21,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
     + [Services](#services)
     + [Messaging](#messaging)
     + [Technology Stack](#technology-stack)
-      - [JAVA Spring Boot](#java-spring-boot)
-      - [Kafka](#kafka)
-      - [PostgreSQL](#postgresql)
-      - [MongoDB](#mongodb)
-      - [Redis](#redis)
-      - [React](#react)
     + [Non-Functional Attributes](#non-functional-attributes)
-      - [High-Performance:](#high-performance)
-        * [Performance](#performance)
-        * [Scalability](#scalability)
-      - [Resiliency:](#resiliency)
-        * [High Availability](#high-availability)
-        * [Fault Tolerance](#fault-tolerance)
-      - [Security](#security)
-      - [Maintainability:](#maintainability)
-          + [Logging](#logging)
-          + [System level testing](#system-level-testing)
   * [Services Drill Down](#services-drill-down)
     + [Mobile application](#mobile-application)
       - [Role](#role)
@@ -63,16 +47,23 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
       - [APIs:](#apis)
 - [Appendices](#appendices)
   * [Non-Functional Attributes - definitions](#non-functional-attributes---definitions)
-    + [High-Performance:](#high-performance-1)
-      - [Performance](#performance-1)
-      - [Scalability](#scalability-1)
-    + [Resiliency:](#resiliency-1)
-      - [High Availability](#high-availability-1)
-      - [Fault Tolerance](#fault-tolerance-1)
-    + [Security](#security-1)
-    + [Maintainability:](#maintainability-1)
+    + [High-Performance:](#high-performance)
+      - [Performance](#performance)
+      - [Scalability](#scalability)
+    + [Resiliency:](#resiliency)
+      - [High Availability](#high-availability)
+      - [Fault Tolerance](#fault-tolerance)
+    + [Security](#security)
+    + [Maintainability:](#maintainability)
       - [Testability:](#testability)
     + [Extensibility](#extensibility)
+  * [Technology Stack - features overview](#technology-stack---features-overview)
+    + [JAVA Spring Boot](#java-spring-boot)
+    + [Kafka](#kafka)
+    + [PostgreSQL](#postgresql)
+    + [MongoDB](#mongodb)
+    + [Redis](#redis)
+    + [React](#react)
   * [12-Factor App methodology](#12-factor-app-methodology)
     + [Codebase:](#codebase)
     + [Dependencies:](#dependencies)
@@ -171,7 +162,8 @@ The architecture comprises the following key services:
 - [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
-  <br><br>Note: This service uses [Redis](#redis) to increase [Performance](#performance-1).  
+  <br><br>Note: This service uses [Redis](#redis) to increase [Performance](#performance-1).
+
   
 - [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-sorter's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the following topics:
   - _pedestrians_streets_
@@ -180,9 +172,12 @@ The architecture comprises the following key services:
   - _mobilized_neighborhoods_
   <br><br>Note: This service uses [PostgreSQL](#postgresql) datasets provided by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop. The database should have read replicas, to increase read scalability.
   
+  
 - [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the following tables:
   - _agg_streets_activity_
   - _agg_neighborhoods_activity_
+    <br><br>Note: This service uses [MongoDB](#mongodb) primarily to ensure higher [Scalability](#scalability-1), and to benefit from Schema Flexibility in future cases (refer to [Extensibility](#extensibility) in the appendix below).
+
 
 - [Info](#info-service) service - will return data from the tables persisted by the Activity-aggregator service.
 
@@ -195,65 +190,39 @@ The architecture comprises the following key services:
 - The [Info](#info-service) service also exposes a **REST API** for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
 
 ### Technology Stack
-The following tech stack was preferred, partially **due to current experience of the development team** and partially for reasons explained below:
-
-#### JAVA Spring Boot
-   - **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
-
-   - Robust **Ecosystem**: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
-
-   - **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
-
-#### Kafka
-   - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
-   - **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
-
-#### PostgreSQL
-   - **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
-   - **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
-   - As this system was inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop, the system uses PostgreSQL datasets provided by this workshop.
-
-#### MongoDB
-   - **Scalability** 
-      - NoSQL databases are designed for **horizontal scaling**, which means they can handle increased loads by adding more servers or nodes to the system. This allows them to distribute data and workload across multiple machines.
-      - **Sharding**: NoSQL databases can implement sharding, where data is divided into smaller, more manageable pieces distributed across multiple servers. Each shard can be queried independently, allowing for parallel processing of requests, which increases throughput and reduces latency.
-      - High **Write and Read Throughput**:
-           NoSQL databases are optimized for high write and read throughput. They can efficiently handle a large number of concurrent operations, making them ideal for applications that generate lots of real-time data, such as the Activity-aggregator service.
-           Relational databases can become performance bottlenecks under high load due to their transactional nature and the overhead of maintaining ACID properties (Atomicity, Consistency, Isolation, Durability).
-   - **Schema Flexibility**:
-   NoSQL databases typically feature a schema-less or flexible schema design. This means you can store data without a predefined structure, allowing for rapid changes in data models. This is a benefit for the Activity-aggregator service, allowing it to [extend](#extensibility) for future aggregation requirements.
-   <BR>Relational databases require a strict schema, and changing this schema often involves complex migrations that can lead to downtime and performance degradation.
-
-#### Redis
-   - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
-   - Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
-
-#### React
-   - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
-   - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
+The following tech stack was preferred, partially **due to current experience of the development team** and partially for the following technical benefits: [Technology Stack - features overview](#technology-stack---features-overview).
+- JAVA Spring Boot
+- Kafka
+- PostgreSQL
+- MongoDB
+- Redis
+- React
 
 ### Non-Functional Attributes
 
-#### [High-Performance:](#high-performance-1)
+- **[High-Performance:](#high-performance-1)**
 
-##### [Performance](#performance-1)
+  - **[Performance](#performance-1)**
 
-##### [Scalability](#scalability-1)
+  - **[Scalability](#scalability-1)**
+ 
 This architecture allows to easily scale services as needed:
 
 1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
 2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
-#### [Resiliency:](#resiliency-1)
+- **[Resiliency:](#resiliency-1)**
 
-##### [High Availability](#high-availability-1)
+  - **[High Availability](#high-availability-1)**
 
-##### [Fault Tolerance](#fault-tolerance-1)
+  - **[Fault Tolerance](#fault-tolerance-1)**
+  
 As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
-#### [Security](#security-1)
+- **[Security](#security-1)**
+
 The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
 
@@ -264,16 +233,20 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 
 (Implementation Instructions: Java Spring Boot has built-in support for these protocols, using the **spring-boot-starter-oauth2-client** and **spring-boot-starter-security** dependencies)
 
-#### [Maintainability:](#maintainability-1)
+- **[Maintainability:](#maintainability-1)**
+  - **Logging**
+  - **System level testing**
+
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
 
-###### Logging
-- All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
+    Logging
+All services should be configured in docker-level (i.e. without changing logging functionality for each service) to redirect their logging into [graylog](https://docs.docker.com/config/containers/logging/gelf/).
 
-###### System level testing
-- Each service should be **runnable on its own**, with pre-prepared data, and have functionality to compare its output to the given input. For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
-- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
+    System level testing
+Each service should be **runnable on its own**, with pre-prepared data, and have functionality to compare its output to the given input. For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
+
+In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
 
 ## Services Drill Down
 
@@ -428,6 +401,46 @@ The software should be designed in a way that facilitates easy testing, both at 
 
 ### Extensibility
 The software should be designed in a way that facilitates adding new features without modifying the existing system.
+
+
+## Technology Stack - features overview
+The following tech stack was preferred, partially **due to current experience of the development team** and partially for reasons explained below:
+
+### JAVA Spring Boot
+- **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
+
+- Robust **Ecosystem**: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
+
+- **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
+
+### Kafka
+- **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
+- **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
+
+### PostgreSQL
+- **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
+- **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
+- As this system was inspired by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop, the system uses PostgreSQL datasets provided by this workshop.
+
+### MongoDB
+- **Scalability**
+    - NoSQL databases are designed for **horizontal scaling**, which means they can handle increased loads by adding more servers or nodes to the system. This allows them to distribute data and workload across multiple machines.
+    - **Sharding**: NoSQL databases can implement sharding, where data is divided into smaller, more manageable pieces distributed across multiple servers. Each shard can be queried independently, allowing for parallel processing of requests, which increases throughput and reduces latency.
+    - High **Write and Read Throughput**:
+      NoSQL databases are optimized for high write and read throughput. They can efficiently handle a large number of concurrent operations, making them ideal for applications that generate lots of real-time data, such as the Activity-aggregator service.
+      Relational databases can become performance bottlenecks under high load due to their transactional nature and the overhead of maintaining ACID properties (Atomicity, Consistency, Isolation, Durability).
+- **Schema Flexibility**:
+  NoSQL databases typically feature a schema-less or flexible schema design. This means you can store data without a predefined structure, allowing for rapid changes in data models.   <BR>Relational databases require a strict schema, and changing this schema often involves complex migrations that can lead to downtime and performance degradation.
+
+### Redis
+- **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
+- Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
+
+### React
+- Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
+- React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
+
+
 
 ## [12-Factor App methodology](https://12factor.net)
 
