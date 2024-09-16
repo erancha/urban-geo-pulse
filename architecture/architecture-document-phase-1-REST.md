@@ -19,7 +19,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   * [Overall Architecture](#overall-architecture)
     + [Detailed diagram](#detailed-diagram)
     + [Services Overview](#services-overview)
-    + [Messaging](#messaging)
+      - [Messaging](#messaging)
     + [Technology Stack](#technology-stack)
     + [Non-Functional Attributes](#non-functional-attributes)
       - [High-Performance](#high-performance)
