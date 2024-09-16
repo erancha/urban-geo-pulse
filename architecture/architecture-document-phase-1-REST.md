@@ -221,6 +221,9 @@ The following tech stack was preferred, partially **due to current experience of
 #### [Resiliency](#resiliency-1)
 
 **[High Availability](#high-availability-1)**: 
+1. On-Premises Solutions: Redundant hardware, Clustering, Regular backups, Failover mechanisms, Monitoring and alerts.
+
+2. AWS Solutions: Multi-AZ (Availability Zone) Deployment, Elastic Load Balancing (ELB), Auto Scaling, Amazon S3 for Backups, AWS Route 53 (DNS failover), Health Checks and Monitoring (CloudWatch).
 
 **[Fault Tolerance](#fault-tolerance-1)**: As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
