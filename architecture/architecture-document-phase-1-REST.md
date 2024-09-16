@@ -181,7 +181,7 @@ The architecture comprises the following key services:
 - The [Info](#info-service) service also exposes a **REST API** for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
 
 ### Technology Stack
-The following tech stack was preferred, partially **due to current experience of the development team** and partially for the following technical benefits: [Technology Stack - features overview](#technology-stack---features-overview).
+The following tech stack was preferred, partially due to current experience of the development team and partially for technical benefits: [Technology Stack - features overview](#technology-stack---features-overview).
 - JAVA Spring Boot
 - Kafka
 - PostgreSQL
