@@ -164,25 +164,11 @@ The architecture comprises the following key services:
 
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
  
-- [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
-  - _pedestrians_geo_locations_
-  - _mobilized_geo_locations_
-  <br><br>Note: This service uses [Redis](#redis) to increase [Performance](#performance-1).
-
+- [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the topics: _pedestrians_geo_locations_ or _mobilized_geo_locations_. This service uses [Redis](#redis) to increase [Performance](#performance-1).
   
-- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-sorter's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the following topics:
-  - _pedestrians_streets_
-  - _pedestrians_neighborhoods_
-  - _mobilized_streets_
-  - _mobilized_neighborhoods_
-  <br><br>Note: This service uses [PostgreSQL](#postgresql) datasets provided by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop. The database should have read replicas, to increase read scalability.
-  
-  
-- [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the following tables:
-  - _agg_streets_activity_
-  - _agg_neighborhoods_activity_
-    <br><br>Note: This service uses [MongoDB](#mongodb) primarily to ensure higher [Scalability](#scalability-1), and to benefit from Schema Flexibility in future cases (refer to [Extensibility](#extensibility) in the appendix below).
-
+- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-sorter's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the topics: _pedestrians_streets_, _pedestrians_neighborhoods_, _mobilized_streets_ or _mobilized_neighborhoods_. This service uses [PostgreSQL](#postgresql) datasets provided by the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop. The database should have read replicas, to increase read scalability.
+    
+- [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the tables: _agg_streets_activity_ or _agg_neighborhoods_activity_. This service uses [MongoDB](#mongodb) primarily to ensure higher [Scalability](#scalability-1), and to benefit from Schema Flexibility in future cases (refer to [Extensibility](#extensibility) in the appendix below).
 
 - [Info](#info-service) service - will return data from the tables persisted by the Activity-aggregator service.
 
