@@ -18,10 +18,14 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   * [Executive Summary](#executive-summary)
   * [Overall Architecture](#overall-architecture)
     + [Detailed diagram](#detailed-diagram)
-    + [Services](#services)
+    + [Services Overview](#services-overview)
     + [Messaging](#messaging)
     + [Technology Stack](#technology-stack)
     + [Non-Functional Attributes](#non-functional-attributes)
+      - [High-Performance](#high-performance)
+      - [Resiliency](#resiliency)
+      - [Security](#security)
+      - [Maintainability](#maintainability)
   * [Services Drill Down](#services-drill-down)
     + [Mobile application](#mobile-application)
       - [Role](#role)
@@ -53,7 +57,7 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
     + [Resiliency:](#resiliency)
       - [High Availability](#high-availability)
       - [Fault Tolerance](#fault-tolerance)
-    + [Security](#security)
+    + [Security](#security-1)
     + [Maintainability:](#maintainability)
       - [Testability:](#testability)
     + [Extensibility](#extensibility)
@@ -152,7 +156,7 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 ![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')
 
-### Services
+### Services Overview
 
 The architecture comprises the following key services:
 
@@ -201,36 +205,32 @@ The following tech stack was preferred, partially **due to current experience of
 
 ### Non-Functional Attributes
 
-- **[High-Performance:](#high-performance-1)**
+#### [High-Performance](#high-performance-1)
 
-  - **[Performance](#performance-1)**
+**[Performance](#performance-1)**: The architecture is designed to handle messages and move them thru the pipeline quickly:
 
-  - **[Scalability](#scalability-1)**
- 
-**Scalability**: This architecture allows to easily scale services as needed:
+1. Each service uses a data store appropriate for its needs. For example, the [Mobilization-sorter](#mobilization-sorter-service) service uses [Redis](#redis) to increase [Performance](#performance-1), and the [Activity-aggregator](#activity-aggregator-service) service uses [MongoDB](#mongodb) to benefit from its high performance and take load off [PostgreSQL](#postgresql) which is mandatory required by the [Locations-finder](#locations-finder-service) service.
+2. Compute resources should be adjusted for each service. For example, the [Mobilization-sorter](#mobilization-sorter-service) service should be assigned compute and memory intensive resources, while the [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service) services should be assigned storage intensive resource.  
+
+**[Scalability](#scalability-1)**: The architecture allows to easily scale services as needed:
 
 1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
 2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
-- **[Resiliency:](#resiliency-1)**
+#### [Resiliency](#resiliency-1)
 
-  - **[High Availability](#high-availability-1)**
+**[High Availability](#high-availability-1)**: 
 
-  - **[Fault Tolerance](#fault-tolerance-1)**
-  
-**Fault Tolerance**: As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
+**[Fault Tolerance](#fault-tolerance-1)**: As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
 
-- **[Security](#security-1)**
+#### [Security](#security-1)
 
 The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support [OAuth2 and JWT](#oauth2-and-jwt---overview).
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
 
-- **[Maintainability:](#maintainability-1)**
-  - **Logging**
-  - **System level testing**
-
+#### [Maintainability](#maintainability-1)
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
 
@@ -371,6 +371,10 @@ The following sections explains the meaning of non-functional attributes and met
 ### High-Performance:
 
 #### Performance
+The software's ability to efficiently process data and return results within a specified timeframe:
+- Response Time: The duration it takes for the system to respond to a user query or request after it has been submitted.
+- Data Processing Efficiency: The capability of the system to handle and process large volumes of incoming data swiftly without delays.
+- User Experience: Maintaining optimal performance is crucial for providing a seamless experience for users, enabling them to make timely decisions.
 
 #### Scalability
 The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both horizontally (adding more machines to the system) and vertically (adding more resources to a single machine).
@@ -379,8 +383,12 @@ The software should be able to handle increased demands and growth without signi
 The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.
 
 #### High Availability
+The software's ability to remain operational and accessible for a high percentage of time, ideally achieving near-continuous service without significant downtime.
+
+This can be achieved through various strategies, such as load balancing, redundant systems, and automatic failover processes, ensuring that if one component fails, another can take over seamlessly. The goal is to minimize service disruptions for users and maintain consistent performance.
 
 #### Fault Tolerance
+The property of a software that allows it to continue functioning properly in the event of a failure of some of its components. This involves the capacity to detect and handle failures without losing data or functionality.
 
 ### Security
 The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.
