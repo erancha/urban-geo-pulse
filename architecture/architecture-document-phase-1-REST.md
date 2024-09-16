@@ -160,7 +160,7 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 The architecture comprises the following key services:
 
-- [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
+- [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver](#receiver-service) service. Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the necessary maps.
 
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
  
@@ -172,7 +172,7 @@ The architecture comprises the following key services:
 
 - [Info](#info-service) service - will return data from the tables persisted by the Activity-aggregator service.
 
-### Messaging
+#### Messaging
 
 - The [Receiver](#receiver-service) service exposes a **REST API**. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md), **MQTT** will be considered as a alternate messaging method.
 
