@@ -57,8 +57,6 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   * [Info service](#info-service)
     + [Role](#role-6)
     + [APIs:](#apis)
-- [Appendix: 12-Factor App methodology](#appendix-12-factor-app-methodology)
-  * [Conclusion](#conclusion)
 
 <!-- tocstop -->
 
@@ -108,7 +106,7 @@ Here is a high-level overview of the architecture:
 ![Lucid](https://lucid.app/publicSegments/view/e27c2f23-c6ec-4091-a0ff-324d2729a915/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
-All the services are stateless, allowing them to [scale](#scalability) easily and seamlessly. In addition, no data is lost if a service is suddenly shutting down. The only places for data in the application are Kafka and the Data Store (PostgreSQL), both of them persist the data to the disk, thus protecting data from cases of shutdown.
+All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the Data Store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
 This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](mvp-level-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
@@ -241,8 +239,7 @@ In addition, the development team should take into consideration best practices 
 - For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
 - In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
 
-#### Extensibility
-
+#### Extensibility 
 (Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system).
 
 ## Services Drill Down
@@ -325,12 +322,10 @@ For better [scalability](#scaling) it is advisable to configure **read-only repl
 #### Role
 
 To process messages containing events that should be:
-
 1. Delayed for a required duration, and then,
 2. Produced to a target topic described in each message.
 
 #### [Diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
-
 ![Lucid](https://lucid.app/publicSegments/view/6da4c3f1-3886-4dc8-baea-45d8ade5daac/image.jpeg 'System diagram')
 
 <hr>
@@ -369,60 +364,3 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 [postman-collection.json](../mvp-level-implementation/services/info/postman-collection.json)
 
 <hr>
-
-## Appendix: 12-Factor App methodology
-
-[**12-Factor App methodology**](https://12factor.net)
-
-To assess whether the **UrbanGeoPulse** architecture adheres to the 12-Factor App methodology, we'll evaluate the architecture's components against the twelve factors outlined in the methodology:
-
-1. **Codebase**: A single codebase tracked in revision control, with many deploys.
-
-   - The architecture should follow this principle by maintaining a single repository for the microservices.
-
-2. **Dependencies**: Explicitly declare and isolate dependencies.
-
-   - The architecture outlines services that are stateless and communicates through Kafka and REST APIs. Each service should specify its dependencies clearly (e.g., through a `pom.xml` for Java).
-
-3. **Configuration**: Store configuration in the environment.
-
-   - The document mentions the use of environment variables for configuration, especially in the service implementations.
-
-4. **Backing services**: Treat backing services as attached resources.
-
-   - Kafka and PostgreSQL are treated as services that can be swapped out or replaced as needed. This adheres to the principle.
-
-5. **Build, release, run**: Strictly separate the build and run stages.
-
-   - If the deployment process is clearly outlined to separate building (e.g., using CI/CD pipelines) from running applications in production, this is followed. However, the document does not explicitly describe this separation.
-
-6. **Processes**: Execute the app as one or more stateless processes.
-
-   - The architecture emphasizes stateless services, allowing for horizontal scaling.
-
-7. **Port binding**: Export services via port binding.
-
-   - The services are meant to be accessed via APIs, which implies port binding via HTTP and/or Kafka.
-
-8. **Concurrency**: Scale out via the process model.
-
-   - The architecture describes scaling services independently based on load.
-
-9. **Disposability**: Maximize robustness with fast startup and graceful shutdown.
-
-   - While not explicit, if the services are designed for quick startup and can handle graceful shutdown (especially in a cloud-native context), this factor is adhered to.
-
-10. **Dev/prod parity**: Keep development, staging, and production as similar as possible.
-
-    - The architecture should ideally ensure similar environments across dev, test, and production, which is not specifically mentioned in the document but should be a best practice for adherence.
-
-11. **Logs**: Treat logs as event streams.
-
-    - The architecture discusses logging to a central logging system (e.g., Graylog), which aligns with this principle.
-
-12. **Admin processes**: Run administrative/management tasks as one-off processes.
-    - The document does not clearly define how admin tasks are managed or executed, which may imply a lack of adherence to this factor.
-
-### Conclusion
-
-Overall, the **UrbanGeoPulse** architecture demonstrates a strong alignment with many of the 12 factors, particularly in service independence, configuration management, and statelessness. However, there are areas where details could be clearer or more explicitly defined, particularly regarding the build/release/run separation and admin processes.
