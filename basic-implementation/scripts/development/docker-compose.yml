@@ -1,0 +1,98 @@
+# version: '3' the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+
+services:
+  kafka-zookeeper:
+    image: confluentinc/cp-zookeeper:6.0.14
+    hostname: kafka-zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - urbangeopulse-net
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka-broker:
+    image: confluentinc/cp-kafka:6.0.14
+    hostname: kafka-broker
+    depends_on:
+      - kafka-zookeeper
+    networks:
+      - urbangeopulse-net
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'kafka-zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:333eae24759aaa7b3fc14e5e7dea232200c13dcd
+    depends_on:
+      - kafka-broker
+      - kafka-zookeeper
+    networks:
+      - urbangeopulse-net
+    ports:
+      - 7070:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kafka-broker
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: kafka-zookeeper:2181
+      LOGGING_LEVEL_ROOT: error
+      LOGGING_LEVEL_COM_PROVECTUS: error
+    restart: unless-stopped
+
+#  kafdrop:
+#    image: obsidiandynamics/kafdrop
+#    networks:
+#      - urbangeopulse-net
+#    ports:
+#      - 9000:9000
+#    depends_on:
+#      - kafka-broker
+#    environment:
+#      KAFKA_BROKERCONNECT: PLAINTEXT://kafka-broker:9092
+#      JVM_OPTS: -Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify
+#      SCHEMAREGISTRY_CONNECT: http://schema-registry:8081
+
+  redis-server:
+    image: redis:7.0-alpine
+    networks:
+      - urbangeopulse-net
+    ports:
+      - 6379:6379
+
+  postgis-server-nyc:
+    image: postgis/postgis:15-3.4
+    ports:
+      - 5433:5432
+    networks:
+      - urbangeopulse-net
+    volumes:
+      - ${LOCALAPPDATA}\Temp\postgreSQL_nyc:/var/lib/postgresql/data
+      # - D:\Temp\postgreSQL_nyc:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=nyc
+
+  pgadmin-server:
+    image: dpage/pgadmin4
+    ports:
+      - 8082:80
+    networks:
+      - urbangeopulse-net
+    volumes:
+      - ${LOCALAPPDATA}\Temp\pgadmin:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadminpass
+
+networks:
+  urbangeopulse-net:
+    driver: bridge

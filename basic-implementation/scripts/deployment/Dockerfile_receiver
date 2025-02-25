@@ -1,0 +1,6 @@
+FROM adoptopenjdk:11-jdk-hotspot
+WORKDIR /app
+COPY target/receiver-1.0.jar /app
+COPY people-geo-locations--Duffield_St.csv /app/people-geo-locations.csv
+EXPOSE 8080
+CMD ["java", "-jar", "receiver-1.0.jar"]

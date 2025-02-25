@@ -1,4 +1,0 @@
-FROM adoptopenjdk:11-jdk-hotspot
-WORKDIR /app
-COPY target/mobilization-sorter-1.0.jar /app
-CMD ["java", "-jar", "mobilization-sorter-1.0.jar"]

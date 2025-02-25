@@ -15,17 +15,18 @@ This data will aid in **decision-making** for **immediate needs**, such as deplo
 1. **Receive** messages that include **geospatial locations**, for example, from the cell phones of **pedestrians** and **mobilized** individuals.
 2. **Determine** the source of each message (**pedestrian** or **mobilized** individual) by calculating the speed based on the last two messages sent from the same device.
 3. Enable users to **access** activity data for streets and neighborhoods **in real-time** for any requested timeframe within the last 24 hours.
- 
+
 ## Solution:
 
 1. [**Architecture Document**](architecture/architecture-document-phase-1-REST.md):
-   - An architecture document has been created to outline the proposed system's structure. It includes an overview of the system components, their interactions, and the technologies used. The document can be accessed **[here](architecture/architecture-document-phase-1-REST.md)**.
-   ![Architecture diagram](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg)
 
-2. [**MVP-level JAVA Spring Boot Implementation**](mvp-level-implementation/README.md):
-   - A Minimum Viable Product (MVP) has been developed using JAVA and Spring Boot as a foundation for the UrbanGeoPulse application. This implementation includes essential features for identifying messages from pedestrians or mobilized individuals and retrieving street and neighborhood information based on specified timeframes.<br>
-   - The design and implementation align with the [12-Factor App methodology](architecture/architecture-document-phase-1-REST.md#appendix-12-factor-app-methodology).
-   - For more information about the MVP implementation, please refer to this [README](mvp-level-implementation/README.md) file.
+   - An architecture document has been created to outline the proposed system's structure. It includes an overview of the system components, their interactions, and the technologies used. The document can be accessed **[here](architecture/architecture-document-phase-1-REST.md)**.
+     ![Architecture diagram](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg)
+
+2. [**Basic JAVA Spring Boot Implementation**](basic-implementation/README.md):
+   - A Basic implementation has been developed using JAVA and Spring Boot as a foundation for the UrbanGeoPulse application. This implementation includes essential features for identifying messages from pedestrians or mobilized individuals and retrieving street and neighborhood information based on specified timeframes.<br>
+   - The design and implementation align with the [12-Factor App methodology](architecture\architecture-document-phase-1-REST.md#appendix-12-factor-app-methodology).
+   - For more information about the basic implementation, please refer to this [README](basic-implementation/README.md) file.
 
 **Acknowledgments**: [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
 

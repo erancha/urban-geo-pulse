@@ -1,1 +1,0 @@
-	set DELAY_MANAGER_TOPIC_NAME=delays

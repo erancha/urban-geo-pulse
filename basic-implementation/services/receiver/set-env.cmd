@@ -1,0 +1,3 @@
+	set POSTGIS_SERVER_HOST_NAME=localhost
+	set POSTGIS_SERVER_PORT=5433
+	set PEOPLE_GEO_LOCATIONS_TOPIC_NAME=people_geo_locations
