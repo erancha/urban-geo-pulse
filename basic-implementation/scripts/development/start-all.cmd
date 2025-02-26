@@ -1,19 +1,21 @@
 	@REM call start-3rd-party-stack.cmd
 
 	call set-sql-env.cmd
-	REM copy delete-from-agg_x_activity.sql %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc\urbangeopulse
-	REM docker exec -i %PG_CONTAINER_ID% psql --dbname=nyc --file=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.sql --username=user --output=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.out
+	@REM copy delete-from-agg_x_activity.sql %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc\urbangeopulse
+	@REM docker exec -i %PG_CONTAINER_ID% psql --dbname=nyc --file=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.sql --username=user --output=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.out
 
 	call set-log-env.cmd
 	
 	call start-a-service receiver 					openlog
 	call start-a-service mobilization-classifier
-	call start-a-service locations-finder
-	@REM call start-a-service activity-aggregator
-	@REM call start-a-service info 	
 	@REM call start-a-service delay-manager
+	call start-a-service activity-aggregator
+	call start-a-service locations-finder
+	@REM call start-a-service info 	
 
-	REM pause
+	@REM TODO: Refer to a comment in 'basic-implementation\services\activity-aggregator\start-service.cmd' about "The number of consumers should be aligned with locations-finder\start-service.cmd"
+
+	@REM pause
 	timeout /t 5 >nul
 
 

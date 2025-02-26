@@ -21,7 +21,7 @@ This data will aid in **decision-making** for **immediate needs**, such as deplo
 1. [**Architecture Document**](architecture/architecture-document-phase-1-REST.md):
 
    - An architecture document has been created to outline the proposed system's structure. It includes an overview of the system components, their interactions, and the technologies used. The document can be accessed **[here](architecture/architecture-document-phase-1-REST.md)**.
-     ![Architecture diagram](https://lucid.app/publicSegments/view/9a85b4c8-aa03-49e9-9268-bddee87edfb8/image.jpeg)
+     ![Architecture diagram](https://lucid.app/publicSegments/view/e6d6bb91-8e6e-43b5-9f44-49935994172d/image.jpeg)
 
 2. [**Basic JAVA Spring Boot Implementation**](basic-implementation/README.md):
    - A Basic implementation has been developed using JAVA and Spring Boot as a foundation for the UrbanGeoPulse application. This implementation includes essential features for identifying messages from pedestrians or mobilized individuals and retrieving street and neighborhood information based on specified timeframes.<br>

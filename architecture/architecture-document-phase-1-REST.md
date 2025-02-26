@@ -21,6 +21,12 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
   - [Services](#services)
   - [Messaging](#messaging)
   - [Technology Stack](#technology-stack)
+    - [JAVA _Spring Boot_](#java-_spring-boot_)
+    - [_Kafka_](#_kafka_)
+    - [_PostgreSQL_](#_postgresql_)
+    - [_MongoDB_](#_mongodb_)
+    - [_Redis_](#_redis_)
+    - [_React_](#_react_)
   - [Non-Functional Attributes](#non-functional-attributes)
     - [High-Performance:](#high-performance)
       - [Performance](#performance)
@@ -105,10 +111,10 @@ When designing the architecture, a strong emphasis was put on the following qual
 <p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring performance and high-availability.</p>
 
 Here is a high-level overview of the architecture:
-![Lucid](https://lucid.app/publicSegments/view/9a85b4c8-aa03-49e9-9268-bddee87edfb8/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/e6d6bb91-8e6e-43b5-9f44-49935994172d/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
-All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the Data Store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
+All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
 This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](mvp-level-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
@@ -116,7 +122,7 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 ### [Detailed diagram](https://lucid.app/publicSegments/view/1146cc57-0419-4bd8-a5ec-75b76874425d/image.jpeg)
 
-![Lucid](https://lucid.app/publicSegments/view/9a85b4c8-aa03-49e9-9268-bddee87edfb8/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/e6d6bb91-8e6e-43b5-9f44-49935994172d/image.jpeg 'System diagram')
 
 - The architecture follows the [**12-Factor App methodology**](https://12factor.net).
 
@@ -129,12 +135,12 @@ The architecture comprises the following services:
 - [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
-- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the following topics:
+- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point using geospatial queries, and produce the location (street or neighborhood) into one of the following topics:
   - _pedestrians_streets_
   - _pedestrians_neighborhoods_
   - _mobilized_streets_
   - _mobilized_neighborhoods_
-- [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the following tables:
+- [Activity-aggregator](#activity-aggregator-service) service - each service instance will consume points from one of the Locations-finder's output topics, aggregate **in-memory** the number of messages of each location (street or neighborhood) per minute, and periodically persist the aggregated data into one of the following [_MongoDB_](#mongodb) tables:
   - _agg_streets_activity_
   - _agg_neighborhoods_activity_
 - [Info](#info-service) service - will return data from the tables persisted by the Activity-aggregator service.
@@ -151,32 +157,41 @@ The architecture comprises the following services:
 
 The following tech stack was preferred, primarily **due to current experience of the development team**:
 
-1. JAVA **Spring Boot**:
+#### JAVA _Spring Boot_
 
-   - **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
+- **Rapid Development**: Spring Boot enables developers to quickly build applications with less boilerplate code and simplified configuration, resulting in faster development cycles and increased productivity.
 
-   - Robust **Ecosystem**: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
+- Robust **Ecosystem**: Spring Boot leverages the extensive Spring ecosystem, providing a wide range of libraries and tools for various functionalities such as security, data access, and web development. This ecosystem enhances development efficiency, code reusability, and overall application quality.
 
-   - **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
+- **Production-Ready** features: Spring Boot includes built-in features for monitoring, logging, metrics, health checks, and configuration management, making it easier to develop and deploy production-ready applications. These features simplify operations, ensure application reliability, and facilitate scalability.
 
-2. **Kafka**:
+#### _Kafka_
 
-   - **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
-   - **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
+- **High-throughput** and **scalable**: Kafka is designed to handle high volumes of data and can scale horizontally to accommodate growing demands.
+- **Real-time** data processing: Kafka enables real-time event **streaming** and data processing, making it suitable for applications that require real-time analytics, data integration, and event-driven architectures.
 
-3. **PostgreSQL**:
+#### _PostgreSQL_
 
-   - **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
-   - **Advanced features**: PostgreSQL offers a wide range of advanced features such as JSON support, **spatial data support**, and full-text search capabilities, providing flexibility for various application requirements.
+- **Reliability** and **stability**: PostgreSQL is known for its robustness, stability, and ACID compliance, making it a reliable choice for data storage.
+- **Advanced features**: PostgreSQL offers a wide range of relevant advanced features such as **spatial data support**, JSON support, and full-text search capabilities, providing flexibility for various application requirements.
 
-4. **Redis**:
+#### _MongoDB_
 
-   - **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
-   - Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
+- The data pattern of the [Activity-aggregator](#activity-aggregator-service) service fits NoSQL well:
+  - Time-series aggregated data
+  - No complex joins needed
+  - No geospatial queries required for these specific tables
+  - Write-heavy workload (periodic persistence of aggregations)
 
-5. **React**:
-   - Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
-   - React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
+#### _Redis_
+
+- **High performance**: Redis is an in-memory data store that delivers exceptional performance and low latency, ideal for applications that require fast data access and high-speed caching.
+- Versatility: Redis supports various data structures, including strings, lists, sets, and sorted sets, enabling different use cases such as caching, session management, real-time analytics, and pub/sub messaging.
+
+#### _React_
+
+- Component-based architecture: React's component-based approach allows for modular and reusable code, leading to improved development efficiency and code maintainability.
+- React **Native**: With React, you can develop cross-platform **mobile** applications using React Native, leveraging code sharing and faster development cycles.
 
 ### Non-Functional Attributes
 
@@ -340,7 +355,7 @@ To process messages containing events that should be:
 #### Role
 
 1. To aggregate in-memory the number of pedestrians and mobilized per 1 minute.
-2. To periodically persist the aggregated data into the following PostgreSQL tables:
+2. To periodically persist the aggregated data into the following [_MongoDB_](#_mongodb_) tables:
    1. _agg_streets_activity_
    2. _agg_neighborhoods_activity_.
 

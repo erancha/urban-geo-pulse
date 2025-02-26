@@ -1,3 +1,3 @@
-	REM del/q %LOCALAPPDATA%\temp\postgreSQL_nyc\*
+	@REM del/q %LOCALAPPDATA%\temp\postgreSQL_nyc\*
 
 	start /B docker-compose-up

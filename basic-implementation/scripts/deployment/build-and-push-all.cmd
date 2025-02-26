@@ -6,5 +6,5 @@
 
 	call deploy.cmd
 
-	REM pause
+	@REM pause
 	timeout /t 5 >nul

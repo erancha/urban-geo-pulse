@@ -33,7 +33,7 @@ public class LocationFinderDataService {
 
         final String query = String.format("select name from %s where ST_Intersects(ST_SetSrid(ST_GeomFromText('%s'),%d),geom);", TABLE_NAME, pointGeom, srid);
         final List<String> locationNames = jdbcTemplate.queryForList(query).stream().map((Map<String, Object> locationRecord) -> (String)locationRecord.get("name")).collect(Collectors.toList());
-        if (locationNames.size() == 0 && !"neighborhood".equals(locationType)) logger.warning(String.format("0 %ss found for point %s", locationType, pointGeom)); // there're de-facto points outsides of any neighborhood..
+        if (locationNames.isEmpty() && !"neighborhood".equals(locationType)) logger.warning(String.format("0 %ss found for point %s", locationType, pointGeom)); // there're de-facto points outsides of any neighborhood..
         else {
             if (locationNames.size() > 10) logger.warning(String.format("%d %ss found for point %s", locationNames.size(), locationType, pointGeom));
             locationNames.forEach(locationName -> {

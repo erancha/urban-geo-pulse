@@ -1,13 +1,13 @@
 
 C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>set LOCATIONS_FINDER_SESSION_TIMEOUT_SECONDS_CONFIG=120 
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM Note: LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT partitions (e.g. 15) =  
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM Note: LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT partitions (e.g. 15) =  
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of street 		 (e.g. 8) +  
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of street 		 (e.g. 8) +  
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of neighborhood  (e.g. 7) 
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of neighborhood  (e.g. 7) 
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM -----------------------------------------------------------------------------  
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM -----------------------------------------------------------------------------  
 
 C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>set LOCATIONS_FINDER_MOBILITY_TYPE=pedestrians 
 
@@ -29,13 +29,13 @@ C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-fin
 
 C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>start /B  java -Xms128M -jar target\locations-finder-1.0.jar  
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM Note: LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT partitions =  
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM Note: LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT partitions =  
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of street +  
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of street +  
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of neighborhood  
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM 		LOCATIONS_FINDER_CONSUMER_THREADS_COUNT of neighborhood  
 
-C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>REM ------------------------------------------------------------------- 
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>@REM ------------------------------------------------------------------- 
 
 C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\locations-finder>set LOCATIONS_FINDER_MOBILITY_TYPE=mobilized 
 

@@ -93,24 +93,6 @@ select cast((
 ;
 
 
-----------------------------------------
--- table disk sizes and records counts :
-----------------------------------------
-SELECT 
-    t.table_name,
-    REPLACE(pg_size_pretty(pg_total_relation_size(t.table_name::text) / (1024 * 1024)), ' bytes', '') AS size_mb
-FROM 
-    information_schema.tables AS t
-WHERE 
-    t.table_schema = 'public'
-    AND t.table_name::text LIKE 'agg_%'
-ORDER BY 
-    pg_total_relation_size(t.table_name::text) DESC;
- 
-select count(*) as agg_streets_activity_count       from agg_streets_activity;
-select count(*) as agg_neighborhoods_activity_count from agg_neighborhoods_activity ;
-
-   
 -------------------------------------------------------------
 -- all streets / neighborhood activities (in the time range):
 -------------------------------------------------------------
@@ -154,3 +136,22 @@ order by
 	name
 ;
 
+
+----------------------------------------
+-- table disk sizes and records counts :
+----------------------------------------
+SELECT 
+    t.table_name,
+    REPLACE(pg_size_pretty(pg_total_relation_size(t.table_name::text) / (1024 * 1024)), ' bytes', '') AS size_mb
+FROM 
+    information_schema.tables AS t
+WHERE 
+    t.table_schema = 'public'
+    AND t.table_name::text LIKE 'agg_%'
+ORDER BY 
+    pg_total_relation_size(t.table_name::text) DESC;
+ 
+select count(*) as agg_streets_activity_total_count       from agg_streets_activity;
+select count(*) as agg_neighborhoods_activity_total_count from agg_neighborhoods_activity ;
+
+   

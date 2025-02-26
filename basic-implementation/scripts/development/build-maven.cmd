@@ -7,7 +7,7 @@ echo Checking environment variables...
 
 SET JAVA_HOME
 
-REM Check JAVA_HOME
+@REM Check JAVA_HOME
 if not defined JAVA_HOME (
     echo Error: JAVA_HOME environment variable is not set
     echo Please set JAVA_HOME to your Java installation directory
@@ -15,7 +15,7 @@ if not defined JAVA_HOME (
     exit /b 1
 )
 
-REM Check M2_HOME (Maven)
+@REM Check M2_HOME (Maven)
 if not defined M2_HOME (
     echo Warning: M2_HOME environment variable is not set
     echo Checking for mvn in PATH...
@@ -28,16 +28,16 @@ if not defined M2_HOME (
     )
 )
 
-REM Change to the script directory
+@REM Change to the script directory
 cd /d "%~dp0"
 
-REM Navigate to the workspace directory (relative path)
+@REM Navigate to the workspace directory (relative path)
 cd ..\..\workspace
 
 echo Building Maven project...
 echo Current directory: %CD%
 
-REM Try to use M2_HOME if set, otherwise use mvn from PATH
+@REM Try to use M2_HOME if set, otherwise use mvn from PATH
 if defined M2_HOME (
     if exist "!M2_HOME!\bin\mvn.cmd" (
         echo Using Maven from M2_HOME: !M2_HOME!

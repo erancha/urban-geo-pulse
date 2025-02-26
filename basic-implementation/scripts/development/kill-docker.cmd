@@ -1,4 +1,4 @@
 	call kill-a-service docker
 	
-	REM pause
+	@REM pause
 	timeout /t 5 >nul

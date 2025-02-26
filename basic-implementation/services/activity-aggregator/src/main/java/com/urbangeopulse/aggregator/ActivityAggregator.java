@@ -63,6 +63,7 @@ public class ActivityAggregator {
     private String ACTIVITY_AGGREGATOR_LOCATION_TYPE;
 
     private String INPUT_TOPIC_NAME;
+    
     private final AtomicLong counter = new AtomicLong();
     private final AtomicInteger maxRecordsToAggregate = new AtomicInteger();
 
