@@ -9,7 +9,7 @@ from
 	agg_streets_activity
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 		and now() AT TIME ZONE 'Israel'
 ;
 
@@ -21,7 +21,7 @@ from
 	agg_neighborhoods_activity
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 		and now() AT TIME ZONE 'Israel'
 ;
 
@@ -40,7 +40,7 @@ with agg_streets_activity_sum as (
 		asa.street_gid = ns.gid
 	where
 		lastUpdateTimestamp between
-			(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+			(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 			and now() AT TIME ZONE 'Israel'
 	group by 
 		name
@@ -68,7 +68,7 @@ WITH agg_streets_activity_range_lastUpdateTimestamp AS (
 	from agg_streets_activity asa
 	where
 		lastUpdateTimestamp between
-			(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+			(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 			and now() AT TIME ZONE 'Israel'
 ), agg_streets_activity_range_desc AS (
     SELECT lastUpdateTimestamp as timestamp FROM agg_streets_activity_range_lastUpdateTimestamp ORDER BY lastUpdateTimestamp DESC
@@ -79,7 +79,7 @@ WITH agg_streets_activity_range_lastUpdateTimestamp AS (
 	from agg_streets_activity asa
 	where
 		insertTimestamp between 
-			(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+			(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 			and now() AT TIME ZONE 'Israel'
 ), agg_streets_activity_range_asc AS (
     SELECT insertTimestamp as timestamp FROM agg_streets_activity_range_insertTimestamp ORDER BY insertTimestamp
@@ -127,7 +127,7 @@ join nyc_streets ns on
 	asa.street_gid = ns.gid
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 		and now() AT TIME ZONE 'Israel'
 order by
 	timestamp_in_sec desc,
@@ -147,7 +147,7 @@ join nyc_neighborhoods nn
 	on ana.neighborhood_gid = nn.gid
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '120 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
 		and now() AT TIME ZONE 'Israel'
 order by
 	timestamp_in_sec desc,

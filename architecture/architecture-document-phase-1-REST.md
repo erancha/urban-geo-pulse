@@ -13,52 +13,52 @@ The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memi
 
 - [Background](#background)
 - [Requirements](#requirements)
-  * [Functional Requirements](#functional-requirements)
-  * [Non-Functional Requirements](#non-functional-requirements)
+  - [Functional Requirements](#functional-requirements)
+  - [Non-Functional Requirements](#non-functional-requirements)
 - [Executive Summary](#executive-summary)
 - [Overall Architecture](#overall-architecture)
-  * [Detailed diagram](#detailed-diagram)
-  * [Services](#services)
-  * [Messaging](#messaging)
-  * [Technology Stack](#technology-stack)
-  * [Non-Functional Attributes](#non-functional-attributes)
-    + [High-Performance:](#high-performance)
+  - [Detailed diagram](#detailed-diagram)
+  - [Services](#services)
+  - [Messaging](#messaging)
+  - [Technology Stack](#technology-stack)
+  - [Non-Functional Attributes](#non-functional-attributes)
+    - [High-Performance:](#high-performance)
       - [Performance](#performance)
       - [Scalability](#scalability)
-    + [Resiliency:](#resiliency)
+    - [Resiliency:](#resiliency)
       - [High Availability](#high-availability)
       - [Fault Tolerance](#fault-tolerance)
-    + [Security:](#security)
-    + [Maintainability:](#maintainability)
+    - [Security:](#security)
+    - [Maintainability:](#maintainability)
       - [Testability:](#testability)
-        * [Logging](#logging)
-        * [System level testing](#system-level-testing)
-    + [Extensibility](#extensibility)
+        - [Logging](#logging)
+        - [System level testing](#system-level-testing)
+    - [Extensibility](#extensibility)
 - [Services Drill Down](#services-drill-down)
-  * [Mobile application](#mobile-application)
-    + [Role](#role)
-  * [Receiver service](#receiver-service)
-    + [Role](#role-1)
-    + [Implementation Instructions](#implementation-instructions)
-    + [APIs](#apis)
-  * [Mobilization-sorter service](#mobilization-sorter-service)
-    + [Role](#role-2)
-    + [Implementation Instructions](#implementation-instructions-1)
-  * [Locations-finder service](#locations-finder-service)
-    + [Role](#role-3)
-    + [Implementation Instructions](#implementation-instructions-2)
-    + [Deployment Instructions](#deployment-instructions)
-  * [Delay service](#delay-service)
-    + [Role](#role-4)
-    + [Diagram](#diagram)
-  * [Activity-aggregator service](#activity-aggregator-service)
-    + [Role](#role-5)
-    + [Implementation Instructions](#implementation-instructions-3)
-  * [Info service](#info-service)
-    + [Role](#role-6)
-    + [APIs:](#apis)
+  - [Mobile application](#mobile-application)
+    - [Role](#role)
+  - [Receiver service](#receiver-service)
+    - [Role](#role-1)
+    - [Implementation Instructions](#implementation-instructions)
+    - [APIs](#apis)
+  - [Mobilization-classifier service](#mobilization-classifier-service)
+    - [Role](#role-2)
+    - [Implementation Instructions](#implementation-instructions-1)
+  - [Locations-finder service](#locations-finder-service)
+    - [Role](#role-3)
+    - [Implementation Instructions](#implementation-instructions-2)
+    - [Deployment Instructions](#deployment-instructions)
+  - [Delay service](#delay-service)
+    - [Role](#role-4)
+    - [Diagram](#diagram)
+  - [Activity-aggregator service](#activity-aggregator-service)
+    - [Role](#role-5)
+    - [Implementation Instructions](#implementation-instructions-3)
+  - [Info service](#info-service)
+    - [Role](#role-6)
+    - [APIs:](#apis)
 - [Appendix: 12-Factor App methodology](#appendix-12-factor-app-methodology)
-  * [Conclusion](#conclusion)
+  - [Conclusion](#conclusion)
 
 <!-- tocstop -->
 
@@ -80,7 +80,7 @@ It’s extremely important for the development team to closely follow the archit
 
 1. [Receive](#receiver-service) messages containing **geospatial locations**, e.g. from cell phones of **pedestrians** and **mobilized** individuals.
 
-2. [Identify](#mobilization-sorter-service) each message's source (**pedestrian** or **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
+2. [Identify](#mobilization-classifier-service) each message's source (**pedestrian** or **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
 3. Allow users to [retrieve](#info-service) streets and neighborhoods activity **in real time** for any requested timeframe within the last 24 hours.
 
@@ -105,7 +105,7 @@ When designing the architecture, a strong emphasis was put on the following qual
 <p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring performance and high-availability.</p>
 
 Here is a high-level overview of the architecture:
-![Lucid](https://lucid.app/publicSegments/view/e27c2f23-c6ec-4091-a0ff-324d2729a915/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/9a85b4c8-aa03-49e9-9268-bddee87edfb8/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the Data Store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
@@ -114,9 +114,9 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 ## Overall Architecture
 
-### [Detailed diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
+### [Detailed diagram](https://lucid.app/publicSegments/view/1146cc57-0419-4bd8-a5ec-75b76874425d/image.jpeg)
 
-![Lucid](https://lucid.app/publicSegments/view/6bffea51-c248-49e8-a244-a0a691a3ab9d/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/9a85b4c8-aa03-49e9-9268-bddee87edfb8/image.jpeg 'System diagram')
 
 - The architecture follows the [**12-Factor App methodology**](https://12factor.net).
 
@@ -126,10 +126,10 @@ The architecture comprises the following services:
 
 - [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
-- [Mobilization-sorter](#mobilization-sorter-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
+- [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
-- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-sorter's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the following topics:
+- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point, and produce the location (street or neighborhood) into one of the following topics:
   - _pedestrians_streets_
   - _pedestrians_neighborhoods_
   - _mobilized_streets_
@@ -143,7 +143,7 @@ The architecture comprises the following services:
 
 - The [Receiver](#receiver-service) service exposes a **REST API**. Since it is the de-facto standard for most of the API consumers, and since this service is going to be used by different types of devices, it’s best to go for the most widely-used messaging method, which is REST API.<br>In [phase 2](architecture-document-phase-2-MQTT.md), **MQTT** will be considered as a alternate messaging method.
 
-- The pipeline services ([Mobilization-sorter](#mobilization-sorter-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru **Kafka**. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
+- The pipeline services ([Mobilization-classifier](#mobilization-classifier-service), [Locations-finder](#locations-finder-service) and [Activity-aggregator](#activity-aggregator-service)) will communicate thru **Kafka**. The reason for that is there is no requirement for a synchronous handling of the messages, and the pipeline services do not report back to the Receiver service when the handling is done. In addition, Kafka adds a layer of Fault Tolerance that does not exist in a REST API (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
 
 - The [Info](#info-service) service also exposes a **REST API** for similar reasons as the Receiver service. In addition, REST API is best suited for request/response model, which is the way this service will be used.
 
@@ -191,7 +191,7 @@ The following tech stack was preferred, primarily **due to current experience of
 This architecture allows to easily scale services as needed:
 
 1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
-2. For example, the [Mobilization-sorter](#mobilization-sorter-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
+2. For example, the [Mobilization-classifier](#mobilization-classifier-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
 #### Resiliency:
@@ -239,9 +239,10 @@ In addition, the development team should take into consideration best practices 
 
 - Each service should be runnable **on its own**, with pre-prepared data, and have functionality to compare its output to the given input.
 - For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
-- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (e.g. COPY_FROM_BACKUP=1*1000 for 1 thread * 1,000 iterations in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
+- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (refer to ITERATIONS_TO_SIMULATE_FROM_BACKUP in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
 
-#### Extensibility 
+#### Extensibility
+
 (Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system).
 
 ## Services Drill Down
@@ -277,7 +278,7 @@ In addition, the development team should take into consideration best practices 
 
 <hr>
 
-### Mobilization-sorter service
+### Mobilization-classifier service
 
 #### Role
 
@@ -324,10 +325,12 @@ For better [scalability](#scaling) it is advisable to configure **read-only repl
 #### Role
 
 To process messages containing events that should be:
+
 1. Delayed for a required duration, and then,
 2. Produced to a target topic described in each message.
 
-#### [Diagram](https://lucid.app/documents/view/9b48ab81-1cc7-44c1-b8bb-a92ec78b2802)
+#### [Diagram](https://lucid.app/publicSegments/view/1146cc57-0419-4bd8-a5ec-75b76874425d/image.jpeg)
+
 ![Lucid](https://lucid.app/publicSegments/view/6da4c3f1-3886-4dc8-baea-45d8ade5daac/image.jpeg 'System diagram')
 
 <hr>
@@ -375,39 +378,39 @@ To assess whether the **UrbanGeoPulse** architecture adheres to the 12-Factor Ap
 
 1. **Codebase**: A single codebase tracked in revision control, with many deploys.
 
-    - The architecture should follow this principle by maintaining a single repository for the microservices.
+   - The architecture should follow this principle by maintaining a single repository for the microservices.
 
 2. **Dependencies**: Explicitly declare and isolate dependencies.
 
-    - The architecture outlines services that are stateless and communicates through Kafka and REST APIs. Each service should specify its dependencies clearly (e.g., through a `pom.xml` for Java).
+   - The architecture outlines services that are stateless and communicates through Kafka and REST APIs. Each service should specify its dependencies clearly (e.g., through a `pom.xml` for Java).
 
 3. **Configuration**: Store configuration in the environment.
 
-    - The document mentions the use of environment variables for configuration, especially in the service implementations.
+   - The document mentions the use of environment variables for configuration, especially in the service implementations.
 
 4. **Backing services**: Treat backing services as attached resources.
 
-    - Kafka and PostgreSQL are treated as services that can be swapped out or replaced as needed. This adheres to the principle.
+   - Kafka and PostgreSQL are treated as services that can be swapped out or replaced as needed. This adheres to the principle.
 
 5. **Build, release, run**: Strictly separate the build and run stages.
 
-    - If the deployment process is clearly outlined to separate building (e.g., using CI/CD pipelines) from running applications in production, this is followed. However, the document does not explicitly describe this separation.
+   - If the deployment process is clearly outlined to separate building (e.g., using CI/CD pipelines) from running applications in production, this is followed. However, the document does not explicitly describe this separation.
 
 6. **Processes**: Execute the app as one or more stateless processes.
 
-    - The architecture emphasizes stateless services, allowing for horizontal scaling.
+   - The architecture emphasizes stateless services, allowing for horizontal scaling.
 
 7. **Port binding**: Export services via port binding.
 
-    - The services are meant to be accessed via APIs, which implies port binding via HTTP and/or Kafka.
+   - The services are meant to be accessed via APIs, which implies port binding via HTTP and/or Kafka.
 
 8. **Concurrency**: Scale out via the process model.
 
-    - The architecture describes scaling services independently based on load.
+   - The architecture describes scaling services independently based on load.
 
 9. **Disposability**: Maximize robustness with fast startup and graceful shutdown.
 
-    - While not explicit, if the services are designed for quick startup and can handle graceful shutdown (especially in a cloud-native context), this factor is adhered to.
+   - While not explicit, if the services are designed for quick startup and can handle graceful shutdown (especially in a cloud-native context), this factor is adhered to.
 
 10. **Dev/prod parity**: Keep development, staging, and production as similar as possible.
 

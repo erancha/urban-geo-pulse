@@ -15,7 +15,7 @@
 
     <modules>
         <module>../services/receiver</module>
-        <module>../services/mobilization-sorter</module>
+        <module>../services/mobilization-classifier</module>
         <module>../services/locations-finder</module>
         <module>../services/delay-manager</module>
         <module>../services/activity-aggregator</module>

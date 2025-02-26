@@ -144,7 +144,7 @@ public class ActivityAggregator {
                         for (ConsumerRecord<String, String> kafkaRecord : kafkaRecords) {
                             try {
                                 final long counterTemp = counter.incrementAndGet();
-                                if (counterTemp % 100000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, INPUT_TOPIC_NAME));
+                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, INPUT_TOPIC_NAME));
 
                                 logger.finer(String.format("#%d: Consumed by '%s', partition = %d, offset = %d, key = %s, value = %s", counterTemp, Thread.currentThread().getName(), kafkaRecord.partition(), kafkaRecord.offset(), kafkaRecord.key(), kafkaRecord.value()));
                                 offsetsToCommit.put(
@@ -183,7 +183,7 @@ public class ActivityAggregator {
         //        };
 
         try {
-            // create topics:
+            logger.info(String.format("Creating input topic '%s' with %d partitions, if it does not exist yet ...", INPUT_TOPIC_NAME, ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT));
             KafkaUtils.checkAndCreateTopic(INPUT_TOPIC_NAME, ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT);
 
             // start consumers:

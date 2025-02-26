@@ -93,8 +93,9 @@ public class KafkaUtils {
         Instant startTime = Instant.now();
         try {
             admin.createTopics(Collections.singleton(newTopic)).all().get();
+            logger.info(String.format("Topic '%s' created with %d partitions, after %d seconds.", topicName, numPartitions, Duration.between(startTime, Instant.now()).toMillis() / 1000));
         } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof TopicExistsException || ex.getCause() instanceof TimeoutException) logger.warning(String.format("Failed to create topic '%s' due to %s, after %d seconds.", topicName, ex.getCause().getClass().getSimpleName(), Duration.between(startTime, Instant.now()).toMillis() / 1000));
+            if (ex.getCause() instanceof TopicExistsException) logger.warning(String.format("Failed to create topic '%s' due to %s, after %d seconds.", topicName, ex.getCause().getClass().getSimpleName(), Duration.between(startTime, Instant.now()).toMillis() / 1000));
             else {
                 logException(ex, String.format("Exception after %d seconds", Duration.between(startTime, Instant.now()).toMillis() / 1000), logger);
                 throw ex;

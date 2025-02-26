@@ -1,18 +1,17 @@
 package com.urbangeopulse.receiver.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
 public class FileWriter implements Writer {
 
-    public static final String BACKUP_FILENAME = "people-geo-locations.csv";
+    public static final String BACKUP_FILENAME = new File("people-geo-locations.csv").exists() ? "people-geo-locations.csv" : "./basic-implementation/services/receiver/NYC_people-geo-locations--all.csv";
 
-    private String topicName;
     private Logger logger;
     private java.io.FileWriter fileWriter;
 
     public FileWriter(String topicName, Logger logger) {
-        this.topicName = topicName;
         try {
             fileWriter = new java.io.FileWriter(BACKUP_FILENAME);
         } catch (IOException e) {

@@ -118,7 +118,7 @@ public class LocationsFinder {
                             try {
                                 final long counterTemp = counter.incrementAndGet();
                                 logger.fine(String.format("#%d: Consumed by '%s', partition = %d, offset = %d, key = %s, value = %s", counterTemp, Thread.currentThread().getName(), kafkaRecord.partition(), kafkaRecord.offset(), kafkaRecord.key(), kafkaRecord.value()));
-                                if (counterTemp % 100000 == 0) logger.info(String.format("%,d records consumed %s.", counterTemp, FROM_MESSAGE));
+                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed %s.", counterTemp, FROM_MESSAGE));
 
                                 final String currKafkaRecordValue = kafkaRecord.value();
                                 final Map currEvent = JavaSerializer.read(currKafkaRecordValue, HashMap.class);
@@ -166,7 +166,7 @@ public class LocationsFinder {
         };
 
         try {
-            // create topics:
+            logger.info(String.format("Creating input topic '%s' with %d partitions, output topic '%s', and delay manager topic '%s', if they do not exist yet ...", INPUT_TOPIC_NAME, LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT, OUTPUT_TOPIC_NAME, DELAY_MANAGER_TOPIC_NAME));
             KafkaUtils.checkAndCreateTopic(INPUT_TOPIC_NAME, LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT);
             KafkaUtils.checkAndCreateTopic(OUTPUT_TOPIC_NAME);
             KafkaUtils.checkAndCreateTopic(DELAY_MANAGER_TOPIC_NAME);

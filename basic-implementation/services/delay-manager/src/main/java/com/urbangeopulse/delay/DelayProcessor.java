@@ -38,6 +38,7 @@ public class DelayProcessor implements Runnable {
         try {
             // create topics:
             final String LISTENING_TEMP_TOPIC_NAME = listeningTopic + "_temp";
+            logger.info(String.format("Creating input topics '%s' and '%s', if they do not exist yet ...", listeningTopic, LISTENING_TEMP_TOPIC_NAME));
             KafkaUtils.checkAndCreateTopic(listeningTopic);
             KafkaUtils.checkAndCreateTopic(LISTENING_TEMP_TOPIC_NAME);
 

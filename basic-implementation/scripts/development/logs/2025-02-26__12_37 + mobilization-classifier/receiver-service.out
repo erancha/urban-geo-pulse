@@ -1,0 +1,45 @@
+
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\scripts\development>copy delete-from-agg_activity.sql "C:\Users\„‰Œ„ ‡‹Ž…\AppData\Local"\Temp\postgreSQL_nyc\urbangeopulse 
+        1 file(s) copied.
+
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\scripts\development>docker exec -i fa3888804c6ee90a85fab107b4e3df9995963080e5ea8fa1f85b3b0b28449da0 psql --dbname=nyc --file=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_activity.sql --username=user --output=/var/lib/postgresql/data/urbangeopulse/init-sql.out 
+        1 file(s) copied.
+
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\receiver>time /T 
+12:37 PM
+
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\receiver>copy "NYC_people-geo-locations--all.csv" people-geo-locations.csv 
+        1 file(s) copied.
+
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\receiver>start /B java -Xms128M -jar target\receiver-1.0.jar  
+
+C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\receiver>timeout /t 900  1>nul 
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.4.5)
+
+2025-02-26 12:37:12.438  INFO 20592 --- [           main] com.urbangeopulse.receiver.Application   : Starting Application v1.0 using Java 21.0.6 on ANAT-WIN10 with PID 20592 (C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\receiver\target\receiver-1.0.jar started by ×”×™×œ×” ×—×›×ž×•×Ÿ in C:\Projects\IntelliJ\urban-geo-pulse\basic-implementation\services\receiver)
+2025-02-26 12:37:12.442  INFO 20592 --- [           main] com.urbangeopulse.receiver.Application   : No active profile set, falling back to default profiles: default
+2025-02-26 12:37:17.463  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : 1 ITERATIONS_TO_SIMULATE_FROM_BACKUP from 'people-geo-locations.csv', with THROTTLE_PRODUCING_THROUGHPUT 1000
+2025-02-26 12:37:26.540  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 10,000 messages produced to topic people_geo_locations, delay 962 ms.
+2025-02-26 12:37:36.533  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 20,000 messages produced to topic people_geo_locations, delay 994 ms.
+2025-02-26 12:37:46.570  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 30,000 messages produced to topic people_geo_locations, delay 970 ms.
+2025-02-26 12:37:56.576  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 40,000 messages produced to topic people_geo_locations, delay 990 ms.
+2025-02-26 12:38:06.592  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 50,000 messages produced to topic people_geo_locations, delay 995 ms.
+2025-02-26 12:38:16.610  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 60,000 messages produced to topic people_geo_locations, delay 993 ms.
+2025-02-26 12:38:26.623  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 70,000 messages produced to topic people_geo_locations, delay 991 ms.
+2025-02-26 12:38:36.642  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 80,000 messages produced to topic people_geo_locations, delay 989 ms.
+2025-02-26 12:38:46.663  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 90,000 messages produced to topic people_geo_locations, delay 987 ms.
+2025-02-26 12:38:56.667  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 100,000 messages produced to topic people_geo_locations, delay 994 ms.
+2025-02-26 12:39:06.691  INFO 20592 --- [           main] c.u.r.services.SimulatorDataService      : Throttle: 110,000 messages produced to topic people_geo_locations, delay 980 ms.
+2025-02-26 12:39:18.397  INFO 20592 --- [           main] c.u.r.controllers.ExecutionTimeAspect    : Staring to execute .. void com.urbangeopulse.receiver.controllers.SimulatorController.onApplicationReady(ContextRefreshedEvent)
+	with parameters: [org.springframework.context.event.ContextRefreshedEvent[source=org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@67e2d983, started on Wed Feb 26 12:37:12 IST 2025]].
+2025-02-26 12:39:18.398  INFO 20592 --- [           main] c.u.r.controllers.ExecutionTimeAspect    : Completed in 0 ms (== 0.0 minutes) : void com.urbangeopulse.receiver.controllers.SimulatorController.onApplicationReady(ContextRefreshedEvent)
+	with parameters: [org.springframework.context.event.ContextRefreshedEvent[source=org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@67e2d983, started on Wed Feb 26 12:37:12 IST 2025]].
+2025-02-26 12:39:18.407  INFO 20592 --- [           main] com.urbangeopulse.receiver.Application   : Started Application in 127.312 seconds (JVM running for 128.397)
+Terminate batch job (Y/N)? 

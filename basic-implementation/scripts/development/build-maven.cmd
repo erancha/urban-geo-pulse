@@ -1,3 +1,5 @@
+call ..\..\services\receiver\set-env.cmd
+
 @echo off
 setlocal enabledelayedexpansion
 
@@ -39,13 +41,13 @@ REM Try to use M2_HOME if set, otherwise use mvn from PATH
 if defined M2_HOME (
     if exist "!M2_HOME!\bin\mvn.cmd" (
         echo Using Maven from M2_HOME: !M2_HOME!
-        "!M2_HOME!\bin\mvn.cmd" clean install
+        call "!M2_HOME!\bin\mvn.cmd" clean install
     ) else (
         echo Warning: mvn.cmd not found in M2_HOME, falling back to PATH
-        mvn clean install
+        call mvn clean install
     )
 ) else (
-    mvn clean install
+    call mvn clean install
 )
 
 if !errorlevel! neq 0 (

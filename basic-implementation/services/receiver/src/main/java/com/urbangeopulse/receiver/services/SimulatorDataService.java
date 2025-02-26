@@ -16,13 +16,10 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
@@ -40,8 +37,15 @@ public class SimulatorDataService {
     @Value("${PEOPLE_GEO_LOCATIONS_TOPIC_NAME:people_geo_locations__default}")
     private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
 
-    @Value("${COPY_FROM_BACKUP:#{null}}")
-    private String COPY_FROM_BACKUP;
+    @Value("${MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT:1}")
+    private short MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT;
+
+    @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")
+    private short ITERATIONS_TO_SIMULATE_FROM_BACKUP;
+
+    @Value("${THROTTLE_PRODUCING_THROUGHPUT:#{10000}}") // maximum throughput - produced messages per second
+    private int THROTTLE_PRODUCING_THROUGHPUT;
+    public static final int THROTTLE_COUNT_CHECK = 1000; // check throttling every N messages.
 
     public SimulatorDataService(ReceiverDataService receiverDataService, JdbcTemplate jdbcTemplate) {
         this.receiverDataService = receiverDataService;
@@ -51,27 +55,14 @@ public class SimulatorDataService {
     @PostConstruct
     private void initialize() {
         try {
-            KafkaUtils.checkAndCreateTopic(PEOPLE_GEO_LOCATIONS_TOPIC_NAME);
+            logger.info(String.format("Creating output topic '%s' with %d partitions, if it does not exist yet ...", PEOPLE_GEO_LOCATIONS_TOPIC_NAME, MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT));
+            KafkaUtils.checkAndCreateTopic(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT); // output topic
 
-            if (COPY_FROM_BACKUP != null) {
-                logger.info(String.format("COPY_FROM_BACKUP '%s' from '%s', ", COPY_FROM_BACKUP, FileWriter.BACKUP_FILENAME));
+            if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) {
+                logger.info(String.format("%d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, FileWriter.BACKUP_FILENAME, THROTTLE_PRODUCING_THROUGHPUT));
                 final boolean isBackupFileExist =  new File(FileWriter.BACKUP_FILENAME).exists();
                 if (!isBackupFileExist) logger.severe(String.format("Backup file '%s' does not exist!", FileWriter.BACKUP_FILENAME));
-                else {
-                    final String[] parts = COPY_FROM_BACKUP.split("\\*");
-                    final short THREADS_COUNT = Short.parseShort(parts[0]);
-                    final int ITERATIONS_COUNT = Integer.parseInt(parts[1]);
-                    ExecutorService threadPool = Executors.newFixedThreadPool(THREADS_COUNT);
-                    for (int i = 0; i < THREADS_COUNT; i++) {
-                        threadPool.submit(() -> {
-                            final Thread currentThread = Thread.currentThread();
-                            logger.info("Starting a thread to copy from backup ..");
-                            simulatePointsFromBackup(ITERATIONS_COUNT);
-                            logger.info("Thread completed.");
-                        });
-                    }
-                    threadPool.shutdown();
-                }
+                else simulatePointsFromBackup(ITERATIONS_TO_SIMULATE_FROM_BACKUP);
             }
         } catch (Exception ex) {
             logException(ex, logger);
@@ -84,8 +75,11 @@ public class SimulatorDataService {
      * @param iterationsCount - number of times to read from the backup file.
      */
     public void simulatePointsFromBackup(int iterationsCount) {
+        float targetTimePerMessageMillis = (float) 1000 / THROTTLE_PRODUCING_THROUGHPUT;
+        long throttleStartTimeMillis = System.currentTimeMillis();
+        long counter = 0;
         long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record
-        for (int i = 1; i <= iterationsCount; i++) {
+        for (int i = 0; i < iterationsCount; i++) {
             try (BufferedReader reader = new BufferedReader(new FileReader(FileWriter.BACKUP_FILENAME))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -98,12 +92,18 @@ public class SimulatorDataService {
                             final long currEventTimeInMS = (Long) currEvent.get("eventTimeInMS");
 
                             // adding the delta between the 1st message's timestamp and the current time to all messages:
-                            if (deltaFromCurrentTime == 0)
-                                deltaFromCurrentTime = System.currentTimeMillis() - currEventTimeInMS;
-                            currEvent.put("eventTimeInMS", currEventTimeInMS + deltaFromCurrentTime);
-                            currEvent.put("cityCode", "NYC");
+                            if (deltaFromCurrentTime == 0) deltaFromCurrentTime = System.currentTimeMillis() - currEventTimeInMS;
+                            else currEvent.put("eventTimeInMS", currEventTimeInMS + deltaFromCurrentTime);
 
                             KafkaUtils.send(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, JavaSerializer.write(currEvent), key);
+                            if (++counter % THROTTLE_COUNT_CHECK == 0) {
+                                long remainingTimeMillis = (long)(THROTTLE_COUNT_CHECK * targetTimePerMessageMillis) - (System.currentTimeMillis() - throttleStartTimeMillis);
+                                if (remainingTimeMillis > 0) {
+                                    if (counter % 10000 == 0) logger.info(String.format("Throttle: %,d messages produced to topic %s, delay %d ms for the recent %,d messages.", counter, PEOPLE_GEO_LOCATIONS_TOPIC_NAME, remainingTimeMillis, THROTTLE_COUNT_CHECK));
+                                    Thread.sleep(remainingTimeMillis);
+                                } else if (counter % 10000 == 0) logger.info(String.format("%,d messages produced to topic %s.", counter, PEOPLE_GEO_LOCATIONS_TOPIC_NAME));
+                                throttleStartTimeMillis = System.currentTimeMillis();
+                            }
                         } catch (InitializationException | ExecutionException | InterruptedException | JsonException e) {
                             logException(e, logger);
                         }
@@ -113,7 +113,6 @@ public class SimulatorDataService {
                 if (e instanceof FileNotFoundException) logger.severe(String.format("%s not found.", FileWriter.BACKUP_FILENAME));
                 else logException(e, logger);
             }
-            if (i % (iterationsCount/2) == 0) logger.fine(String.format("%,-5d lines read from '%s'.", i, FileWriter.BACKUP_FILENAME));
         }
     }
 
@@ -146,7 +145,7 @@ public class SimulatorDataService {
                 }
                 logger.fine(String.format("%,d streets returned by query: %s, in %d ms.", count, query, Duration.between(startTime, Instant.now()).toMillis()));
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logException(e, logger);
         } finally {
             DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());

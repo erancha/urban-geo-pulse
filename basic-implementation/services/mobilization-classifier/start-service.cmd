@@ -1,0 +1,19 @@
+	@echo off
+
+	REM set EXECUTION_COMMAND=mvnw spring-boot:run --quiet
+	set EXECUTION_COMMAND=java -Xms128M -jar target\mobilization-classifier-1.0.jar 
+
+	call ../receiver/set-env.cmd
+
+	REM set MOBILIZATION_CLASSIFIER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES=3
+	REM set MOBILIZATION_CLASSIFIER_DEBUG_USE_LOCAL_CACHE=true
+	
+	@echo on
+	
+	set MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG=earliest
+	set MOBILIZATION_CLASSIFIER_SESSION_TIMEOUT_SECONDS_CONFIG=120
+
+	set PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME=pedestrians_geo_locations
+	set MOBILIZED_GEO_LOCATIONS_TOPIC_NAME=mobilized_geo_locations
+
+	for /l %%i in (1,1,1) do start /B  %EXECUTION_COMMAND%

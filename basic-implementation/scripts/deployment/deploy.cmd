@@ -19,7 +19,7 @@
     docker stack deploy --compose-file=docker-compose-app-locations-finder.yml 		--with-registry-auth  app
 	timeout /t 10 >nul
 
-    docker stack deploy --compose-file=docker-compose-app-mobilization-sorter.yml 	--with-registry-auth  app
+    docker stack deploy --compose-file=docker-compose-app-mobilization-classifier.yml 	--with-registry-auth  app
 	timeout /t 10 >nul
 
     docker stack deploy --compose-file=docker-compose-app-web-api.yml 				--with-registry-auth  app

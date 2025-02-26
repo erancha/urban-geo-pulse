@@ -12,7 +12,7 @@ services:
       - ./pg-vars.env
     environment:
       PEOPLE_GEO_LOCATIONS_TOPIC_NAME: people_geo_locations
-      COPY_FROM_BACKUP: 1*1000
+      ITERATIONS_TO_SIMULATE_FROM_BACKUP: 10
       PEOPLE_GEO_LOCATIONS_CSV: people-geo-locations--Duffield_St.csv
     depends_on:
       - kafka-broker
