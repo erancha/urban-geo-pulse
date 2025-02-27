@@ -30,13 +30,17 @@ import static com.urbangeopulse.utils.misc.Logger.logException;
 public class ActivityAggregator {
     private static final Logger logger = Logger.getLogger(ActivityAggregator.class.getName());
 
+    @Value("${ACTIVITY_AGGREGATOR_INPUT_TOPIC:pedestrians_streets__default,2}")
+    private String ACTIVITY_AGGREGATOR_INPUT_TOPIC;
+    private KafkaUtils.TopicConfig inputTopicConfig;
+
     @Value("${ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT:1}")
     private short ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT;
 
     @Value("${ACTIVITY_AGGREGATOR_AUTO_OFFSET_RESET_CONFIG:latest}")
     private String ACTIVITY_AGGREGATOR_AUTO_OFFSET_RESET_CONFIG;
 
-    @Value("${ACTIVITY_AGGREGATOR_MAX_POLL_INTERVAL_MINUTES_CONFIG:5}")
+    @Value("${ACTIVITY_AGGREGATOR_MAX_POLL_INTERVAL_MINUTES_CONFIG:10}")
     private short ACTIVITY_AGGREGATOR_MAX_POLL_INTERVAL_MINUTES_CONFIG;
 
     @Value("${ACTIVITY_AGGREGATOR_SESSION_TIMEOUT_SECONDS_CONFIG:30}")
@@ -62,8 +66,6 @@ public class ActivityAggregator {
     @Value("${ACTIVITY_AGGREGATOR_LOCATION_TYPE:street}")
     private String ACTIVITY_AGGREGATOR_LOCATION_TYPE;
 
-    private String INPUT_TOPIC_NAME;
-    
     private final AtomicLong counter = new AtomicLong();
     private final AtomicInteger maxRecordsToAggregate = new AtomicInteger();
 
@@ -75,12 +77,13 @@ public class ActivityAggregator {
 
     @PostConstruct
     void startBackgroundConsumers() {
-        INPUT_TOPIC_NAME = String.format("%s_%ss", ACTIVITY_AGGREGATOR_MOBILITY_TYPE, ACTIVITY_AGGREGATOR_LOCATION_TYPE);
+        inputTopicConfig = KafkaUtils.TopicConfig.from(ACTIVITY_AGGREGATOR_INPUT_TOPIC);
+
 		this.maxRecordsToAggregate.set(ACTIVITY_AGGREGATOR_PERSISTENCE_MAX_RECORDS);
 
         final Map<String, Object> CONSUMER_CONFIGS =
                 new HashMap<String, Object>() {{
-                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("activity-aggregator-%s-%ss-cg", ACTIVITY_AGGREGATOR_MOBILITY_TYPE, ACTIVITY_AGGREGATOR_LOCATION_TYPE));
+                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("activity-aggregator-%s-cg", inputTopicConfig.getTopicName()));
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, ACTIVITY_AGGREGATOR_AUTO_OFFSET_RESET_CONFIG);
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, ACTIVITY_AGGREGATOR_MAX_POLL_INTERVAL_MINUTES_CONFIG * 60000);
@@ -96,7 +99,7 @@ public class ActivityAggregator {
 
             try {
                 try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(CONSUMER_CONFIGS)) {
-                    consumer.subscribe(Collections.singleton(INPUT_TOPIC_NAME), new ConsumerRebalanceListener() {
+                    consumer.subscribe(Collections.singleton(inputTopicConfig.getTopicName()), new ConsumerRebalanceListener() {
                         @Override
                         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
                             if (!partitions.isEmpty()) {
@@ -134,7 +137,7 @@ public class ActivityAggregator {
 
                         // every ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC seconds persist minuteResolutionMap into the database and reset it:
                         if (Duration.between(lastPersistenceTime, Instant.now()).toMillis() >= ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC * 1000) {
-                            logger.fine(minuteResolutionMap.size() > 0
+                            logger.fine(!minuteResolutionMap.isEmpty()
                                     ? String.format("Persisting data collected since: %s .. offsetsToCommit.size() = %d, minuteResolutionMap.size() = %d", lastPersistenceTime.atZone(zoneId).format(formatter), offsetsToCommit.size(), minuteResolutionMap.size())
                                     : String.format("No data to persist since: %s .. offsetsToCommit.size() = %d, minuteResolutionMap.size() = %d", lastPersistenceTime.atZone(zoneId).format(formatter), offsetsToCommit.size(), minuteResolutionMap.size()));
                             if (!offsetsToCommit.isEmpty()) persistUncommitted(consumer, offsetsToCommit, minuteResolutionMap);
@@ -145,7 +148,7 @@ public class ActivityAggregator {
                         for (ConsumerRecord<String, String> kafkaRecord : kafkaRecords) {
                             try {
                                 final long counterTemp = counter.incrementAndGet();
-                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, INPUT_TOPIC_NAME));
+                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, inputTopicConfig.getTopicName()));
 
                                 logger.finer(String.format("#%d: Consumed by '%s', partition = %d, offset = %d, key = %s, value = %s", counterTemp, Thread.currentThread().getName(), kafkaRecord.partition(), kafkaRecord.offset(), kafkaRecord.key(), kafkaRecord.value()));
                                 offsetsToCommit.put(
@@ -184,8 +187,8 @@ public class ActivityAggregator {
         //        };
 
         try {
-            logger.info(String.format("Creating input topic '%s' with %d partitions, if it does not exist yet ...", INPUT_TOPIC_NAME, ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT));
-            KafkaUtils.checkAndCreateTopic(INPUT_TOPIC_NAME, ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT);
+            logger.info(String.format("Creating input topic '%s' (%d partitions), if it does not exist yet ...", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount()));
+            KafkaUtils.checkAndCreateTopic(inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount());
 
             // start consumers:
             ExecutorService threadPool = Executors.newFixedThreadPool(ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT);
@@ -193,7 +196,7 @@ public class ActivityAggregator {
                 threadPool.submit(aggregatorConsumerThread/*dataServiceTestThread*/);
 				if (ACTIVITY_AGGREGATOR_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES > 0 && i == Math.round(ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT/2)) Thread.sleep(ACTIVITY_AGGREGATOR_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES * 60000); // sleep for few minutes to trigger re-balancing (and also comment ACTIVITY_AGGREGATOR_MAX_POLL_INTERVAL_MINUTES_CONFIG and ACTIVITY_AGGREGATOR_SESSION_TIMEOUT_SECONDS_CONFIG, and increase ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC ..)
             }
-            logger.info(String.format("Started %2d consumer threads from topic '%s', persisting every %d seconds.", ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT, INPUT_TOPIC_NAME, ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC));
+            logger.info(String.format("Started %2d consumer threads from topic '%s', persisting every %d seconds.", ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT, inputTopicConfig.getTopicName(), ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC));
         } catch (Exception ex) {
             logException(ex, logger);
         }
@@ -239,7 +242,7 @@ public class ActivityAggregator {
 			minuteResolutionMap.clear();
         } catch (Exception ex) {
             com.urbangeopulse.utils.misc.Logger.logException(ex, String.format("Failed in %3d sec to persist uncommitted changes: offsetsToCommit.size() = %d (from %d), minuteResolutionMap.size() = %d, from topic '%s'.",
-                    Duration.between(startTime, Instant.now()).toMillis() / 1000, offsetsToCommit.size(), offsetsToCommitSize, minuteResolutionMap.size(), INPUT_TOPIC_NAME), logger);
+                    Duration.between(startTime, Instant.now()).toMillis() / 1000, offsetsToCommit.size(), offsetsToCommitSize, minuteResolutionMap.size(), inputTopicConfig.getTopicName()), logger);
             if (ex.getCause() instanceof CommitFailedException) {
                 offsetsToCommit.clear();
                 minuteResolutionMap.clear();

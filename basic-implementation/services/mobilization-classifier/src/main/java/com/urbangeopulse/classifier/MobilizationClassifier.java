@@ -25,8 +25,22 @@ import static com.urbangeopulse.utils.misc.Logger.logException;
 public class MobilizationClassifier {
     private static final Logger logger = Logger.getLogger(MobilizationClassifier.class.getName());
 
+    @Value("${PEOPLE_GEO_LOCATIONS_TOPIC:people_geo_locations__default,2}")
+    private String PEOPLE_GEO_LOCATIONS_TOPIC;
+    private KafkaUtils.TopicConfig peopleGeoLocationsTopicConfig;
+
+    @Value("${PEDESTRIANS_GEO_LOCATIONS_TOPIC:pedestrians_geo_locations__default,2}")
+    private String PEDESTRIANS_GEO_LOCATIONS_TOPIC;
+    private KafkaUtils.TopicConfig pedestriansGeoLocationsTopicConfig;
+
+    @Value("${MOBILIZED_GEO_LOCATIONS_TOPIC:mobilized_geo_locations__default,1}")
+    private String MOBILIZED_GEO_LOCATIONS_TOPIC;
+    private KafkaUtils.TopicConfig mobilizedGeoLocationsTopicConfig;
+
+
     @Value("${MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT:1}")
     private short MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT;
+
 
     @Value("${MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG:latest}")
     private String MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG;
@@ -44,19 +58,14 @@ public class MobilizationClassifier {
     @Value("${MOBILIZATION_CLASSIFIER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES:0}")
     private short MOBILIZATION_CLASSIFIER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES;
 
-    @Value("${PEOPLE_GEO_LOCATIONS_TOPIC_NAME:people_geo_locations__default}")
-    private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
-
-    @Value("${PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME:pedestrians_geo_locations__default}")
-    private String PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME;
-
-    @Value("${MOBILIZED_GEO_LOCATIONS_TOPIC_NAME:mobilized_geo_locations__default}")
-    private String MOBILIZED_GEO_LOCATIONS_TOPIC_NAME;
-
     static final AtomicLong counter = new AtomicLong();
 
     @PostConstruct
     void startBackgroundConsumers() {
+        peopleGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEOPLE_GEO_LOCATIONS_TOPIC);
+        pedestriansGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEDESTRIANS_GEO_LOCATIONS_TOPIC);
+        mobilizedGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(MOBILIZED_GEO_LOCATIONS_TOPIC);
+
         final Map<String, Object> CONSUMER_CONFIGS =
                 new HashMap<String, Object>() {{
                     put(ConsumerConfig.GROUP_ID_CONFIG, "mobilization-classifier-cg");
@@ -86,7 +95,7 @@ public class MobilizationClassifier {
                         }
                     }
                 };
-                try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, CONSUMER_CONFIGS, rebalanceListener)) {
+                try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(peopleGeoLocationsTopicConfig.getTopicName(), CONSUMER_CONFIGS, rebalanceListener)) {
                     WKTReader wktReader = new WKTReader();
 
                     //Note! When using a local cache, if the process crashes and restarts, messages already committed and not yet forwarded (i.e. the first message for a uuid) will be lost.
@@ -105,7 +114,7 @@ public class MobilizationClassifier {
                             try {
                                 final long counterTemp = counter.incrementAndGet();
                                 logger.fine(String.format("#%d: Consumed by '%s', partition = %d, offset = %d, key = %s, value = %s", counterTemp, Thread.currentThread().getName(), kafkaRecord.partition(), kafkaRecord.offset(), kafkaRecord.key(), kafkaRecord.value()));
-                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, PEOPLE_GEO_LOCATIONS_TOPIC_NAME));
+                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, peopleGeoLocationsTopicConfig.getTopicName()));
 
                                 final String currKafkaRecordValue = kafkaRecord.value();
                                 final Map currEvent = JavaSerializer.read(currKafkaRecordValue, HashMap.class);
@@ -118,8 +127,8 @@ public class MobilizationClassifier {
                                     double timeBetweenPointsInSec = getTimeBetweenPointsInSec(currEvent, prevEvent);
                                     logger.fine(String.format("currUuid '%s' : distance %.0f meters(?) in %3.1f sec", currUuid, distanceBetweenPointsInMeter, timeBetweenPointsInSec));
                                     KafkaUtils.send(distanceBetweenPointsInMeter / timeBetweenPointsInSec <= 7 // <= 7 meter/sec is assumed to be a pedestrian (== 25 km/h).
-                                                    ? PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME
-                                                    : MOBILIZED_GEO_LOCATIONS_TOPIC_NAME
+                                                    ? pedestriansGeoLocationsTopicConfig.getTopicName()
+                                                    : mobilizedGeoLocationsTopicConfig.getTopicName()
                                             , currKafkaRecordValue, currUuid);
                                     cache.remove(currUuid);
                                 }
@@ -141,10 +150,10 @@ public class MobilizationClassifier {
 
         try {
             // create topics:
-            logger.info(String.format("Creating input topic '%s' with %d partitions, and output topics '%s' and '%s', if they do not exist yet ...", PEOPLE_GEO_LOCATIONS_TOPIC_NAME, MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT, PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME, MOBILIZED_GEO_LOCATIONS_TOPIC_NAME));
-            KafkaUtils.checkAndCreateTopic(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT); // input topic
-            KafkaUtils.checkAndCreateTopic(PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME); // output topic
-            KafkaUtils.checkAndCreateTopic(MOBILIZED_GEO_LOCATIONS_TOPIC_NAME); // output topic
+            logger.info(String.format("Creating input topic '%s' (%d partitions), and output topics '%s' (%d partitions) and '%s' (%d partitions), if they do not exist yet ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount(), pedestriansGeoLocationsTopicConfig.getTopicName(), pedestriansGeoLocationsTopicConfig.getPartitionsCount(),mobilizedGeoLocationsTopicConfig.getTopicName(), mobilizedGeoLocationsTopicConfig.getPartitionsCount()));
+            KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()); // input topic
+            KafkaUtils.checkAndCreateTopic(pedestriansGeoLocationsTopicConfig.getTopicName(), pedestriansGeoLocationsTopicConfig.getPartitionsCount()); // output topic
+            KafkaUtils.checkAndCreateTopic(mobilizedGeoLocationsTopicConfig.getTopicName(), mobilizedGeoLocationsTopicConfig.getPartitionsCount()); // output topic
 
             logger.fine(String.format("Using %s cache", MOBILIZATION_CLASSIFIER_DEBUG_USE_LOCAL_CACHE ? "local" : "remote"));
 
@@ -154,7 +163,7 @@ public class MobilizationClassifier {
                 threadPool.submit(peopleGeoLocationsConsumerThread);
                 if (MOBILIZATION_CLASSIFIER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES > 0 && i == Math.round(MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT/2)) Thread.sleep(MOBILIZATION_CLASSIFIER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES * 60000); // sleep for few minutes to trigger re-balancing (and also comment *_MAX_POLL_INTERVAL_MINUTES_CONFIG and *_SESSION_TIMEOUT_SECONDS_CONFIG ..)
             }
-            logger.info(String.format("Started %2d consumer threads from topic '%s' to topics '%s' and '%s'.", MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT, PEOPLE_GEO_LOCATIONS_TOPIC_NAME, PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME, MOBILIZED_GEO_LOCATIONS_TOPIC_NAME));
+            logger.info(String.format("Started %2d consumer threads from topic '%s' to topics '%s' and '%s'.", MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT, peopleGeoLocationsTopicConfig.getTopicName(), pedestriansGeoLocationsTopicConfig.getTopicName(), mobilizedGeoLocationsTopicConfig.getTopicName()));
         } catch (Exception ex) {
             logException(ex, logger);
         }

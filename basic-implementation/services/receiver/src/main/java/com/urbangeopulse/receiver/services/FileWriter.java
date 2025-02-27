@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 public class FileWriter implements Writer {
 
-    public static final String BACKUP_FILENAME = new File("people-geo-locations.csv").exists() ? "people-geo-locations.csv" : "./basic-implementation/services/receiver/NYC_people-geo-locations--all.csv";
+    public static final String BACKUP_FILENAME = new File("people-geo-locations.csv").exists() ? "people-geo-locations.csv" : "./basic-implementation/services/receiver/NYC_people-geo-locations--Duffield_St.csv";
 
     private Logger logger;
     private java.io.FileWriter fileWriter;

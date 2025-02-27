@@ -9,10 +9,9 @@ services:
       - ./kafka-vars.env
     environment:
       REDIS_HOST_NAME: redis-server
-      PEOPLE_GEO_LOCATIONS_TOPIC_NAME: people_geo_locations
-      PEDESTRIANS_GEO_LOCATIONS_TOPIC_NAME: pedestrians_geo_locations
-      MOBILIZED_GEO_LOCATIONS_TOPIC_NAME: mobilized_geo_locations
-      MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT: 60
+
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
+
       MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG: earliest
       MOBILIZATION_CLASSIFIER_SESSION_TIMEOUT_SECONDS_CONFIG: 120
     depends_on:

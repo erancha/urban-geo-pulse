@@ -11,7 +11,8 @@ services:
       - ./kafka-vars.env
       - ./pg-vars.env
     environment:
-      PEOPLE_GEO_LOCATIONS_TOPIC_NAME: people_geo_locations
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
+
       ITERATIONS_TO_SIMULATE_FROM_BACKUP: 10
       PEOPLE_GEO_LOCATIONS_CSV: people-geo-locations--Duffield_St.csv
     depends_on:

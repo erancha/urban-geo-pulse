@@ -34,11 +34,9 @@ public class SimulatorDataService {
     private final ReceiverDataService receiverDataService;
     private final JdbcTemplate jdbcTemplate;
 
-    @Value("${PEOPLE_GEO_LOCATIONS_TOPIC_NAME:people_geo_locations__default}")
-    private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
-
-    @Value("${MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT:1}")
-    private short MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT;
+    @Value("${PEOPLE_GEO_LOCATIONS_TOPIC:people_geo_locations__default,2}")
+    private String PEOPLE_GEO_LOCATIONS_TOPIC;
+    private KafkaUtils.TopicConfig peopleGeoLocationsTopicConfig;
 
     @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")
     private short ITERATIONS_TO_SIMULATE_FROM_BACKUP;
@@ -55,13 +53,15 @@ public class SimulatorDataService {
     @PostConstruct
     private void initialize() {
         try {
-            logger.info(String.format("Creating output topic '%s' with %d partitions, if it does not exist yet ...", PEOPLE_GEO_LOCATIONS_TOPIC_NAME, MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT));
-            KafkaUtils.checkAndCreateTopic(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT); // output topic
+            peopleGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEOPLE_GEO_LOCATIONS_TOPIC);
+            logger.info(String.format("Creating output topic '%s' with %d partitions, if it does not exist yet ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
+            KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
 
             if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) {
                 logger.info(String.format("%d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, FileWriter.BACKUP_FILENAME, THROTTLE_PRODUCING_THROUGHPUT));
-                final boolean isBackupFileExist =  new File(FileWriter.BACKUP_FILENAME).exists();
-                if (!isBackupFileExist) logger.severe(String.format("Backup file '%s' does not exist!", FileWriter.BACKUP_FILENAME));
+                final boolean isBackupFileExist = new File(FileWriter.BACKUP_FILENAME).exists();
+                if (!isBackupFileExist)
+                    logger.severe(String.format("Backup file '%s' does not exist!", FileWriter.BACKUP_FILENAME));
                 else simulatePointsFromBackup(ITERATIONS_TO_SIMULATE_FROM_BACKUP);
             }
         } catch (Exception ex) {
@@ -72,9 +72,11 @@ public class SimulatorDataService {
     /**
      * Read value and key from a backup .csv file, and produce the messages into a kafka topic.
      * The messages are produced with the current timestamp by adding the delta between the 1st message and the current timestamp to all messages.
+     *
      * @param iterationsCount - number of times to read from the backup file.
      */
     public void simulatePointsFromBackup(int iterationsCount) {
+        if (peopleGeoLocationsTopicConfig == null) throw new IllegalStateException("Topic configuration is not initialized.");
         float targetTimePerMessageMillis = (float) 1000 / THROTTLE_PRODUCING_THROUGHPUT;
         long throttleStartTimeMillis = System.currentTimeMillis();
         long counter = 0;
@@ -92,38 +94,45 @@ public class SimulatorDataService {
                             final long currEventTimeInMS = (Long) currEvent.get("eventTimeInMS");
 
                             // adding the delta between the 1st message's timestamp and the current time to all messages:
-                            if (deltaFromCurrentTime == 0) deltaFromCurrentTime = System.currentTimeMillis() - currEventTimeInMS;
+                            if (deltaFromCurrentTime == 0)
+                                deltaFromCurrentTime = System.currentTimeMillis() - currEventTimeInMS;
                             else currEvent.put("eventTimeInMS", currEventTimeInMS + deltaFromCurrentTime);
 
-                            KafkaUtils.send(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, JavaSerializer.write(currEvent), key);
+                            KafkaUtils.send(peopleGeoLocationsTopicConfig.getTopicName(), JavaSerializer.write(currEvent), key);
                             if (++counter % THROTTLE_COUNT_CHECK == 0) {
-                                long remainingTimeMillis = (long)(THROTTLE_COUNT_CHECK * targetTimePerMessageMillis) - (System.currentTimeMillis() - throttleStartTimeMillis);
+                                long remainingTimeMillis = (long) (THROTTLE_COUNT_CHECK * targetTimePerMessageMillis) - (System.currentTimeMillis() - throttleStartTimeMillis);
                                 if (remainingTimeMillis > 0) {
-                                    if (counter % 10000 == 0) logger.info(String.format("Throttle: %,d messages produced to topic %s, delay %d ms for the recent %,d messages.", counter, PEOPLE_GEO_LOCATIONS_TOPIC_NAME, remainingTimeMillis, THROTTLE_COUNT_CHECK));
+                                    if (counter % 10000 == 0)
+                                        logger.info(String.format("Throttle: %,d messages produced to topic %s, delay %d ms for the recent %,d messages.", counter, peopleGeoLocationsTopicConfig.getTopicName(), remainingTimeMillis, THROTTLE_COUNT_CHECK));
                                     Thread.sleep(remainingTimeMillis);
-                                } else if (counter % 10000 == 0) logger.info(String.format("%,d messages produced to topic %s.", counter, PEOPLE_GEO_LOCATIONS_TOPIC_NAME));
+                                } else if (counter % 10000 == 0)
+                                    logger.info(String.format("%,d messages produced to topic %s.", counter, peopleGeoLocationsTopicConfig.getTopicName()));
                                 throttleStartTimeMillis = System.currentTimeMillis();
                             }
-                        } catch (InitializationException | ExecutionException | InterruptedException | JsonException e) {
+                        } catch (InitializationException | ExecutionException | InterruptedException |
+                                 JsonException e) {
                             logException(e, logger);
                         }
                     }
                 }
             } catch (IOException e) {
-                if (e instanceof FileNotFoundException) logger.severe(String.format("%s not found.", FileWriter.BACKUP_FILENAME));
+                if (e instanceof FileNotFoundException)
+                    logger.severe(String.format("%s not found.", FileWriter.BACKUP_FILENAME));
                 else logException(e, logger);
             }
         }
     }
 
-    /** create a writer, either to write messages into a file or to produce messages into a kafka topic.
+    /**
+     * create a writer, either to write messages into a file or to produce messages into a kafka topic.
+     *
      * @param saveToBackup - which writer to creates.
      * @return
      */
     public Writer createWriter(Boolean saveToBackup) {
         return saveToBackup
-                ? new FileWriter(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, logger)
-                : new KafkaProducer(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, logger);
+                ? new FileWriter(peopleGeoLocationsTopicConfig.getTopicName(), logger)
+                : new KafkaProducer(peopleGeoLocationsTopicConfig.getTopicName(), logger);
     }
 
     /**

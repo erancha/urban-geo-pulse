@@ -29,8 +29,8 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 ## Contribution suggestions:
 
 1. **Web App** for:
-   1. Showing results from the [Info](services/info/architecture.md) service, potentially with web-sockets to automatically refresh the UI when the order of higher concentration streets or neighborhood changes.
-   2. **Visualizing** the activity data aggregated by the [Activity-aggregator](services/activity-aggregator/architecture.md) service on top of the NYC streets and neighborhood using **vector tiles**.
+   1. Showing results from the [Info](services/info/readme.md) service, potentially with web-sockets to automatically refresh the UI when the order of higher concentration streets or neighborhood changes.
+   2. **Visualizing** the activity data aggregated by the [Activity-aggregator](services/activity-aggregator/readme) service on top of the NYC streets and neighborhood using **vector tiles**.
 2. Adding [MQTT messaging](../architecture/architecture-document-phase-1-REST.md#messaging).
 3. Preparing a **Kubernetes** configuration.
 4. Hardening the implementation for production.

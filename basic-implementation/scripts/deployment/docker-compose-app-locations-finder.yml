@@ -10,10 +10,7 @@ services:
       - ./pg-vars.env
       - ./locations-finder-vars.env
     environment:
-      LOCATIONS_FINDER_MOBILITY_TYPE: pedestrians
-      LOCATIONS_FINDER_LOCATION_TYPE: street
-      LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT: 40
-      LOCATIONS_FINDER_CONSUMER_THREADS_COUNT: 20
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
     depends_on:
       - kafka-broker
       - postgis-server-nyc
@@ -27,47 +24,38 @@ services:
       - ./pg-vars.env
       - ./locations-finder-vars.env
     environment:
-      LOCATIONS_FINDER_MOBILITY_TYPE: pedestrians
-      LOCATIONS_FINDER_LOCATION_TYPE: neighborhood
-      LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT: 40
-      LOCATIONS_FINDER_CONSUMER_THREADS_COUNT: 20
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
     depends_on:
       - kafka-broker
       - postgis-server-nyc
 
-  # locations-finder-mobilized-streets:
-    # image: erancha/urbangeopulse:locations-finder-1.0
-    # networks:
-      # - urbangeopulse-net
-    # env_file:
-      # - ./kafka-vars.env
-      # - ./pg-vars.env
-      # - ./locations-finder-vars.env
-    # environment:
-      # LOCATIONS_FINDER_MOBILITY_TYPE: mobilized
-      # LOCATIONS_FINDER_LOCATION_TYPE: street
-      # LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT: 10
-      # LOCATIONS_FINDER_CONSUMER_THREADS_COUNT: 5
-    # depends_on:
-      # - kafka-broker
-      # - postgis-server-nyc
+  locations-finder-mobilized-streets:
+    image: erancha/urbangeopulse:locations-finder-1.0
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./kafka-vars.env
+      - ./pg-vars.env
+      - ./locations-finder-vars.env
+    environment:
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
+    depends_on:
+      - kafka-broker
+      - postgis-server-nyc
 
-  # locations-finder-mobilized-neighborhoods:
-    # image: erancha/urbangeopulse:locations-finder-1.0
-    # networks:
-      # - urbangeopulse-net
-    # env_file:
-      # - ./kafka-vars.env
-      # - ./pg-vars.env
-      # - ./locations-finder-vars.env
-    # environment:
-      # LOCATIONS_FINDER_MOBILITY_TYPE: mobilized
-      # LOCATIONS_FINDER_LOCATION_TYPE: neighborhood
-      # LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT: 10
-      # LOCATIONS_FINDER_CONSUMER_THREADS_COUNT: 5
-    # depends_on:
-      # - kafka-broker
-      # - postgis-server-nyc
+  locations-finder-mobilized-neighborhoods:
+    image: erancha/urbangeopulse:locations-finder-1.0
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./kafka-vars.env
+      - ./pg-vars.env
+      - ./locations-finder-vars.env
+    environment:
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
+    depends_on:
+      - kafka-broker
+      - postgis-server-nyc
 
 networks:
   urbangeopulse-net:

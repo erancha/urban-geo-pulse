@@ -326,7 +326,7 @@ In addition, the development team should take into consideration best practices 
 
 #### Implementation Instructions
 
-Each instance of this service should handle one and only one combination of mobility type (pedestrians or mobilized) and location type (streets or neighborhoods). This will allow to easily [scale](#scaling) the services accurately according to load (for example, assuming that there're more pedestrians than mobilized, and more streets than neighborhoods, then more replicas for this combination should be started (either automatically or manually) than other combinations).
+Each instance of this service should handle one and only one combination of mobility type (pedestrians or mobilized) and location type (streets or neighborhoods). This will allow to easily [scale](#scaling) the services accurately according to load (for example, assuming that there're more pedestrians than mobilized, and more streets than neighborhoods, then more replicas for this combination chould be started (either automatically or manually) than other combinations).
 
 #### Deployment Instructions
 
@@ -362,11 +362,11 @@ To process messages containing events that should be:
 #### Implementation Instructions
 
 1. Each instance of this service should aggregate and persist data for one and only **one combination** of **Pedestrians**/**mobilized** and **streets**/**neighborhoods**.
-2. The combination should be configured by two environment variables, that together decide the input topic (one of the output topics of the [Locations-finder service](#locations-finder-service)). This will allow [scaling](#scalability) specific combinations according to the load, as explained in the [Locations-finder](#locations-finder-service) service.
+2. The combination should be configured by two environment variables, that together decide the input topic (one of the output topics of the [Locations-finder service](#locations-finder-service)). This will allow [scaling](#scalability) specific combinations according to the load, as explained in the [Implementation Instructions](#implementation-instructions-2) of the Locations-finder service.
 3. The persistence interval and number of records should be configurable by environment variables. This should provide a way to control the memory consumption and database persistence time.
 4. **Consumer groups rebalancing must be handled** properly by this service, otherwise messages aggregated in-memory might be lost when the service will attempt to commit the uncommitted offsets associated with these messages.
 
-Further details can be found in the [mvp-level implementation](../mvp-level-implementation/services/activity-aggregator/architecture.md).
+Further details can be found in the [mvp-level implementation](../mvp-level-implementation/services/activity-aggregator/readme.md).
 
 <hr>
 

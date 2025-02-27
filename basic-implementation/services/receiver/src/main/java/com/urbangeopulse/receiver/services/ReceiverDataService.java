@@ -7,6 +7,7 @@ import com.urbangeopulse.utils.serialization.JsonException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -19,8 +20,20 @@ public class ReceiverDataService {
 
     private final static Logger logger = Logger.getLogger(ReceiverDataService.class.getName());
 
-    @Value("${PEOPLE_GEO_LOCATIONS_TOPIC_NAME:people_geo_locations__default}")
-    private String PEOPLE_GEO_LOCATIONS_TOPIC_NAME;
+    @Value("${PEOPLE_GEO_LOCATIONS_TOPIC:people_geo_locations__default,2}")
+    private String PEOPLE_GEO_LOCATIONS_TOPIC;
+    private KafkaUtils.TopicConfig peopleGeoLocationsTopicConfig;
+
+    @PostConstruct
+    private void initialize() {
+        try {
+            peopleGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEOPLE_GEO_LOCATIONS_TOPIC);
+            logger.info(String.format("Creating output topic '%s' with %d partitions, if it does not exist yet ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
+            KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
+        } catch (Exception ex) {
+            logException(ex, logger);
+        }
+    }
 
     /** process a geospatial point.
      * @param cityCode - city code, e.g. NYC for New York City.
@@ -33,14 +46,14 @@ public class ReceiverDataService {
     public void processGeoPoint(String cityCode, String uuid, String point, long currentTimeMillis) {
         Map<String, Object> geoLocationEvent = prepareGeoPointEvent(cityCode, uuid, point, currentTimeMillis);
         try {
-            KafkaUtils.send(PEOPLE_GEO_LOCATIONS_TOPIC_NAME, JavaSerializer.write(geoLocationEvent), uuid);
+            KafkaUtils.send(peopleGeoLocationsTopicConfig.getTopicName(), JavaSerializer.write(geoLocationEvent), uuid);
         } catch (JsonException | InitializationException | ExecutionException | InterruptedException e) {
             logException(e, logger);
         }
     }
 
     public Map<String, Object> prepareGeoPointEvent(String cityCode, String uuid, String point, long currentTimeMillis) {
-        Map<String, Object> geoLocationEvent = new HashMap<String, Object>() {
+        return new HashMap<>() {
             {
                 put("cityCode", cityCode);
                 put("uuid", uuid);
@@ -48,6 +61,5 @@ public class ReceiverDataService {
                 put("eventTimeInMS", currentTimeMillis);
             }
         };
-        return geoLocationEvent;
     }
 }

@@ -27,12 +27,23 @@ import static com.urbangeopulse.utils.misc.Logger.logException;
 public class LocationsFinder {
     private static final Logger logger = Logger.getLogger(LocationsFinder.class.getName());
 
+    @Value("${LOCATIONS_FINDER_INPUT_TOPIC:pedestrians_geo_locations__default,2}")
+    private String LOCATIONS_FINDER_INPUT_TOPIC;
+    private KafkaUtils.TopicConfig inputTopicConfig;
+
+    @Value("${LOCATIONS_FINDER_LOCATION_TYPE:street}")
+    private String LOCATIONS_FINDER_LOCATION_TYPE;
+
+    @Value("${LOCATIONS_FINDER_OUTPUT_TOPIC:pedestrians_streets__default,2}")
+    private String LOCATIONS_FINDER_OUTPUT_TOPIC;
+    private KafkaUtils.TopicConfig outputTopicConfig;
+
     @Value("${LOCATIONS_FINDER_CONSUMER_THREADS_COUNT:1}")
     private short LOCATIONS_FINDER_CONSUMER_THREADS_COUNT;
 
-    // number of partitions per mobility type.
-    @Value("${LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT:2}")
-    private short LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT;
+    @Value("${DELAY_MANAGER_TOPIC_NAME:delays__default}")
+    private String DELAY_MANAGER_TOPIC_NAME;
+    
 
     @Value("${LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG:latest}")
     private String LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG;
@@ -47,20 +58,9 @@ public class LocationsFinder {
     @Value("${LOCATIONS_FINDER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES:0}")
     private short LOCATIONS_FINDER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES;
 
-    // mobility type: pedestrians or mobilized (i.e. non-pedestrians).
-    @Value("${LOCATIONS_FINDER_MOBILITY_TYPE:pedestrians}")
-    private String LOCATIONS_FINDER_MOBILITY_TYPE;
-
     // SRID (Spatial Reference Identifiers) to use when locating geom points.
     @Value("${LOCATIONS_FINDER_INPUT_SRID:26918}")
     private int LOCATIONS_FINDER_INPUT_SRID;
-
-    // search type: streets or neighborhoods.
-    @Value("${LOCATIONS_FINDER_LOCATION_TYPE:street}")
-    private String LOCATIONS_FINDER_LOCATION_TYPE;
-
-    @Value("${DELAY_MANAGER_TOPIC_NAME:delays__default}")
-    private String DELAY_MANAGER_TOPIC_NAME;
 
     @Value("${LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC:60}")
     private short LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC;
@@ -75,12 +75,13 @@ public class LocationsFinder {
 
     @PostConstruct
     void startBackgroundConsumers() {
-        final String INPUT_TOPIC_NAME = String.format("%s_geo_locations", LOCATIONS_FINDER_MOBILITY_TYPE);
-        final String OUTPUT_TOPIC_NAME = String.format("%s_%ss", LOCATIONS_FINDER_MOBILITY_TYPE, LOCATIONS_FINDER_LOCATION_TYPE);
-        final String FROM_MESSAGE = String.format("from topic '%s' for '%ss' ..", INPUT_TOPIC_NAME, LOCATIONS_FINDER_LOCATION_TYPE);
+        inputTopicConfig = KafkaUtils.TopicConfig.from(LOCATIONS_FINDER_INPUT_TOPIC);
+        outputTopicConfig = KafkaUtils.TopicConfig.from(LOCATIONS_FINDER_OUTPUT_TOPIC);
+
+        final String FROM_MESSAGE = String.format("from topic '%s' to topic '%s' ..", inputTopicConfig.getTopicName(), outputTopicConfig.getTopicName());
         final Map<String, Object> CONSUMER_CONFIGS =
                 new HashMap<String, Object>() {{
-                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("locations-finder-%s-%ss-cg", LOCATIONS_FINDER_MOBILITY_TYPE, LOCATIONS_FINDER_LOCATION_TYPE));
+                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("locations-finder-%s-cg", inputTopicConfig.getTopicName()));
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG);
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, LOCATIONS_FINDER_MAX_POLL_INTERVAL_MINUTES_CONFIG * 60000);
@@ -107,7 +108,7 @@ public class LocationsFinder {
                         }
                     }
                 };
-                try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(INPUT_TOPIC_NAME, CONSUMER_CONFIGS, rebalanceListener)) {
+                try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(inputTopicConfig.getTopicName(), CONSUMER_CONFIGS, rebalanceListener)) {
                     // consume, with poll interval between 1,000 and 1 ms, depending on whether records were consumed or not.
                     short pollIntervalInMS = 1000;
                     while (true) {
@@ -131,7 +132,7 @@ public class LocationsFinder {
                                         if (locationName != null) { // having a null name returned for a point is a valid scenario, e.g. for 'motorway_link' type:  select * from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(599559.4836523728 4507255.523744515)'),26918),geom);
                                             currEvent.put("location", locationName);
                                             try {
-                                                KafkaUtils.send(OUTPUT_TOPIC_NAME, JavaSerializer.write(currEvent));
+                                                KafkaUtils.send(outputTopicConfig.getTopicName(), JavaSerializer.write(currEvent));
                                             } catch (InitializationException | ExecutionException | InterruptedException | JsonException ex) {
                                                 logException(ex, logger);
                                             }
@@ -144,7 +145,7 @@ public class LocationsFinder {
                                             put("eventToDelay", JavaSerializer.write(currEvent)); // the content of the event to be delayed.
                                             put("delayStartTimestamp", System.currentTimeMillis()); // the timestamp from which the event should be delayed.
                                             put("delayInSec", LOCATIONS_FINDER_DELAY_FOR_MISSING_CITY_IN_SEC); // the time, in seconds, that the event should be delayed
-                                            put("returnToTopic", INPUT_TOPIC_NAME); // the topic name to which the event should be returned after the delay.
+                                            put("returnToTopic", inputTopicConfig.getTopicName()); // the topic name to which the event should be returned after the delay.
                                             put("partitionKey", kafkaRecord.key()); // the key to use when the delay-manager will return the message back to 'returnToTopic'.
                                         }
                                     };
@@ -166,9 +167,9 @@ public class LocationsFinder {
         };
 
         try {
-            logger.info(String.format("Creating input topic '%s' with %d partitions, output topic '%s', and delay manager topic '%s', if they do not exist yet ...", INPUT_TOPIC_NAME, LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT, OUTPUT_TOPIC_NAME, DELAY_MANAGER_TOPIC_NAME));
-            KafkaUtils.checkAndCreateTopic(INPUT_TOPIC_NAME, LOCATIONS_FINDER_MOBILITY_TYPE_PARTITIONS_COUNT);
-            KafkaUtils.checkAndCreateTopic(OUTPUT_TOPIC_NAME);
+            logger.info(String.format("Creating input topic '%s' (%d partitions), output topic '%s' (%d partitions), and delay manager topic '%s', if they do not exist yet ...", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount(), outputTopicConfig.getTopicName(), outputTopicConfig.getPartitionsCount(), DELAY_MANAGER_TOPIC_NAME));
+            KafkaUtils.checkAndCreateTopic(inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount());
+            KafkaUtils.checkAndCreateTopic(outputTopicConfig.getTopicName(), outputTopicConfig.getPartitionsCount());
             KafkaUtils.checkAndCreateTopic(DELAY_MANAGER_TOPIC_NAME);
 
             // start consumers:
@@ -177,7 +178,7 @@ public class LocationsFinder {
                 threadPool.submit(locationsFinderConsumerThread);
                 if (LOCATIONS_FINDER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES > 0 && i == Math.round(LOCATIONS_FINDER_CONSUMER_THREADS_COUNT/2)) Thread.sleep(LOCATIONS_FINDER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES * 60000); // sleep for few minutes to trigger re-balancing (and also comment *_MAX_POLL_INTERVAL_MINUTES_CONFIG and *_SESSION_TIMEOUT_SECONDS_CONFIG ..)
             }
-            logger.info(String.format("Started %2d consumer threads from topic '%s' to topic '%s'.", LOCATIONS_FINDER_CONSUMER_THREADS_COUNT, INPUT_TOPIC_NAME, OUTPUT_TOPIC_NAME));
+            logger.info(String.format("Started %2d consumer threads from topic '%s' to topic '%s'.", LOCATIONS_FINDER_CONSUMER_THREADS_COUNT, inputTopicConfig.getTopicName(), outputTopicConfig.getTopicName()));
         } catch (Exception ex) {
             logException(ex, logger);
         }

@@ -3,8 +3,9 @@
 	@REM set EXECUTION_COMMAND=mvnw spring-boot:run --quiet
 	set EXECUTION_COMMAND=java -Xms128M -jar target\info-1.0.jar 
 
-	call set-env.cmd
-	
+	set POSTGIS_SERVER_HOST_NAME=localhost
+	set POSTGIS_SERVER_PORT=5433
+		
 	@echo on
 
 	start /B %EXECUTION_COMMAND%

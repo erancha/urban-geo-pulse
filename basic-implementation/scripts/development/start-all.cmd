@@ -8,9 +8,10 @@
 	
 	call start-a-service receiver 					openlog
 	call start-a-service mobilization-classifier
-	@REM call start-a-service delay-manager
-	call start-a-service activity-aggregator
 	call start-a-service locations-finder
+	@REM @REM call start-a-service delay-manager
+	call start-a-service activity-aggregator
+		
 	@REM call start-a-service info 	
 
 	@REM TODO: Refer to a comment in 'basic-implementation\services\activity-aggregator\start-service.cmd' about "The number of consumers should be aligned with locations-finder\start-service.cmd"

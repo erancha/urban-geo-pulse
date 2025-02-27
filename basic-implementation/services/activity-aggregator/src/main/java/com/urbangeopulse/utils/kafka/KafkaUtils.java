@@ -93,7 +93,7 @@ public class KafkaUtils {
         Instant startTime = Instant.now();
         try {
             admin.createTopics(Collections.singleton(newTopic)).all().get();
-            logger.info(String.format("Topic '%s' created with %d partitions, after %d seconds.", topicName, numPartitions, Duration.between(startTime, Instant.now()).toMillis() / 1000));  
+            logger.info(String.format("Topic '%s' created with %d partitions, after %d seconds.", topicName, numPartitions, Duration.between(startTime, Instant.now()).toMillis() / 1000));
         } catch (ExecutionException ex) {
             if (ex.getCause() instanceof TopicExistsException) logger.warning(String.format("Failed to create topic '%s' due to %s, after %d seconds.", topicName, ex.getCause().getClass().getSimpleName(), Duration.between(startTime, Instant.now()).toMillis() / 1000));
             else {
@@ -307,5 +307,34 @@ public class KafkaUtils {
         if (configs != null)
             finalConfigs.putAll(configs);
         return finalConfigs;
+    }
+
+    // A new encapsulation class for topic configuration
+    public static class TopicConfig {
+        private final String outputTopicName;
+        private final int partitionsCount;
+
+        private TopicConfig(String outputTopicName, int partitionsCount) {
+            this.outputTopicName = outputTopicName;
+            this.partitionsCount = partitionsCount;
+        }
+
+        public static TopicConfig from(String topicConfigString) {
+            String[] outputTopicParts = topicConfigString.split(",");
+            if (outputTopicParts.length < 2) {
+                throw new IllegalArgumentException("Invalid topic configuration: " + topicConfigString);
+            }
+            String outputTopicName = outputTopicParts[0];
+            int partitionsCount = Integer.parseInt(outputTopicParts[1]);
+            return new TopicConfig(outputTopicName, partitionsCount);
+        }
+
+        public String getTopicName() {
+            return outputTopicName;
+        }
+
+        public int getPartitionsCount() {
+            return partitionsCount;
+        }
     }
 }

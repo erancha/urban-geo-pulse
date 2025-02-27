@@ -308,4 +308,33 @@ public class KafkaUtils {
             finalConfigs.putAll(configs);
         return finalConfigs;
     }
+
+    // A new encapsulation class for topic configuration
+    public static class TopicConfig {
+        private final String outputTopicName;
+        private final int partitionsCount;
+
+        private TopicConfig(String outputTopicName, int partitionsCount) {
+            this.outputTopicName = outputTopicName;
+            this.partitionsCount = partitionsCount;
+        }
+
+        public static TopicConfig from(String topicConfigString) {
+            String[] outputTopicParts = topicConfigString.split(",");
+            if (outputTopicParts.length < 2) {
+                throw new IllegalArgumentException("Invalid topic configuration: " + topicConfigString);
+            }
+            String outputTopicName = outputTopicParts[0];
+            int partitionsCount = Integer.parseInt(outputTopicParts[1]);
+            return new TopicConfig(outputTopicName, partitionsCount);
+        }
+
+        public String getTopicName() {
+            return outputTopicName;
+        }
+
+        public int getPartitionsCount() {
+            return partitionsCount;
+        }
+    }
 }

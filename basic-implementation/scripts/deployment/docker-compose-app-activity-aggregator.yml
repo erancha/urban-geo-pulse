@@ -10,10 +10,9 @@ services:
       - ./pg-vars.env
       - ./activity-aggregator-vars.env
     environment:
-      ACTIVITY_AGGREGATOR_MOBILITY_TYPE: pedestrians
-      ACTIVITY_AGGREGATOR_LOCATION_TYPE: street
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
       ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC: 20
-      ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT: 30
+      # ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT: 2
     depends_on:
       - kafka-broker
       - postgis-server-nyc
@@ -27,9 +26,7 @@ services:
       - ./pg-vars.env
       - ./activity-aggregator-vars.env
     environment:
-      ACTIVITY_AGGREGATOR_MOBILITY_TYPE: pedestrians
-      ACTIVITY_AGGREGATOR_LOCATION_TYPE: neighborhood
-      ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT: 10
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
     depends_on:
       - kafka-broker
       - postgis-server-nyc
@@ -43,9 +40,7 @@ services:
       # - ./pg-vars.env
       # - ./activity-aggregator-vars.env
     # environment:
-      # ACTIVITY_AGGREGATOR_MOBILITY_TYPE: mobilized
-      # ACTIVITY_AGGREGATOR_LOCATION_TYPE: street
-      # ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT: 8
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
     # depends_on:
       # - kafka-broker
       # - postgis-server-nyc
@@ -59,9 +54,7 @@ services:
       # - ./pg-vars.env
       # - ./activity-aggregator-vars.env
     # environment:
-      # ACTIVITY_AGGREGATOR_MOBILITY_TYPE: mobilized
-      # ACTIVITY_AGGREGATOR_LOCATION_TYPE: neighborhood
-      # ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT: 2
+      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
     # depends_on:
       # - kafka-broker
       # - postgis-server-nyc
