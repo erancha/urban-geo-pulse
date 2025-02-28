@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "74579ad1-5a0e-46a5-8781-6ed67589eee1",
+		"_postman_id": "383532d8-8328-4107-a4df-531b6d91d970",
 		"name": "UrbanGeoPulse - info",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "9394726"
@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8081/urbangeopulse/api/info/locations/activity?recordsCount=2&minutesBack=30",
+					"raw": "http://localhost:8081/urbangeopulse/api/info/locations/activity?recordsCount=10&minutesBack=30",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -38,7 +38,7 @@
 						},
 						{
 							"key": "recordsCount",
-							"value": "2"
+							"value": "10"
 						},
 						{
 							"key": "startTimestamp",
