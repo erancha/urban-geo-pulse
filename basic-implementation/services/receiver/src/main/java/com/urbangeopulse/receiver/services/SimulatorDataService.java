@@ -41,8 +41,8 @@ public class SimulatorDataService {
     @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")
     private short ITERATIONS_TO_SIMULATE_FROM_BACKUP;
 
-    @Value("${THROTTLE_PRODUCING_THROUGHPUT:#{10000}}") // maximum throughput - produced messages per second
-    private int THROTTLE_PRODUCING_THROUGHPUT;
+    @Value("${RECEIVER_THROTTLE_PRODUCING_THROUGHPUT:#{10000}}") // maximum throughput - produced messages per second
+    private int RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
     public static final int THROTTLE_COUNT_CHECK = 1000; // check throttling every N messages.
 
     public SimulatorDataService(ReceiverDataService receiverDataService, JdbcTemplate jdbcTemplate) {
@@ -58,7 +58,7 @@ public class SimulatorDataService {
             KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
 
             if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) {
-                logger.info(String.format("%d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, FileWriter.BACKUP_FILENAME, THROTTLE_PRODUCING_THROUGHPUT));
+                logger.info(String.format("Starting %d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, FileWriter.BACKUP_FILENAME, RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
                 final boolean isBackupFileExist = new File(FileWriter.BACKUP_FILENAME).exists();
                 if (!isBackupFileExist)
                     logger.severe(String.format("Backup file '%s' does not exist!", FileWriter.BACKUP_FILENAME));
@@ -77,7 +77,7 @@ public class SimulatorDataService {
      */
     public void simulatePointsFromBackup(int iterationsCount) {
         if (peopleGeoLocationsTopicConfig == null) throw new IllegalStateException("Topic configuration is not initialized.");
-        float targetTimePerMessageMillis = (float) 1000 / THROTTLE_PRODUCING_THROUGHPUT;
+        float targetTimePerMessageMillis = (float) 1000 / RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
         long throttleStartTimeMillis = System.currentTimeMillis();
         long counter = 0;
         long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record

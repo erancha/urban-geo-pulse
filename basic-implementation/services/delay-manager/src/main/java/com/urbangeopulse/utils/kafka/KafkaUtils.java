@@ -95,7 +95,7 @@ public class KafkaUtils {
             admin.createTopics(Collections.singleton(newTopic)).all().get();
             logger.info(String.format("Topic '%s' created with %d partitions, after %d seconds.", topicName, numPartitions, Duration.between(startTime, Instant.now()).toMillis() / 1000));
         } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof TopicExistsException) logger.warning(String.format("Failed to create topic '%s' due to %s, after %d seconds.", topicName, ex.getCause().getClass().getSimpleName(), Duration.between(startTime, Instant.now()).toMillis() / 1000));
+            if (ex.getCause() instanceof TopicExistsException) logger.fine(String.format("Failed to create topic '%s' due to %s, after %d seconds.", topicName, ex.getCause().getClass().getSimpleName(), Duration.between(startTime, Instant.now()).toMillis() / 1000));
             else {
                 logException(ex, String.format("Exception after %d seconds", Duration.between(startTime, Instant.now()).toMillis() / 1000), logger);
                 throw ex;
@@ -312,9 +312,9 @@ public class KafkaUtils {
     // A new encapsulation class for topic configuration
     public static class TopicConfig {
         private final String outputTopicName;
-        private final int partitionsCount;
+        private final short partitionsCount;
 
-        private TopicConfig(String outputTopicName, int partitionsCount) {
+        private TopicConfig(String outputTopicName, short partitionsCount) {
             this.outputTopicName = outputTopicName;
             this.partitionsCount = partitionsCount;
         }
@@ -325,7 +325,7 @@ public class KafkaUtils {
                 throw new IllegalArgumentException("Invalid topic configuration: " + topicConfigString);
             }
             String outputTopicName = outputTopicParts[0];
-            int partitionsCount = Integer.parseInt(outputTopicParts[1]);
+            short partitionsCount = Short.parseShort(outputTopicParts[1]);
             return new TopicConfig(outputTopicName, partitionsCount);
         }
 
@@ -333,7 +333,7 @@ public class KafkaUtils {
             return outputTopicName;
         }
 
-        public int getPartitionsCount() {
+        public short getPartitionsCount() {
             return partitionsCount;
         }
     }

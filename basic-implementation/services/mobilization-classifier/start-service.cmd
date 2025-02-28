@@ -13,7 +13,6 @@
 	
 	call set-env.cmd
 	call ../locations-finder/set-env.cmd
-
-	set MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT=20
+	@REM set MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT=5
 
 	for /l %%i in (1,1,1) do start /B  %EXECUTION_COMMAND%

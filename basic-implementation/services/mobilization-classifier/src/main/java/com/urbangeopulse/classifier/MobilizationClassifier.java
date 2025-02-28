@@ -37,10 +37,8 @@ public class MobilizationClassifier {
     private String MOBILIZED_GEO_LOCATIONS_TOPIC;
     private KafkaUtils.TopicConfig mobilizedGeoLocationsTopicConfig;
 
-
-    @Value("${MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT:1}")
+    @Value("${MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT:100}") // = (short) Math.min(MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT, peopleGeoLocationsTopicConfig.getPartitionsCount());
     private short MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT;
-
 
     @Value("${MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG:latest}")
     private String MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG;
@@ -59,6 +57,7 @@ public class MobilizationClassifier {
     private short MOBILIZATION_CLASSIFIER_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES;
 
     static final AtomicLong counter = new AtomicLong();
+    static private long lastLogTimeMilli = System.currentTimeMillis();
 
     @PostConstruct
     void startBackgroundConsumers() {
@@ -114,8 +113,12 @@ public class MobilizationClassifier {
                             try {
                                 final long counterTemp = counter.incrementAndGet();
                                 logger.fine(String.format("#%d: Consumed by '%s', partition = %d, offset = %d, key = %s, value = %s", counterTemp, Thread.currentThread().getName(), kafkaRecord.partition(), kafkaRecord.offset(), kafkaRecord.key(), kafkaRecord.value()));
-                                if (counterTemp % 10000 == 0) logger.info(String.format("%,d records consumed from topic '%s'.", counterTemp, peopleGeoLocationsTopicConfig.getTopicName()));
-
+                                if (counterTemp % 10000 == 0) {
+                                    long currentTimeMillis = System.currentTimeMillis();
+                                    long elapsedTimeMillis = (currentTimeMillis - lastLogTimeMilli);
+                                    lastLogTimeMilli = currentTimeMillis;
+                                    logger.info(String.format("(+%4.1f s) %,7d records consumed from topic '%s'", (float)elapsedTimeMillis / 1000, counterTemp, peopleGeoLocationsTopicConfig.getTopicName()));
+                                }
                                 final String currKafkaRecordValue = kafkaRecord.value();
                                 final Map currEvent = JavaSerializer.read(currKafkaRecordValue, HashMap.class);
                                 final String currUuid = (String) currEvent.get("uuid");
@@ -157,7 +160,8 @@ public class MobilizationClassifier {
 
             logger.fine(String.format("Using %s cache", MOBILIZATION_CLASSIFIER_DEBUG_USE_LOCAL_CACHE ? "local" : "remote"));
 
-            // start consumers:
+            // start consumers: (ensure at least one partition per consumer)
+            MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT = (short) Math.min(MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT, peopleGeoLocationsTopicConfig.getPartitionsCount());
             ExecutorService threadPool = Executors.newFixedThreadPool(MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT);
             for (int i = 1; i <= MOBILIZATION_CLASSIFIER_CONSUMER_THREADS_COUNT; i++) {
                 threadPool.submit(peopleGeoLocationsConsumerThread);

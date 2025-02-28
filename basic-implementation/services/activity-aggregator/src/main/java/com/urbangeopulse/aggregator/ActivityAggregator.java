@@ -34,7 +34,15 @@ public class ActivityAggregator {
     private String ACTIVITY_AGGREGATOR_INPUT_TOPIC;
     private KafkaUtils.TopicConfig inputTopicConfig;
 
-    @Value("${ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT:1}")
+    // mobility type: pedestrians or mobilized (i.e. non-pedestrians).
+    @Value("${ACTIVITY_AGGREGATOR_MOBILITY_TYPE:pedestrians}")
+    private String ACTIVITY_AGGREGATOR_MOBILITY_TYPE;
+
+    // location type: street or neighborhood.
+    @Value("${ACTIVITY_AGGREGATOR_LOCATION_TYPE:street}")
+    private String ACTIVITY_AGGREGATOR_LOCATION_TYPE;
+
+    @Value("${ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT:100}") // = (short) Math.min(ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT, inputTopicConfig.getPartitionsCount());
     private short ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT;
 
     @Value("${ACTIVITY_AGGREGATOR_AUTO_OFFSET_RESET_CONFIG:latest}")
@@ -57,14 +65,6 @@ public class ActivityAggregator {
     // number of minutes after which to artificially trigger rebalancing during startup (by delaying half of the threads).
     @Value("${ACTIVITY_AGGREGATOR_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES:0}")
     private short ACTIVITY_AGGREGATOR_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES;
-
-    // mobility type: pedestrians or mobilized (i.e. non-pedestrians).
-    @Value("${ACTIVITY_AGGREGATOR_MOBILITY_TYPE:pedestrians}")
-    private String ACTIVITY_AGGREGATOR_MOBILITY_TYPE;
-
-    // location type: street or neighborhood.
-    @Value("${ACTIVITY_AGGREGATOR_LOCATION_TYPE:street}")
-    private String ACTIVITY_AGGREGATOR_LOCATION_TYPE;
 
     private final AtomicLong counter = new AtomicLong();
     private final AtomicInteger maxRecordsToAggregate = new AtomicInteger();
@@ -190,7 +190,8 @@ public class ActivityAggregator {
             logger.info(String.format("Creating input topic '%s' (%d partitions), if it does not exist yet ...", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount()));
             KafkaUtils.checkAndCreateTopic(inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount());
 
-            // start consumers:
+            // start consumers: (ensure at least one partition per consumer)
+            ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT = (short) Math.min(ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT, inputTopicConfig.getPartitionsCount());
             ExecutorService threadPool = Executors.newFixedThreadPool(ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT);
             for (int i = 1; i <= ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT; i++) {
                 threadPool.submit(aggregatorConsumerThread/*dataServiceTestThread*/);

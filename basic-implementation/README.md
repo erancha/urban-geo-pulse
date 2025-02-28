@@ -9,8 +9,11 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 2. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd).
 3. In `Docker Desktop` : Copy the container id of `development` \ `postgis-server-nyc-1` into the environment variable `PG\*CONTAINER_ID` in [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd).
 4. Start PGAdmin (http://localhost:8082: Username = `user@gmail.com`, Password = `pgadminpass`, add a new server : Host name/address = `postgis-server-nyc`, Username = `user`, Password = `pass`), right click on the `nyc` database, and [download](https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip) and [`Restore`](https://postgis.net/workshops/postgis-intro/loading_data.html) the data bundle the of the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
-5. Execute [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd) to create additional tables for the UrbanGeoPulse application.
-6. Maven build [workspace/pom.xml](workspace/pom.xml) (from an IDE or from command line : [scripts/development/build-maven.cmd](scripts/development/build-maven.cmd)).
+5. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd) to start 3rd-party infrastucture services (Kafka, Postgres, Redis, etc .. [scripts/development/docker-compose.yml](scripts/development/docker-compose.yml)).
+6. Update [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd) : set PG_CONTAINER_ID=`!!!` (copy/paste the `Container ID` from `Containers` >
+   `development-postgis-server-nyc-1` in `Docker Desktop`)
+7. Execute [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd) to create additional tables for the UrbanGeoPulse application.
+8. Maven build [workspace/pom.xml](workspace/pom.xml) (from an IDE or from command line : [scripts/development/build-maven.cmd](scripts/development/build-maven.cmd)).
 
 ### Startup:
 

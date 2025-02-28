@@ -1,30 +1,29 @@
-	@REM call start-3rd-party-stack.cmd
+@echo off
 
-	call set-sql-env.cmd
-	@REM copy delete-from-agg_x_activity.sql %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc\urbangeopulse
-	@REM docker exec -i %PG_CONTAINER_ID% psql --dbname=nyc --file=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.sql --username=user --output=/var/lib/postgresql/data/urbangeopulse/delete-from-agg_x_activity.out
+@REM Initialize environment
+call set-sql-env.cmd
+call set-log-env.cmd
 
-	call set-log-env.cmd
-	
-	call start-a-service receiver 					openlog
-	call start-a-service mobilization-classifier
-	call start-a-service locations-finder
-	@REM @REM call start-a-service delay-manager
-	call start-a-service activity-aggregator
-		
-	@REM call start-a-service info 	
+@REM Start services in order
+call start-a-service receiver                openlog
+call start-a-service mobilization-classifier
+call start-a-service locations-finder
+@REM call start-a-service delay-manager
+call start-a-service activity-aggregator
+call start-a-service info
 
-	@REM TODO: Refer to a comment in 'basic-implementation\services\activity-aggregator\start-service.cmd' about "The number of consumers should be aligned with locations-finder\start-service.cmd"
+@REM Wait for services to initialize
+timeout /t 5 >nul
 
-	@REM pause
-	timeout /t 5 >nul
+@REM Performance analysis:
+@REM ---------------------
+@REM 	1. RECEIVER_THROTTLE_PRODUCING_THROUGHPUT=1250 
+@REM 			+ receiver + mobilization-classifier services, 
+@REM 			+ PEOPLE_GEO_LOCATIONS_TOPIC=people_geo_locations,10 : Almost no lag in mobilization-classifier-cg.
+@REM	2. Same, with PEOPLE_GEO_LOCATIONS_TOPIC=people_geo_locations,15 ==> Huge lag    (~70,000 records).
+@REM	3. Same, with PEOPLE_GEO_LOCATIONS_TOPIC=people_geo_locations,10 ==> Average lag (~10,000 records).
+@REM	4. Same, with PEOPLE_GEO_LOCATIONS_TOPIC=people_geo_locations,7  ==> Higher lag  (~30,000 records).
 
-
-	@REM services																					througput 
-	@REM ----------------------------------------------------------------------------------         -------------------------------------------------------------
-	@REM receiver (1 partition)  + mobilization-classifier (1 threads) 								< 1,250 (huge mobilization-classifier lag ~ up to 70,000)
-	@REM receiver (5 partition)  + mobilization-classifier (5 threads) 								< 1,250 (mobilization-classifier lag ~ 12,000)
-	@REM receiver (10 partition) + mobilization-classifier (10 threads)			  					  1,250 (~ no lag)
-	@REM receiver (10 partition) + mobilization-classifier (10 threads)								< 1,500 (mobilization-classifier lag ~ 18,000, 'development-kafka-broker-1' ~100% CPU, Memory ~1GB)
-	@REM receiver (20 partition) + mobilization-classifier (20 threads)			  					  1,500 (~ no lag)
-	@REM receiver (20 partition) + mobilization-classifier (20 threads)	+ locations-finder			< 1,000 (huge mobilization-classifier lag ~ up to 50,000)
+@REM	5. RECEIVER_THROTTLE_PRODUCING_THROUGHPUT=500 + all services: 	==> Substantial lag (~25,000 records).
+@REM 	6. Same, with PEOPLE_GEO_LOCATIONS_TOPIC=people_geo_locations,8	==> Average lag (~10,000 records), elapsed (aggregator): 4:51 minutes
+@REM    7. Same, with PEOPLE_GEO_LOCATIONS_TOPIC=people_geo_locations,7 ==> Higher lag  (~25,000 records), elapsed (aggregator): 4:54 minutes

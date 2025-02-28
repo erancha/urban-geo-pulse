@@ -38,12 +38,11 @@ public class LocationsFinder {
     private String LOCATIONS_FINDER_OUTPUT_TOPIC;
     private KafkaUtils.TopicConfig outputTopicConfig;
 
-    @Value("${LOCATIONS_FINDER_CONSUMER_THREADS_COUNT:1}")
+    @Value("${LOCATIONS_FINDER_CONSUMER_THREADS_COUNT:100}") // (short) Math.min(LOCATIONS_FINDER_CONSUMER_THREADS_COUNT, inputTopicConfig.getPartitionsCount());
     private short LOCATIONS_FINDER_CONSUMER_THREADS_COUNT;
 
     @Value("${DELAY_MANAGER_TOPIC_NAME:delays__default}")
     private String DELAY_MANAGER_TOPIC_NAME;
-    
 
     @Value("${LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG:latest}")
     private String LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG;
@@ -172,7 +171,8 @@ public class LocationsFinder {
             KafkaUtils.checkAndCreateTopic(outputTopicConfig.getTopicName(), outputTopicConfig.getPartitionsCount());
             KafkaUtils.checkAndCreateTopic(DELAY_MANAGER_TOPIC_NAME);
 
-            // start consumers:
+            // start consumers: (ensure at least one partition per consumer)
+            LOCATIONS_FINDER_CONSUMER_THREADS_COUNT = (short) Math.min(LOCATIONS_FINDER_CONSUMER_THREADS_COUNT, inputTopicConfig.getPartitionsCount());
             ExecutorService threadPool = Executors.newFixedThreadPool(LOCATIONS_FINDER_CONSUMER_THREADS_COUNT);
             for (int i = 1; i <= LOCATIONS_FINDER_CONSUMER_THREADS_COUNT; i++) {
                 threadPool.submit(locationsFinderConsumerThread);

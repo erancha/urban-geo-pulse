@@ -33,3 +33,4 @@ build/
 .vscode/
 
 postgis-workshop/
+basic-implementation/scripts/development/logs/
