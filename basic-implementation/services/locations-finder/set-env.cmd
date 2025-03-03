@@ -1,6 +1,9 @@
-    @REM Input topic(s) of the current service , output topic(s) of the previous service in the pipeline 
-    @REM The value is the topic name , number of partitions.
-    @REM (each previous service has its own defaults - the current variables define the topics for the needs of current service).
+@REM Input topic(s) of the current service , output topic(s) of the previous service in the pipeline.
+@REM The format is: `topic name , number of partitions`.
 
-    set PEDESTRIANS_GEO_LOCATIONS_TOPIC=pedestrians_geo_locations,6
-    set MOBILIZED_GEO_LOCATIONS_TOPIC=mobilized_geo_locations,4
+@REM Eeach previous service has its own defaults for its output topic(s); 
+@REM The current variables define the input topic(s) optimized for the needs of current service - 
+@REM     the number of partitions is reused as the number of consumer threads, to ensure that no consumer is left idle without a partition).
+
+set PEDESTRIANS_GEO_LOCATIONS_TOPIC=pedestrians_geo_locations,6
+set MOBILIZED_GEO_LOCATIONS_TOPIC=mobilized_geo_locations,4

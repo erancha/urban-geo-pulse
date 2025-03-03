@@ -9,7 +9,7 @@ from
 	agg_streets_activity
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 		and now() AT TIME ZONE 'Israel'
 ;
 
@@ -21,7 +21,7 @@ from
 	agg_neighborhoods_activity
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 		and now() AT TIME ZONE 'Israel'
 ;
 
@@ -32,27 +32,27 @@ where
 with agg_streets_activity_sum as (
 	select 
 		name,
-		sum(asa.pedestrians_count) as sum_pedestrians_count,
-		sum(asa.mobilized_count) as sum_mobilized_count
+		sum(asa.pedestrians_count) as sum_pedestrians_streets_count,
+		sum(asa.mobilized_count) as sum_mobilized_streets_count
 	from
 		agg_streets_activity asa
 	join nyc_streets ns on
 		asa.street_gid = ns.gid
 	where
 		lastUpdateTimestamp between
-			(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+			(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 			and now() AT TIME ZONE 'Israel'
 	group by 
 		name
 )
 select
 	name,
-	sum_pedestrians_count,
-	sum_mobilized_count
+	sum_pedestrians_streets_count,
+	sum_mobilized_streets_count
 from
 	agg_streets_activity_sum
 order by 
-	sum_pedestrians_count desc,
+	sum_pedestrians_streets_count desc,
 	name
 limit 10
 ;
@@ -68,7 +68,7 @@ WITH agg_streets_activity_range_lastUpdateTimestamp AS (
 	from agg_streets_activity asa
 	where
 		lastUpdateTimestamp between
-			(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+			(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 			and now() AT TIME ZONE 'Israel'
 ), agg_streets_activity_range_desc AS (
     SELECT lastUpdateTimestamp as timestamp FROM agg_streets_activity_range_lastUpdateTimestamp ORDER BY lastUpdateTimestamp DESC
@@ -79,7 +79,7 @@ WITH agg_streets_activity_range_lastUpdateTimestamp AS (
 	from agg_streets_activity asa
 	where
 		insertTimestamp between 
-			(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+			(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 			and now() AT TIME ZONE 'Israel'
 ), agg_streets_activity_range_asc AS (
     SELECT insertTimestamp as timestamp FROM agg_streets_activity_range_insertTimestamp ORDER BY insertTimestamp
@@ -109,7 +109,7 @@ join nyc_streets ns on
 	asa.street_gid = ns.gid
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 		and now() AT TIME ZONE 'Israel'
 order by
 	timestamp_in_sec desc,
@@ -129,7 +129,7 @@ join nyc_neighborhoods nn
 	on ana.neighborhood_gid = nn.gid
 where
 	lastUpdateTimestamp between
-		(now() AT TIME ZONE 'Israel' - interval '900 seconds') /* '2023-09-06 07:43:00' */
+		(now() AT TIME ZONE 'Israel' - interval '420 seconds') /* '2025-02-28 21:00:00' */
 		and now() AT TIME ZONE 'Israel'
 order by
 	timestamp_in_sec desc,

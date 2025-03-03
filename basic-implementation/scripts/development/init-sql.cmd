@@ -1,11 +1,13 @@
 @echo off
 call set-sql-env.cmd
 
+@REM @echo on
 @REM rmdir /s /q %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc
 @REM mkdir %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc
+@REM pause
 
-@REM set SQL_FILE=init.sql
-set SQL_FILE=delete-from-agg_activity.sql
+set SQL_FILE=init.sql
+@REM set SQL_FILE=delete-from-agg_activity.sql
 
 @echo on
 copy %SQL_FILE% %PG_CONTAINER_FOLDER%\Temp\postgreSQL_nyc\urbangeopulse
