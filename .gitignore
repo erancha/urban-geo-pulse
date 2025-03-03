@@ -34,3 +34,4 @@ build/
 
 postgis-workshop/
 basic-implementation/scripts/development/logs/
+basic-implementation/scripts/deployment/.env

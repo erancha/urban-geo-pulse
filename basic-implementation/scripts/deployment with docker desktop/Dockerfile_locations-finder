@@ -1,0 +1,4 @@
+FROM adoptopenjdk:11-jdk-hotspot
+WORKDIR /app
+COPY target/locations-finder-1.0.jar /app
+CMD ["java", "-jar", "locations-finder-1.0.jar"]

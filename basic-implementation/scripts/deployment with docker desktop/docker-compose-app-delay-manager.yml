@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  delay-manager:
+    image: erancha/urbangeopulse:delay-manager-1.0
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./shared-env/pg-access-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/delay-manager-vars.env
+    depends_on:
+      - kafka-broker
+
+networks:
+  urbangeopulse-net:
+    external: true
