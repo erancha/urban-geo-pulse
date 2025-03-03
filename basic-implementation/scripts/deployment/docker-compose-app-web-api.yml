@@ -2,19 +2,19 @@ version: '3'
 
 services:
   receiver:
-    image: erancha/urbangeopulse:receiver-1.0
+    image: erancha/urbangeopulse:receiver-1.2
     ports:
       - "8080:8080"
     networks:
       - urbangeopulse-net
     env_file:
-      - ./kafka-vars.env
-      - ./pg-vars.env
+      - ./shared-env/pg-access-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/mobilization-classifier-vars.env
     environment:
-      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
-
-      ITERATIONS_TO_SIMULATE_FROM_BACKUP: 10
-      PEOPLE_GEO_LOCATIONS_CSV: people-geo-locations--Duffield_St.csv
+      PEOPLE_GEO_LOCATIONS_CSV: /app/NYC_people-geo-locations--all.csv
+      ITERATIONS_TO_SIMULATE_FROM_BACKUP: 1
+      RECEIVER_THROTTLE_PRODUCING_THROUGHPUT: 500
     depends_on:
       - kafka-broker
       - postgis-server-nyc
@@ -26,11 +26,11 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./pg-vars.env
+      - ./shared-env/pg-access-vars.env
+      - ./shared-env/pipeline-vars.env
     depends_on:
       - postgis-server-nyc
 
 networks:
   urbangeopulse-net:
-    external:
-      name: urbangeopulse-net
+    external: true

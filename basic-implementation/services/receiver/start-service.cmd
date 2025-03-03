@@ -27,13 +27,10 @@ set RECEIVER_THROTTLE_PRODUCING_THROUGHPUT=500
 
 call ../mobilization-classifier/set-env.cmd
 time /T
-copy "%PEOPLE_GEO_LOCATIONS_CSV%" people-geo-locations.csv
 start /B %EXECUTION_COMMAND%
 timeout /t %TIME_TO_WAIT_BEFORE_SQL_QUERY_IN_SEC% >nul
 
 @echo off
-
-del people-geo-locations.csv
 
 pushd ..\..\scripts\development
 call query-sql.cmd

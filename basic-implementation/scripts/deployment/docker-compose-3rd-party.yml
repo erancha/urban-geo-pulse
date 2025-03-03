@@ -1,4 +1,4 @@
-version: '3'
+# version: '3' the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
 
 services:
   kafka-zookeeper:
@@ -38,37 +38,26 @@ services:
     networks:
       - urbangeopulse-net
     ports:
-      - "7070:8080"
+      - 7070:8080
     environment:
       KAFKA_CLUSTERS_0_NAME: kafka-broker
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: kafka-zookeeper:2181
       LOGGING_LEVEL_ROOT: error
       LOGGING_LEVEL_COM_PROVECTUS: error
-
-  # kafdrop:
-    # image: obsidiandynamics/kafdrop
-    # networks:
-      # - urbangeopulse-net
-    # ports:
-      # - 9000:9000
-    # depends_on:
-      # - kafka-broker
-    # environment:
-      # KAFKA_BROKERCONNECT: PLAINTEXT://kafka-broker:9092
-      # JVM_OPTS: -Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify
+    restart: unless-stopped
 
   redis-server:
     image: redis:7.0-alpine
     networks:
       - urbangeopulse-net
     ports:
-      - "6379:6379"
+      - 6379:6379
 
   postgis-server-nyc:
-    image: postgis/postgis:12-3.3
+    image: postgis/postgis:15-3.4
     ports:
-      - "5433:5432"
+      - 5433:5432
     networks:
       - urbangeopulse-net
     volumes:
@@ -78,17 +67,17 @@ services:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_DB=nyc
 
-  # pgadmin-server:
-    # image: dpage/pgadmin4
-    # ports:
-      # - "8082:80"
-    # networks:
-      # - urbangeopulse-net
-    # volumes:
-      # - ${LOCALAPPDATA}\Temp\pgadmin:/var/lib/pgadmin
-    # environment:
-      # - PGADMIN_DEFAULT_EMAIL=user@gmail.com
-      # - PGADMIN_DEFAULT_PASSWORD=pgadminpass
+  pgadmin-server:
+    image: dpage/pgadmin4
+    ports:
+      - 8082:80
+    networks:
+      - urbangeopulse-net
+    volumes:
+      - ${LOCALAPPDATA}\Temp\pgadmin:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadminpass
 
 #  kafka-exporter:
 #    image: danielqsj/kafka-exporter:latest

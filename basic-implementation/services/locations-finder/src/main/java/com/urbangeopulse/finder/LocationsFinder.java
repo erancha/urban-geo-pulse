@@ -74,6 +74,7 @@ public class LocationsFinder {
 
     @PostConstruct
     void startBackgroundConsumers() {
+        logger.info(String.format("Configuring input topic '%s' and output topic '%s' ...", LOCATIONS_FINDER_INPUT_TOPIC, LOCATIONS_FINDER_OUTPUT_TOPIC));
         inputTopicConfig = KafkaUtils.TopicConfig.from(LOCATIONS_FINDER_INPUT_TOPIC);
         outputTopicConfig = KafkaUtils.TopicConfig.from(LOCATIONS_FINDER_OUTPUT_TOPIC);
 

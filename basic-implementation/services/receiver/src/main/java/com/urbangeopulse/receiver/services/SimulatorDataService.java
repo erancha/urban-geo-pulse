@@ -38,6 +38,9 @@ public class SimulatorDataService {
     private String PEOPLE_GEO_LOCATIONS_TOPIC;
     private KafkaUtils.TopicConfig peopleGeoLocationsTopicConfig;
 
+    @Value("${PEOPLE_GEO_LOCATIONS_CSV:./NYC_people-geo-locations--Duffield_St.csv}")
+    private String PEOPLE_GEO_LOCATIONS_CSV;
+
     @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")
     private short ITERATIONS_TO_SIMULATE_FROM_BACKUP;
 
@@ -58,10 +61,10 @@ public class SimulatorDataService {
             KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
 
             if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) {
-                logger.info(String.format("Starting %d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, FileWriter.BACKUP_FILENAME, RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
-                final boolean isBackupFileExist = new File(FileWriter.BACKUP_FILENAME).exists();
+                logger.info(String.format("Starting %d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, PEOPLE_GEO_LOCATIONS_CSV, RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
+                final boolean isBackupFileExist = new File(PEOPLE_GEO_LOCATIONS_CSV).exists();
                 if (!isBackupFileExist)
-                    logger.severe(String.format("Backup file '%s' does not exist!", FileWriter.BACKUP_FILENAME));
+                    logger.severe(String.format("Backup file '%s' does not exist!", PEOPLE_GEO_LOCATIONS_CSV));
                 else simulatePointsFromBackup(ITERATIONS_TO_SIMULATE_FROM_BACKUP);
             }
         } catch (Exception ex) {
@@ -82,7 +85,7 @@ public class SimulatorDataService {
         long counter = 0;
         long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record
         for (int i = 0; i < iterationsCount; i++) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(FileWriter.BACKUP_FILENAME))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(PEOPLE_GEO_LOCATIONS_CSV))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split("\\|");
@@ -117,21 +120,22 @@ public class SimulatorDataService {
                 }
             } catch (IOException e) {
                 if (e instanceof FileNotFoundException)
-                    logger.severe(String.format("%s not found.", FileWriter.BACKUP_FILENAME));
+                    logger.severe(String.format("%s not found.", PEOPLE_GEO_LOCATIONS_CSV));
                 else logException(e, logger);
             }
         }
     }
 
     /**
-     * create a writer, either to write messages into a file or to produce messages into a kafka topic.
-     *
-     * @param saveToBackup - which writer to creates.
-     * @return
+     * Creates and returns a Writer instance based on the input parameter.
+     * If saveToBackup is true, a FileWriter instance is returned to write data to a CSV file.
+     * If saveToBackup is false, a KafkaProducer instance is returned to send data to a Kafka topic.
+     * @param saveToBackup a Boolean indicating whether the data should be saved to a backup file (true) or sent to a Kafka topic (false).
+     * @return a Writer instance, either FileWriter for backup to a file or KafkaProducer for Kafka messaging.
      */
     public Writer createWriter(Boolean saveToBackup) {
         return saveToBackup
-                ? new FileWriter(peopleGeoLocationsTopicConfig.getTopicName(), logger)
+                ? new FileWriter(PEOPLE_GEO_LOCATIONS_CSV, logger)
                 : new KafkaProducer(peopleGeoLocationsTopicConfig.getTopicName(), logger);
     }
 

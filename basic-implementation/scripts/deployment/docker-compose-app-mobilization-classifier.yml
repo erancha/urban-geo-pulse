@@ -6,18 +6,17 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./kafka-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/mobilization-classifier-vars.env
+      - ./shared-env/locations-finder-vars-cross-service.env
     environment:
       REDIS_HOST_NAME: redis-server
-
-      # TODO: Try to reuse env variables as in basic-implementation\scripts\development
-
       MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG: earliest
       MOBILIZATION_CLASSIFIER_SESSION_TIMEOUT_SECONDS_CONFIG: 120
     depends_on:
       - kafka-broker
+      - redis-server
 
 networks:
   urbangeopulse-net:
-    external:
-      name: urbangeopulse-net
+    external: true

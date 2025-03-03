@@ -3,7 +3,7 @@
 @REM set EXECUTION_COMMAND=mvnw spring-boot:run --quiet
 set EXECUTION_COMMAND=java -Xms128M -jar target\activity-aggregator-1.0.jar 
 
-@REM set ACTIVITY_AGGREGATOR_AUTO_OFFSET_RESET_CONFIG=earliest
+set ACTIVITY_AGGREGATOR_AUTO_OFFSET_RESET_CONFIG=earliest
 @REM set ACTIVITY_AGGREGATOR_DEBUG_TRIGGER_REBALANCING_ON_STARTUP_AFTER_MINUTES=1
 @REM set ACTIVITY_AGGREGATOR_PERSISTENCE_MAX_RECORDS=100
 
@@ -12,7 +12,6 @@ set EXECUTION_COMMAND=java -Xms128M -jar target\activity-aggregator-1.0.jar
 
 @echo on
 
-call ../locations-finder/set-env.cmd
 call set-env.cmd
 @REM set ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT=5
 

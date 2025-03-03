@@ -1,5 +1,5 @@
 	docker-compose up -d
-	timeout /t 10 >nul
 	docker-compose ps
 
+	timeout /t 5 >nul
 	@REM pause
