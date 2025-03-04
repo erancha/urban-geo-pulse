@@ -14,7 +14,7 @@ services:
     environment:
       PEOPLE_GEO_LOCATIONS_CSV: /app/NYC_people-geo-locations--all.csv
       ITERATIONS_TO_SIMULATE_FROM_BACKUP: 1
-      RECEIVER_THROTTLE_PRODUCING_THROUGHPUT: 500
+      RECEIVER_THROTTLE_PRODUCING_THROUGHPUT: 1500
     depends_on:
       - kafka-broker
       - postgis-server-nyc
