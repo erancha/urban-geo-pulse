@@ -3,7 +3,9 @@
 This is a functional basic JAVA spring-boot implementation of the [**UrbanGeoPulse** software architect big-data showcase](../README.md).
 It serves as a starting point for building the UrbanGeoPulse application. The implementation includes the basic functionality required to identify messages from pedestrians or non-pedestrians (referred to as **mobilized** individuals) and retrieve information on streets and neighborhoods based on specified timeframes.
 
-### Setup:
+### Development:
+
+#### Setup:
 
 1. Start `Docker Desktop`.
 2. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd).
@@ -15,11 +17,11 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 7. Execute [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd) to create additional tables for the UrbanGeoPulse application.
 8. Maven build [workspace/pom.xml](workspace/pom.xml) (from an IDE or from command line : [scripts/development/build-maven.cmd](scripts/development/build-maven.cmd)).
 
-### Startup:
+#### Startup:
 
 7. Execute [scripts/development/start-all.cmd](scripts/development/start-all.cmd).
 
-### Testing:
+#### Testing:
 
 8. The [Receiver](services) service can also be set to simulate messages from pedestrians or mobilized individuals, by setting an environment variable `PEOPLE_GEO_LOCATIONS_CSV` in [services/receiver/start-service.cmd](services/receiver/start-service.cmd).<br>
    Each two adjacent points from the CSV file are associated with the same person (i.e. have the same uuid), to simulate a movement of that person.
