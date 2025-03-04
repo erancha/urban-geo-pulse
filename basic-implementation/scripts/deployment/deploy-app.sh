@@ -10,18 +10,6 @@ set +a  # stop automatically exporting
 # Ensure Docker is running and configured
 ./ensure-docker.sh
 
-# Ensure we're in swarm mode
-if ! docker info | grep -q "Swarm: active"; then
-    echo "Initializing Docker Swarm..."
-    docker swarm init
-fi
-
-# Create the swarm-scoped network if it doesn't exist
-echo "Ensuring swarm network exists..."
-if ! docker network ls | grep -q "urban-geo-pulse-net"; then
-    docker network create --driver overlay --attachable urban-geo-pulse-net
-fi
-
 # Deploy application services stack
 echo "Deploying application services..."
 

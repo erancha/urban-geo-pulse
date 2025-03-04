@@ -9,6 +9,21 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Enable systemd
+echo "Enabling systemd..."
+cat > /etc/wsl.conf << EOF
+[boot]
+systemd=true
+EOF
+
+if ! ps -p 1 -o comm= | grep -q "systemd"; then
+    echo "Systemd is not running as PID 1. Please:"
+    echo "1. Exit WSL: 'exit'"
+    echo "2. In PowerShell: 'wsl --shutdown'"
+    echo "3. Restart WSL and run this script again"
+    exit 1
+fi
+
 # Complete cleanup of old installations
 echo "Cleaning up any existing Docker installations..."
 systemctl stop docker.service docker.socket containerd.service || true
@@ -56,7 +71,7 @@ mkdir -p /etc/containerd
 containerd config default | tee /etc/containerd/config.toml > /dev/null
 sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 
-# Restart containerd
+# Start and enable containerd
 echo "Starting containerd..."
 systemctl enable --now containerd
 systemctl restart containerd
@@ -74,17 +89,10 @@ cat > /etc/docker/daemon.json << EOF
 }
 EOF
 
-# Start and enable Docker on system boot
-echo "Enabling Docker service..."
+# Start and enable Docker
+echo "Starting Docker service..."
 systemctl enable docker
 systemctl start docker
-
-# Configure Docker to start on WSL launch
-echo "Configuring Docker to start on WSL launch..."
-cat > /etc/wsl.conf << EOF
-[boot]
-command="service docker start"
-EOF
 
 # Add current user to docker group
 if [ -n "$SUDO_USER" ]; then
@@ -103,4 +111,3 @@ echo "Please exit WSL and restart it for all changes to take effect:"
 echo "1. Exit WSL: 'exit'"
 echo "2. In PowerShell: 'wsl --shutdown'"
 echo "3. Restart WSL: 'wsl -d Ubuntu'"
-echo "4. Verify Docker: 'docker run hello-world'"

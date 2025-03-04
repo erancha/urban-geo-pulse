@@ -8,10 +8,16 @@ if ! systemctl is-active --quiet docker; then
     sleep 5
 fi
 
-# Initialize swarm if not already done
+echo "Ensuring Docker Swarm is initialized..."
 if ! docker info | grep -q "Swarm: active"; then
     echo "Initializing Docker Swarm..."
     docker swarm init
+fi
+
+echo "Ensuring swarm network exists..."
+if ! docker network ls | grep -q "urbangeopulse-net"; then
+    echo "Creating urbangeopulse-net network..."
+    docker network create --driver overlay --attachable urbangeopulse-net
 fi
 
 # Start local registry if not running

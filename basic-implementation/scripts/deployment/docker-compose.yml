@@ -10,7 +10,7 @@ services:
       - kafka
       - mongodb
     networks:
-      - urban-geo-pulse-net
+      - urbangeopulse-net
 
   # delay-manager:
   #   image: ${DOCKER_REGISTRY}/delay-manager:latest
@@ -19,7 +19,7 @@ services:
   #   depends_on:
   #     - kafka
   #   networks:
-  #     - urban-geo-pulse-net
+  #     - urbangeopulse-net
 
   locations-finder:
     image: ${DOCKER_REGISTRY}/locations-finder:latest
@@ -28,7 +28,7 @@ services:
     depends_on:
       - kafka
     networks:
-      - urban-geo-pulse-net
+      - urbangeopulse-net
 
   mobilization-classifier:
     image: ${DOCKER_REGISTRY}/mobilization-classifier:latest
@@ -37,7 +37,7 @@ services:
     depends_on:
       - kafka
     networks:
-      - urban-geo-pulse-net
+      - urbangeopulse-net
 
   receiver:
     image: ${DOCKER_REGISTRY}/receiver:latest
@@ -48,8 +48,8 @@ services:
     depends_on:
       - kafka
     networks:
-      - urban-geo-pulse-net
+      - urbangeopulse-net
 
 networks:
-  urban-geo-pulse-net:
+  urbangeopulse-net:
     external: true

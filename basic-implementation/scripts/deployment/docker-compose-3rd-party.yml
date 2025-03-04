@@ -1,40 +1,54 @@
-# version: '3' the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+version: '3.8'
+
+networks:
+  urbangeopulse-net:
+    external: true
+    name: urbangeopulse-net
 
 services:
+  kafka:
+    image: confluentinc/cp-kafka:6.0.14
+    hostname: kafka
+    depends_on:
+      - kafka-zookeeper
+    networks:
+      - urbangeopulse-net
+    ports:
+      - target: 9092
+        published: 9092
+        protocol: tcp
+        mode: host
+      - target: 29092
+        published: 29092
+        protocol: tcp
+        mode: host
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'kafka-zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
+
   kafka-zookeeper:
     image: confluentinc/cp-zookeeper:6.0.14
     hostname: kafka-zookeeper
     ports:
-      - "2181:2181"
+      - target: 2181
+        published: 2181
+        protocol: tcp
+        mode: host
     networks:
       - urbangeopulse-net
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  kafka-broker:
-    image: confluentinc/cp-kafka:6.0.14
-    hostname: kafka-broker
-    depends_on:
-      - kafka-zookeeper
-    networks:
-      - urbangeopulse-net
-    ports:
-      - "29092:29092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'kafka-zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
-
   kafka-ui:
     image: provectuslabs/kafka-ui:333eae24759aaa7b3fc14e5e7dea232200c13dcd
     depends_on:
-      - kafka-broker
-      - kafka-zookeeper
+      - kafka
     networks:
       - urbangeopulse-net
     ports:
@@ -43,12 +57,11 @@ services:
         protocol: tcp
         mode: host
     environment:
-      KAFKA_CLUSTERS_0_NAME: kafka-broker
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:9092
+      KAFKA_CLUSTERS_0_NAME: kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: kafka-zookeeper:2181
       LOGGING_LEVEL_ROOT: error
       LOGGING_LEVEL_COM_PROVECTUS: error
-    restart: unless-stopped
 
   redis-server:
     image: redis:7.0-alpine
@@ -61,7 +74,11 @@ services:
         mode: host
 
   postgis-server-nyc:
-    image: postgis/postgis:15-3.4
+    image: postgis/postgis:15-3.3
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=nyc
     ports:
       - target: 5432
         published: 5433
@@ -69,15 +86,13 @@ services:
         mode: host
     networks:
       - urbangeopulse-net
-    volumes:
-      - /tmp/postgreSQL_nyc:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=pass
-      - POSTGRES_DB=nyc
 
   pgadmin-server:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadminpass
+      - PGADMIN_CONFIG_SERVER_MODE=False
     ports:
       - target: 80
         published: 8082
@@ -85,72 +100,3 @@ services:
         mode: host
     networks:
       - urbangeopulse-net
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=user@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=pgadminpass
-      - PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10
-      # Pre-configure the PostgreSQL server connection
-      - PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
-    volumes:
-      - type: bind
-        source: ./servers.json
-        target: /pgadmin4/servers.json
-        read_only: true
-
-#  kafka-exporter:
-#    image: danielqsj/kafka-exporter:latest
-#    ports:
-#      - "9308:9308"
-#    environment:
-#      KAFKA_SERVER: kafka:9092
-#    command: -e kafka.server=kafka:9092
-#
-#  prometheus:
-#    image: prom/prometheus:latest
-#    ports:
-#      - "9090:9090"
-#    volumes:
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-#
-#  grafana:
-#    image: grafana/grafana:latest
-#    ports:
-#      - "3000:3000"
-#    environment:
-#      GF_INSTALL_PLUGINS: grafana-kafka-datasource
-#      GF_SECURITY_ADMIN_PASSWORD: your_grafana_password
-#    volumes:
-#      - ./provisioning:/etc/grafana/provisioning
-#
-#
-#Explanation:
-#- The grafana service now includes a volume mount to provide a provisioning directory for additional configuration files.
-#- Inside the provisioning directory, create a file named datasources.yaml with the following content:
-#
-#apiVersion: 1
-#datasources:
-#- name: Prometheus
-#  type: prometheus
-#  access: proxy
-#  orgId: 1
-#  url: http://prometheus:9090
-#  basicAuth: false
-#  isDefault: true
-#  editable: false
-#
-#
-#This configuration file sets up Prometheus as the default data source for Grafana.
-#
-#To start the updated setup, save the modified Docker Compose configuration, create the prometheus.yml file as mentioned in the previous response, and create the provisioning/datasources.yaml file with the provided content. Then, run the following command:
-#
-#docker-compose up
-#
-#
-#After the services have started, you can access Grafana at http://localhost:3000 and configure it to visualize the Kafka metrics using the Kafka App plugin.
-#
-#Please ensure you have Docker and Docker Compose installed on your system before running the above commands.
-
-networks:
-  urbangeopulse-net:
-    external:
-      name: urbangeopulse-net
