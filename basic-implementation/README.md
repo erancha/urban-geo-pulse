@@ -8,14 +8,11 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 #### Setup:
 
 1. Start `Docker Desktop`.
-2. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd).
-3. In `Docker Desktop` : Copy the container id of `development` \ `postgis-server-nyc-1` into the environment variable `PG\*CONTAINER_ID` in [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd).
-4. Start PGAdmin (http://localhost:8082: Username = `user@gmail.com`, Password = `pgadminpass`, add a new server : Host name/address = `postgis-server-nyc`, Username = `user`, Password = `pass`), right click on the `nyc` database, and [download](https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip) and [`Restore`](https://postgis.net/workshops/postgis-intro/loading_data.html) the data bundle the of the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
-5. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd) to start 3rd-party infrastucture services (Kafka, Postgres, Redis, etc .. [scripts/development/docker-compose.yml](scripts/development/docker-compose.yml)).
-6. Update [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd) : set PG_CONTAINER_ID=`!!!` (copy/paste the `Container ID` from `Containers` >
-   `development-postgis-server-nyc-1` in `Docker Desktop`)
-7. Execute [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd) to create additional tables for the UrbanGeoPulse application.
-8. Maven build [workspace/pom.xml](workspace/pom.xml) (from an IDE or from command line : [scripts/development/build-maven.cmd](scripts/development/build-maven.cmd)).
+2. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd) to start 3rd-party infrastucture services (Kafka, Postgres, Redis, etc .. [scripts/development/docker-compose.yml](scripts/development/docker-compose.yml)).
+3. Start PGAdmin (http://localhost:8082: Username = `user@gmail.com`, Password = `pgadminpass`, add a new server : Host name/address = `postgis-server-nyc`, Username = `user`, Password = `pass`), right click on the `nyc` database, and [download](https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip) + [`Restore`](https://postgis.net/workshops/postgis-intro/loading_data.html) the data bundle the of the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
+4. Copy the container id of `development` \ `postgis-server-nyc-1` from `Docker Desktop` into the environment variable `PG_CONTAINER_ID` in [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd).
+5. Execute [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd) to create additional tables for the UrbanGeoPulse application.
+6. Maven build [workspace/pom.xml](workspace/pom.xml) (from an IDE or from command line : [scripts/development/build-maven.cmd](scripts/development/build-maven.cmd)).
 
 #### Startup:
 
@@ -25,11 +22,11 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 
 8. The [Receiver](services) service can also be set to simulate messages from pedestrians or mobilized individuals, by setting an environment variable `PEOPLE_GEO_LOCATIONS_CSV` in [services/receiver/start-service.cmd](services/receiver/start-service.cmd).<br>
    Each two adjacent points from the CSV file are associated with the same person (i.e. have the same uuid), to simulate a movement of that person.
-9. [scripts/development/start-all.cmd](scripts/development/start-all.cmd) from bullet 7 is set by default to simulate a few messages from a CSV file, and is executed automatically when the application starts, expected to complete in a minute or two.
+   The receiver is set by default to simulate ~120,000 messages from a CSV file, and is executed automatically when the application starts, expected to complete in few minutes.
 
 ### Deployment:
 
-The folder [scripts/deployment](scripts/deployment) contains additional files for a fully containerized deployment.
+The folders [scripts/deployment-with-docker-desktop](scripts/deployment-with-docker-desktop) and [scripts/deployment](scripts/deployment) contain additional files for a fully containerized deployment.
 
 #### Prerequisites
 
