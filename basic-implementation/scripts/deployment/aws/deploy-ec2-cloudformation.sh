@@ -1,5 +1,4 @@
 #!/bin/bash
-# This script deploys an EC2 instance using CloudFormation and copies deployment files to it
 set -e
 
 # Default values

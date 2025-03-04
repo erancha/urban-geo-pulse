@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "NYC PostGIS",
+            "Group": "Servers",
+            "Host": "postgis-server-nyc",
+            "Port": 5432,
+            "MaintenanceDB": "nyc",
+            "Username": "user",
+            "SSLMode": "prefer",
+            "PassFile": "/pgpassfile"
+        }
+    }
+}

@@ -1,11 +1,36 @@
 #!/bin/bash
 set -e
 
-# Stop and remove all application containers
-docker-compose -f docker-compose-app-activity-aggregator.yml down
-docker-compose -f docker-compose-app-delay-manager.yml down
-docker-compose -f docker-compose-app-locations-finder.yml down
-docker-compose -f docker-compose-app-mobilization-classifier.yml down
-docker-compose -f docker-compose-app-web-api.yml down
+# Ensure Docker is running and configured
+./ensure-docker.sh
 
-echo "Application undeployment complete!"
+# Remove application services stack
+echo "Removing application services..."
+docker stack rm urban-geo-pulse-app
+
+# Wait for stack to be removed
+echo "Waiting for services to be removed..."
+while docker stack ls | grep -q "urban-geo-pulse-app"; do
+    sleep 2
+    echo -n "."
+done
+echo
+
+# Verify stack is removed
+if docker stack ls | grep -q "urban-geo-pulse-app"; then
+    echo "ERROR: Failed to remove stack!"
+    exit 1
+fi
+
+# Clean up any temporary files
+rm -f docker-compose.tmp.yml
+
+echo -e "\nApplication services removed successfully!"
+
+# Show remaining stacks
+echo -e "\nRemaining stacks:"
+docker stack ls
+
+# Show any remaining containers
+echo -e "\nRemaining containers:"
+docker ps

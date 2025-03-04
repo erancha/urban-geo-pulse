@@ -38,7 +38,10 @@ services:
     networks:
       - urbangeopulse-net
     ports:
-      - 7070:8080
+      - target: 8080
+        published: 7070
+        protocol: tcp
+        mode: host
     environment:
       KAFKA_CLUSTERS_0_NAME: kafka-broker
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:9092
@@ -52,16 +55,22 @@ services:
     networks:
       - urbangeopulse-net
     ports:
-      - 6379:6379
+      - target: 6379
+        published: 6379
+        protocol: tcp
+        mode: host
 
   postgis-server-nyc:
     image: postgis/postgis:15-3.4
     ports:
-      - 5433:5432
+      - target: 5432
+        published: 5433
+        protocol: tcp
+        mode: host
     networks:
       - urbangeopulse-net
     volumes:
-      - ${LOCALAPPDATA}\Temp\postgreSQL_nyc:/var/lib/postgresql/data
+      - /tmp/postgreSQL_nyc:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
@@ -70,14 +79,23 @@ services:
   pgadmin-server:
     image: dpage/pgadmin4
     ports:
-      - 8082:80
+      - target: 80
+        published: 8082
+        protocol: tcp
+        mode: host
     networks:
       - urbangeopulse-net
-    volumes:
-      - ${LOCALAPPDATA}\Temp\pgadmin:/var/lib/pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=user@gmail.com
       - PGADMIN_DEFAULT_PASSWORD=pgadminpass
+      - PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10
+      # Pre-configure the PostgreSQL server connection
+      - PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
+    volumes:
+      - type: bind
+        source: ./servers.json
+        target: /pgadmin4/servers.json
+        read_only: true
 
 #  kafka-exporter:
 #    image: danielqsj/kafka-exporter:latest
@@ -136,4 +154,3 @@ networks:
   urbangeopulse-net:
     external:
       name: urbangeopulse-net
-

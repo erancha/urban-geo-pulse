@@ -10,6 +10,3 @@ start /B notepad++ %LOG_FOLDER%\query-agg_activity.out
 
 @REM pause
 timeout /t 5 >nul
-
-@REM docker exec -it %PG_CONTAINER_ID% bash
-@REM docker exec -it %PG_CONTAINER_ID% pg_resetxlog -D /var/lib/postgresql/data

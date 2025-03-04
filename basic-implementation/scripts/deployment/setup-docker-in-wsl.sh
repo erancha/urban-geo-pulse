@@ -1,9 +1,3 @@
-# To use this script:
-# In your WSL Ubuntu session, navigate to the deployment directory: 
-#     cd /mnt/c/Projects/IntelliJ/urban-geo-pulse/basic-implementation/scripts/deployment
-#     chmod +x setup-docker-in-wsl.sh
-#     sudo ./setup-docker-in-wsl.sh
-
 #!/bin/bash
 set -e
 
@@ -15,14 +9,21 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Remove any old Docker installations
-echo "Removing old Docker installations if they exist..."
+# Complete cleanup of old installations
+echo "Cleaning up any existing Docker installations..."
+systemctl stop docker.service docker.socket containerd.service || true
+systemctl disable docker.service docker.socket containerd.service || true
 apt-get remove -y docker docker-engine docker.io containerd runc || true
+apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || true
+apt-get autoremove -y
+rm -rf /var/lib/docker /etc/docker /var/run/docker.sock /var/run/docker.pid
+rm -rf /var/lib/containerd /etc/containerd/config.toml
 
 # Update package index and install prerequisites
 echo "Installing prerequisites..."
 apt-get update
 apt-get install -y \
+    apt-transport-https \
     ca-certificates \
     curl \
     gnupg \
@@ -30,8 +31,9 @@ apt-get install -y \
 
 # Add Docker's official GPG key
 echo "Adding Docker's GPG key..."
-mkdir -m 0755 -p /etc/apt/keyrings
+mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
 
 # Set up the Docker repository
 echo "Setting up Docker repository..."
@@ -39,38 +41,66 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Install Docker Engine and Docker Compose
-echo "Installing Docker Engine and Docker Compose..."
+# Install Docker Engine
+echo "Installing Docker Engine..."
 apt-get update
 apt-get install -y \
     docker-ce \
     docker-ce-cli \
     containerd.io \
-    docker-buildx-plugin \
     docker-compose-plugin
 
-# Start Docker service
-echo "Starting Docker service..."
-service docker start
+# Configure containerd
+echo "Configuring containerd..."
+mkdir -p /etc/containerd
+containerd config default | tee /etc/containerd/config.toml > /dev/null
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+
+# Restart containerd
+echo "Starting containerd..."
+systemctl enable --now containerd
+systemctl restart containerd
+
+# Configure Docker daemon
+echo "Configuring Docker daemon..."
+mkdir -p /etc/docker
+cat > /etc/docker/daemon.json << EOF
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+EOF
+
+# Start and enable Docker on system boot
+echo "Enabling Docker service..."
+systemctl enable docker
+systemctl start docker
+
+# Configure Docker to start on WSL launch
+echo "Configuring Docker to start on WSL launch..."
+cat > /etc/wsl.conf << EOF
+[boot]
+command="service docker start"
+EOF
 
 # Add current user to docker group
 if [ -n "$SUDO_USER" ]; then
-    echo "Adding user $SUDO_USER to docker group..."
     usermod -aG docker "$SUDO_USER"
-    echo "NOTE: You'll need to log out and back in for the group changes to take effect"
+    echo "Added user $SUDO_USER to docker group"
 fi
 
-# Configure Docker to start on WSL boot
-echo "Configuring Docker to start on WSL boot..."
-if ! grep -q "service docker start" /etc/wsl.conf 2>/dev/null; then
-    echo -e "[boot]\ncommand=\"service docker start\"" >> /etc/wsl.conf
-fi
-
-# Verify installation
-echo "Verifying Docker installation..."
-docker --version
-docker compose version
+# Run ensure-docker.sh to verify everything
+echo "Verifying Docker setup..."
+cp ensure-docker.sh /usr/local/bin/ensure-docker
+chmod +x /usr/local/bin/ensure-docker
+/usr/local/bin/ensure-docker
 
 echo "Docker installation complete!"
-echo "To verify everything is working, try running: docker run hello-world"
-echo "If you get a permission error, log out of WSL and log back in for group changes to take effect"
+echo "Please exit WSL and restart it for all changes to take effect:"
+echo "1. Exit WSL: 'exit'"
+echo "2. In PowerShell: 'wsl --shutdown'"
+echo "3. Restart WSL: 'wsl -d Ubuntu'"
+echo "4. Verify Docker: 'docker run hello-world'"

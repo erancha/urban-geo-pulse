@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  activity-aggregator:
+    image: ${DOCKER_REGISTRY}/activity-aggregator:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - MONGODB_URI=mongodb://mongodb:27017/urban-geo-pulse
+    depends_on:
+      - kafka
+      - mongodb
+    networks:
+      - urban-geo-pulse-net
+
+  # delay-manager:
+  #   image: ${DOCKER_REGISTRY}/delay-manager:latest
+  #   environment:
+  #     - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+  #   depends_on:
+  #     - kafka
+  #   networks:
+  #     - urban-geo-pulse-net
+
+  locations-finder:
+    image: ${DOCKER_REGISTRY}/locations-finder:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - urban-geo-pulse-net
+
+  mobilization-classifier:
+    image: ${DOCKER_REGISTRY}/mobilization-classifier:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - urban-geo-pulse-net
+
+  receiver:
+    image: ${DOCKER_REGISTRY}/receiver:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - urban-geo-pulse-net
+
+networks:
+  urban-geo-pulse-net:
+    external: true
