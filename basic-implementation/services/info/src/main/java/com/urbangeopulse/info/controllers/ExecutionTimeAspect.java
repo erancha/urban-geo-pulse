@@ -32,7 +32,12 @@ public class ExecutionTimeAspect {
                     elapsedTimeInMS, (double)elapsedTimeInMS / 60000, joinPoint.getSignature(), Arrays.toString(joinPoint.getArgs())));
         }
         catch (Exception ex){
+            final long elapsedTimeInMS = Duration.between(startTime, Instant.now()).toMillis();
+            logger.severe(String.format("Failed in %,d ms (== %.1f minutes) : %s\n\twith parameters: %s.",
+                    elapsedTimeInMS, (double)elapsedTimeInMS / 60000, joinPoint.getSignature(), Arrays.toString(joinPoint.getArgs())));
+
             com.urbangeopulse.utils.misc.Logger.logException(ex, logger, Level.SEVERE);
+            throw ex; // Re-throw the exception
         }
 
         return result;

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   receiver:
-    image: erancha/urbangeopulse:receiver-1.5
+    image: erancha/urbangeopulse:receiver-1.6
     ports:
       - "8080:8080"
     networks:
@@ -21,7 +21,7 @@ services:
       - postgis-server-nyc
 
   info:
-    image: erancha/urbangeopulse:info-1.0
+    image: erancha/urbangeopulse:info-1.1
     ports:
       - "8081:8081"
     networks:

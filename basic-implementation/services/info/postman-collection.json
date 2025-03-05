@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8081/urbangeopulse/api/info/locations/activity?recordsCount=10&minutesBack=30",
+					"raw": "http://localhost:8081/urbangeopulse/api/info/locations/activity?recordsCount=10&locationType=street&sortBy=pedestrians&minutesBack=5",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -27,18 +27,23 @@
 					],
 					"query": [
 						{
+							"key": "recordsCount",
+							"value": "10"
+						},
+						{
 							"key": "locationType",
-							"value": "neighborhood",
-							"disabled": true
+							"value": "street",
+							"description": "'street' or 'neighborhood'."
 						},
 						{
 							"key": "sortBy",
-							"value": "mobilized",
-							"disabled": true
+							"value": "pedestrians",
+							"description": "'pedestrians' or 'mobilized'"
 						},
 						{
-							"key": "recordsCount",
-							"value": "10"
+							"key": "minutesBack",
+							"value": "5",
+							"description": "(alternative to 'startTimestamp' and 'endTimestamp') minutes ago from the current time, until the current time."
 						},
 						{
 							"key": "startTimestamp",
@@ -49,10 +54,6 @@
 							"key": "endTimestamp",
 							"value": "2023-08-27 08:30:00.000",
 							"disabled": true
-						},
-						{
-							"key": "minutesBack",
-							"value": "30"
 						}
 					]
 				}

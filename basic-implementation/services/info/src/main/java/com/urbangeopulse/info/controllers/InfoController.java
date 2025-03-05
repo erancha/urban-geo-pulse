@@ -27,19 +27,20 @@ public class InfoController {
     /**
      * @param startTimestamp - start time stamp.
      * @param endTimestamp - end time stamp.
-     * @param minutesBack - (alternative to 'startTimestamp' and 'endTimestamp') minutes from the current time, until the current time.
+     * @param minutesBack - (alternative to 'startTimestamp' and 'endTimestamp') minutes ago from the current time, until the current time.
      * @param locationType - 'street' or 'neighborhood'.
      * @param sortBy - 'pedestrians' or 'mobilized'.
      * @param recordsCount - number of records to return.
      * @return the first most active 'recordsCount' streets or neighborhoods (depending on 'locationType') between timestamps 'startTimestamp' and 'endTimestamp', sorted by 'sortBy'.
      */
     @GetMapping("/urbangeopulse/api/info/locations/activity")
-    public List<Map<String, Object>> getActiveLocations(@RequestParam(required = false) Timestamp startTimestamp,
-                                                        @RequestParam(required = false) Timestamp endTimestamp,
-                                                        @RequestParam(required = false) Short minutesBack,
-                                                        @RequestParam(required = false, defaultValue = "street") String locationType,
-                                                        @RequestParam(required = false, defaultValue = "pedestrians") String sortBy,
-                                                        @RequestParam(required = false, defaultValue = "10") Short recordsCount) {
+    public List<Map<String, Object>> getActiveLocations(
+            @RequestParam(required = false) Timestamp startTimestamp,
+            @RequestParam(required = false) Timestamp endTimestamp,
+            @RequestParam(required = false) Short minutesBack,
+            @RequestParam(required = false, defaultValue = "street") String locationType,
+            @RequestParam(required = false, defaultValue = "pedestrians") String sortBy,
+            @RequestParam(required = false, defaultValue = "10") Short recordsCount) {
         if (startTimestamp == null || endTimestamp == null) {
             if (minutesBack != null) {
                 // Calculate startTimestamp and endTimestamp based on minutesBack
@@ -47,7 +48,12 @@ public class InfoController {
                 cal.add(Calendar.MINUTE, -minutesBack);
                 startTimestamp = new Timestamp(cal.getTimeInMillis());
                 endTimestamp = new Timestamp(System.currentTimeMillis());
-            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Either provide startTimestamp and endTimestamp, or minutesBack");
+            } else {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Either provide startTimestamp and endTimestamp, or minutesBack"
+                );
+            }
         }
         return dataService.getActiveLocations(startTimestamp, endTimestamp, locationType, sortBy, recordsCount);
     }

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "257e11a3-0f4b-4d6a-b440-df3969566c8d",
+		"_postman_id": "862d17c2-3ec2-46c3-845e-34e6b472c87a",
 		"name": "UrbanGeoPulse - simulator",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "9394726"
@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/urbangeopulse/api/simulator/streets/points?streetName=Duffield St&iterationsCount=10&saveToBackup=true",
+					"raw": "http://localhost:8080/urbangeopulse/api/simulator/streets/points?streetName=Duffield St&durationInMin=2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -37,16 +37,17 @@
 						},
 						{
 							"key": "durationInMin",
-							"value": "30",
-							"disabled": true
+							"value": "2"
 						},
 						{
 							"key": "iterationsCount",
-							"value": "10"
+							"value": "10",
+							"disabled": true
 						},
 						{
 							"key": "saveToBackup",
-							"disabled": true
+							"disabled": true,
+							"value": null
 						}
 					]
 				}
