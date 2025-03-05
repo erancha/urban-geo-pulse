@@ -22,10 +22,10 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 
 8. The [Receiver](services) service can be set to simulate messages on startup by setting an environment variable `PEOPLE_GEO_LOCATIONS_CSV` in [services/receiver/start-service.cmd](services/receiver/start-service.cmd).
    - Each two adjacent points from the CSV file are associated with the same person (i.e. have the same uuid), to simulate a movement of that person.
-   - The receiver is set by default to simulate messages from [services/receiver/NYC_people-geo-locations--Duffield_St.csv](services\receiver\NYC_people-geo-locations--Duffield_St.csv).
-   - Progress can be monitored in [Kafka-UI](http://localhost:7070/ui/clusters/kafka-broker/consumer-groups) and by querying Postgres: [scripts/development/query-sql.cmd](scripts\development\query-sql.cmd).
+   - The receiver is set by default to simulate messages from [services/receiver/NYC_people-geo-locations--Duffield_St.csv](services/receiver/NYC_people-geo-locations--Duffield_St.csv).
+   - Progress can be monitored in [Kafka-UI](http://localhost:7070/ui/clusters/kafka-broker/consumer-groups) and by querying Postgres: [scripts/development/query-sql.cmd](scripts/development/query-sql.cmd).
    - This simulation is expected to complete in few minutes.
-9. In addition, a Postman collection is available to initiate further simulation: [services/receiver/simulator-postman-collection.json](services\receiver\simulator-postman-collection.json).
+9. In addition, a Postman collection is available to initiate further simulation: [services/receiver/simulator-postman-collection.json](services/receiver/simulator-postman-collection.json).
 
 ### Deployment:
 
