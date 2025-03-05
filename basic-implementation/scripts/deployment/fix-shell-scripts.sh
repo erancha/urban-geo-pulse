@@ -14,8 +14,8 @@ fi
 echo "Fixing line endings in .env files..."
 dos2unix .env activity-aggregator-vars.env 2>/dev/null || true
 
-# Create build-and-push.sh
-cat > build-and-push.sh << 'EOF'
+# Create build-and-push-a-service.sh
+cat > build-and-push-a-service.sh << 'EOF'
 #!/bin/bash
 set -e
 
@@ -164,4 +164,4 @@ EOF
 chmod +x *.sh aws/*.sh
 
 echo "All shell scripts have been created with proper Unix line endings and made executable!"
-echo "You can now run the scripts directly, for example: ./build-and-push.sh"
+echo "You can now run the scripts directly, for example: ./build-and-push-a-service.sh"

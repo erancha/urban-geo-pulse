@@ -1,5 +1,0 @@
-FROM adoptopenjdk:11-jdk-hotspot
-WORKDIR /app
-COPY target/delay-manager-1.0.jar /app
-EXPOSE 8084
-CMD ["java", "-jar", "delay-manager-1.0.jar"]

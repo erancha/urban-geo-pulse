@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mobilization-classifier:
-    image: erancha/urbangeopulse:mobilization-classifier-1.0
+    image: erancha/urbangeopulse:mobilization-classifier-1.1
     networks:
       - urbangeopulse-net
     env_file:

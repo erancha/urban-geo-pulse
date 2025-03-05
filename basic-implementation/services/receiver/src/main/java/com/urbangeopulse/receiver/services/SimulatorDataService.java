@@ -38,7 +38,7 @@ public class SimulatorDataService {
     private String PEOPLE_GEO_LOCATIONS_TOPIC;
     private KafkaUtils.TopicConfig peopleGeoLocationsTopicConfig;
 
-    @Value("${PEOPLE_GEO_LOCATIONS_CSV:./NYC_people-geo-locations--Duffield_St.csv}")
+    @Value("${PEOPLE_GEO_LOCATIONS_CSV:./NYC_people-geo-locations--Duffield_St.csv //TODO:REMOVE}")
     private String PEOPLE_GEO_LOCATIONS_CSV;
 
     @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")

@@ -167,7 +167,7 @@ public class LocationsFinder {
         };
 
         try {
-            logger.info(String.format("Creating input topic '%s' (%d partitions), output topic '%s' (%d partitions), and delay manager topic '%s', if they do not exist yet ...", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount(), outputTopicConfig.getTopicName(), outputTopicConfig.getPartitionsCount(), DELAY_MANAGER_TOPIC_NAME));
+            logger.info(String.format("Creating input topic '%s' (%d partitions), output topic '%s' (%d partitions), and delay manager topic '%s', if they do not exist yet ... LOCATIONS_FINDER_LOCATION_TYPE is %s", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount(), outputTopicConfig.getTopicName(), outputTopicConfig.getPartitionsCount(), DELAY_MANAGER_TOPIC_NAME, LOCATIONS_FINDER_LOCATION_TYPE));
             KafkaUtils.checkAndCreateTopic(inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount());
             KafkaUtils.checkAndCreateTopic(outputTopicConfig.getTopicName(), outputTopicConfig.getPartitionsCount());
             KafkaUtils.checkAndCreateTopic(DELAY_MANAGER_TOPIC_NAME);

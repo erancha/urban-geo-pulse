@@ -20,9 +20,12 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 
 #### Testing:
 
-8. The [Receiver](services) service can also be set to simulate messages from pedestrians or mobilized individuals, by setting an environment variable `PEOPLE_GEO_LOCATIONS_CSV` in [services/receiver/start-service.cmd](services/receiver/start-service.cmd).<br>
-   Each two adjacent points from the CSV file are associated with the same person (i.e. have the same uuid), to simulate a movement of that person.
-   The receiver is set by default to simulate ~120,000 messages from a CSV file, and is executed automatically when the application starts, expected to complete in few minutes.
+8. The [Receiver](services) service can be set to simulate messages on startup by setting an environment variable `PEOPLE_GEO_LOCATIONS_CSV` in [services/receiver/start-service.cmd](services/receiver/start-service.cmd).
+   - Each two adjacent points from the CSV file are associated with the same person (i.e. have the same uuid), to simulate a movement of that person.
+   - The receiver is set by default to simulate messages from [services/receiver/NYC_people-geo-locations--Duffield_St.csv](services\receiver\NYC_people-geo-locations--Duffield_St.csv).
+   - Progress can be monitored in [Kafka-UI](http://localhost:7070/ui/clusters/kafka-broker/consumer-groups) and by querying Postgres: [scripts/development/query-sql.cmd](scripts\development\query-sql.cmd).
+   - This simulation is expected to complete in few minutes.
+9. In addition, a Postman collection is available to initiate further simulation: [services/receiver/simulator-postman-collection.json](services\receiver\simulator-postman-collection.json).
 
 ### Deployment:
 
@@ -65,7 +68,7 @@ The folders [scripts/deployment-with-docker-desktop](scripts/deployment-with-doc
 - Build and push Docker images:
   ```bash
   cd /mnt/c/Projects/IntelliJ/urban-geo-pulse/basic-implementation/scripts/deployment
-  ./build-and-push.sh
+  ./build-and-push-a-service.sh
   ```
   This step must be done in the development environment where the source code is available.
 

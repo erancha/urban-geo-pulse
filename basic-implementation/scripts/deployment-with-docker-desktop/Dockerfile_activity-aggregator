@@ -1,4 +1,0 @@
-FROM adoptopenjdk:11-jdk-hotspot
-WORKDIR /app
-COPY target/activity-aggregator-1.0.jar /app
-CMD ["java", "-jar", "activity-aggregator-1.0.jar"]

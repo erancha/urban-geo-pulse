@@ -1,4 +1,4 @@
-	@echo off
+@echo off
 if "%1"=="undeploy" (
     call undeploy-app.cmd
     exit /b
@@ -14,12 +14,12 @@ if errorlevel 1 (
 )
 
 echo Building and pushing all services...
-call build-and-push receiver 1.2
-call build-and-push mobilization-classifier
-call build-and-push locations-finder 1.3
-call build-and-push delay-manager
-call build-and-push activity-aggregator
-call build-and-push info
+call build-and-push-a-service receiver 					1.5
+call build-and-push-a-service mobilization-classifier   1.1
+call build-and-push-a-service locations-finder 			1.4
+call build-and-push-a-service delay-manager
+call build-and-push-a-service activity-aggregator       1.1
+call build-and-push-a-service info
 
 echo.
 echo Deploying application services...

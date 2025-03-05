@@ -77,6 +77,7 @@ public class ActivityAggregator {
 
     @PostConstruct
     void startBackgroundConsumers() {
+        logger.info(String.format("Configuring input topic '%s' ...", ACTIVITY_AGGREGATOR_INPUT_TOPIC));
         inputTopicConfig = KafkaUtils.TopicConfig.from(ACTIVITY_AGGREGATOR_INPUT_TOPIC);
 
 		this.maxRecordsToAggregate.set(ACTIVITY_AGGREGATOR_PERSISTENCE_MAX_RECORDS);
@@ -90,6 +91,8 @@ public class ActivityAggregator {
                     put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, ACTIVITY_AGGREGATOR_SESSION_TIMEOUT_SECONDS_CONFIG * 1000);
                 }};
 
+        // Continuously consumes activity events from Kafka, aggregates them by location and minute (in minuteResolutionMap), and periodically persists the aggregated counts to the database. 
+        // Handles partition rebalancing using offsetsToCommit and ensures at-least-once delivery semantics.
         Runnable aggregatorConsumerThread = () -> {
             final Thread currentThread = Thread.currentThread();
             logger.fine(String.format("Starting '%s' of class '%s' ..", currentThread.getName(), currentThread.getStackTrace()[1].getClassName()));
@@ -99,6 +102,7 @@ public class ActivityAggregator {
 
             try {
                 try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(CONSUMER_CONFIGS)) {
+                    // Handle partition rebalancing using offsetsToCommit.
                     consumer.subscribe(Collections.singleton(inputTopicConfig.getTopicName()), new ConsumerRebalanceListener() {
                         @Override
                         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
@@ -125,7 +129,7 @@ public class ActivityAggregator {
                         }
                     });
 
-                    // consume, with poll interval between 1,000 and 1 ms, depending on whether records were consumed or not.
+                    // consume kafka records, with poll interval between 1,000 and 1 ms depending on whether records were consumed or not.
                     short pollIntervalInMS = 1000;
                     ZoneId zoneId = ZoneId.systemDefault();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -135,7 +139,9 @@ public class ActivityAggregator {
                         ConsumerRecords<String, String> kafkaRecords = consumer.poll(Duration.ofMillis(pollIntervalInMS));
                         pollIntervalInMS = (short) (kafkaRecords.isEmpty() ? 1000 : Math.max(pollIntervalInMS / 2, 1));
 
-                        // every ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC seconds persist minuteResolutionMap into the database and reset it:
+                        // Persist to database every ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC seconds.
+                        // Lower values: More frequent commits, lower latency, but higher database load and transaction overhead
+                        // Higher values: Better batching and throughput, but increased memory usage and potential data loss on crashes
                         if (Duration.between(lastPersistenceTime, Instant.now()).toMillis() >= ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC * 1000) {
                             logger.fine(!minuteResolutionMap.isEmpty()
                                     ? String.format("Persisting data collected since: %s .. offsetsToCommit.size() = %d, minuteResolutionMap.size() = %d", lastPersistenceTime.atZone(zoneId).format(formatter), offsetsToCommit.size(), minuteResolutionMap.size())

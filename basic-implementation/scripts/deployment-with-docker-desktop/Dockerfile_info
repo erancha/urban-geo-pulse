@@ -1,5 +1,0 @@
-FROM adoptopenjdk:11-jdk-hotspot
-WORKDIR /app
-COPY target/info-1.0.jar /app
-EXPOSE 8081
-CMD ["java", "-jar", "info-1.0.jar"]

@@ -1,5 +1,7 @@
 @echo off
 
+call 3rdparty-up.cmd
+
 @REM Initialize environment
 call set-sql-env.cmd
 call set-log-env.cmd

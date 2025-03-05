@@ -46,7 +46,7 @@
 						},
 						{
 							"key": "saveToBackup",
-							"value": "true"
+							"disabled": true
 						}
 					]
 				}

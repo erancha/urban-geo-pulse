@@ -61,6 +61,7 @@ public class MobilizationClassifier {
 
     @PostConstruct
     void startBackgroundConsumers() {
+        logger.info(String.format("Configuring topics '%s', '%s' and '%s' ...", PEOPLE_GEO_LOCATIONS_TOPIC, PEDESTRIANS_GEO_LOCATIONS_TOPIC, MOBILIZED_GEO_LOCATIONS_TOPIC));
         peopleGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEOPLE_GEO_LOCATIONS_TOPIC);
         pedestriansGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEDESTRIANS_GEO_LOCATIONS_TOPIC);
         mobilizedGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(MOBILIZED_GEO_LOCATIONS_TOPIC);
