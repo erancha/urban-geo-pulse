@@ -5,18 +5,18 @@
 **UrbanGeoPulse** is a Big-Data application built using a microservices architecture and containerization.
 This serves as a **demonstration** of a **software architecture** definition process, with hypothetical requirements.
 
-## Preface:
+## Preface
 
 New York City (NYC) requires **real-time** data on the streets and neighborhoods with the highest number of **pedestrians** and **non-pedestrians** (collectively referred to as **mobilized** individuals) at any given moment.
 This data will aid in **decision-making** for **immediate needs**, such as deploying police resources and managing traffic, as well as for **long-term** planning like transportation budgets, scheduling municipal construction, and setting advertising rates.
 
-## Functional Requirements:
+## Functional Requirements
 
 1. **Receive** messages that include **geospatial locations**, for example, from the cell phones of **pedestrians** and **mobilized** individuals.
 2. **Determine** the source of each message (**pedestrian** or **mobilized** individual) by calculating the speed based on the last two messages sent from the same device.
 3. Enable users to **access** activity data for streets and neighborhoods **in real-time** for any requested timeframe within the last 24 hours.
 
-## Solution:
+## Solution
 
 1. [**Architecture Document**](architecture/architecture-document-phase-1-REST.md):
 
