@@ -116,7 +116,7 @@ As can be seen in the diagram, the application comprises a few separate, indepen
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
-This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](basic-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
+This architecture, in conjunction with a modern development platform (refer to [basic JAVA Spring Boot implementation](../basic-implementation/README.md)), will help create a modern, **scalable**, **reliable**, and **easy to maintain** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
 ## Overall Architecture
 
@@ -201,17 +201,17 @@ The following tech stack was preferred, primarily **due to current experience of
 
 ##### Scalability
 
-<p>(Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system))</p>
+`Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system)`
 
 This architecture allows to easily scale services as needed:
 
-1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../basic-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
+1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by a [Kafka UI](../basic-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
 2. For example, the [Mobilization-classifier](#mobilization-classifier-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
-3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
+3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing the code or shutting down the system.
 
 #### Resiliency:
 
-<p>(Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.)</p>
+`Definition: The software should be reliable and available for use whenever required. It should be able to handle errors, exceptions, and failures gracefully, ensuring minimal disruption to the system.`
 
 ##### High Availability
 
@@ -222,13 +222,13 @@ Note: **Consumer groups rebalancing** must be handled properly (refer specifical
 
 #### Security:
 
-<p>(Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.)</p>
+`Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.`
 
 The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
 
 - [OAuth2](https://oauth.net/2/) is the primary authentication protocol used to grant access to user accounts without sharing the actual login credentials. It allows third-party applications to request access to user data on their behalf.
-  During the OAuth2 authentication flow, the Gmail API uses JWT to generate and sign the access tokens.
+  During the OAuth2 authentication flow, Google API uses JWT to generate and sign the access tokens.
 - [JWT](https://jwt.io/) (JSON Web Tokens) are a compact, URL-safe means of representing claims between two parties. The access token contains information about the user and the permissions granted to the third-party application.
 - In summary, OAuth2 is used for the overall authentication process, while JWT is used for generating and signing the access tokens that grant access to user data.
 
@@ -236,14 +236,14 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 
 #### Maintainability:
 
-<p>(Definition: The software should be designed in a way that makes it easy to understand, modify, and maintain over time. This includes considerations for code readability, proper documentation, and adherence to coding best practices.)</p>
+`Definition: The software should be designed in a way that makes it easy to understand, modify, and maintain over time. This includes considerations for code readability, proper documentation, and adherence to coding best practices.`
 
 As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
 In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
 
 ##### Testability:
 
-<p>(Definition: The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues)</p>
+`Definition: The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues.`
 
 ###### Logging
 
@@ -258,7 +258,7 @@ In addition, the development team should take into consideration best practices 
 
 #### Extensibility
 
-(Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system).
+`Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system`.
 
 ## Services Drill Down
 
