@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -144,24 +142,29 @@ public class SimulatorDataService {
      * @param writer     - writes a message into a target.
      */
     public void simulatePointsForStreets(String streetName, Writer writer) {
-        Instant startTime = Instant.now();
-        String query = "select distinct name from nyc_streets where name " + (streetName == null ? "is not null" : "like ?");
-        Connection connection = DataSourceUtils.getConnection(jdbcTemplate.getDataSource());
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            if (streetName != null) statement.setString(1, streetName);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                int count = 0;
-                while (resultSet.next()) {
-                    String name = resultSet.getString("name");
-                    simulatePointsForOneStreet(name, writer);
-                    count++;
+        Connection connection = null;
+        try {
+            connection = DataSourceUtils.getConnection(jdbcTemplate.getDataSource());
+            if (streetName == null) {
+                try (PreparedStatement stmt = connection.prepareStatement("select distinct name from nyc_streets;");
+                     ResultSet rs = stmt.executeQuery()) {
+                    List<String> streets = new ArrayList<>();
+                    while (rs.next()) {
+                        streets.add(rs.getString("name"));
+                    }
+                    logger.fine(String.format("%,d streets returned by query", streets.size()));
+                    Connection finalConnection = connection;
+                    streets.forEach(currStreetName -> simulatePointsForOneStreet(currStreetName, writer, finalConnection));
                 }
-                logger.fine(String.format("%,d streets returned by query: %s, in %d ms.", count, query, Duration.between(startTime, Instant.now()).toMillis()));
+            } else {
+                simulatePointsForOneStreet(streetName, writer, connection);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logException(e, logger);
         } finally {
-            DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
+            }
         }
     }
 
@@ -171,8 +174,9 @@ public class SimulatorDataService {
      *
      * @param streetName - street name.
      * @param writer     - writes a message into a target.
+     * @param connection - database connection to reuse
      */
-    private void simulatePointsForOneStreet(String streetName, Writer writer) {
+    private void simulatePointsForOneStreet(String streetName, Writer writer, Connection connection) {
         // 'running' values for the 'points.forEach', changing every two points (explained in the method's comment).
         AtomicLong counter = new AtomicLong();
         AtomicReference<UUID>/*AtomicLong*/ runningUuid = new AtomicReference<>/*AtomicLong*/(); // AtomicLong - only for debugging
@@ -183,8 +187,25 @@ public class SimulatorDataService {
 
         final String query = "select *,ST_AsText((ST_DumpPoints(geom)).geom) as point_geom from nyc_streets where name=?;"; // order by geom - only for debugging
         Instant startTime = Instant.now();
-        List<Map<String, Object>> points = jdbcTemplate.queryForList(query, streetName);
-        logger.fine(String.format("%,d points returned by query: %s for: '%s' , in %d ms.", points.size(), query, streetName, Duration.between(startTime, Instant.now()).toMillis()));
+        
+        List<Map<String, Object>> points = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, streetName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> point = new HashMap<>();
+                    point.put("point_geom", rs.getString("point_geom"));
+                    points.add(point);
+                }
+            }
+        } catch (SQLException e) {
+            logException(e, logger);
+            return;
+        }
+        
+        logger.fine(String.format("%,d points returned by query: %s for: '%s' , in %d ms.", 
+            points.size(), query, streetName, Duration.between(startTime, Instant.now()).toMillis()));
+            
         points.forEach(point -> {
             String currPointAsText = (String) point.get("point_geom");
             String prevPointAsText = runningPointAsText.get();
@@ -192,7 +213,7 @@ public class SimulatorDataService {
 
             if (prevPointAsText == null) {
                 runningPointAsText.set(currPointAsText);
-                runningUuid.set(UUID.randomUUID()/*counter.get()*/);
+                runningUuid.set(UUID.randomUUID()/*counter.get()*/); // counter.get() - only for debugging
                 runningEventTimeInMS.set(System.currentTimeMillis());
             } else {
                 // 'runningUuid' is not modified here, to simulate a movement by the same person.

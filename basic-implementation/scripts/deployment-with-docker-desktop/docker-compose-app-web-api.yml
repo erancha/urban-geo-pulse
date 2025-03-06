@@ -2,7 +2,7 @@ version: '3'
 
 services:
   receiver:
-    image: erancha/urbangeopulse:receiver-1.6
+    image: erancha/urbangeopulse:receiver-1.8
     ports:
       - "8080:8080"
     networks:
@@ -15,7 +15,7 @@ services:
       # PEOPLE_GEO_LOCATIONS_CSV: /app/NYC_people-geo-locations--all.csv
       PEOPLE_GEO_LOCATIONS_CSV: /app/NYC_people-geo-locations--Duffield_St.csv
       # ITERATIONS_TO_SIMULATE_FROM_BACKUP: 10
-      RECEIVER_THROTTLE_PRODUCING_THROUGHPUT: 1500
+      RECEIVER_THROTTLE_PRODUCING_THROUGHPUT: 2000
     depends_on:
       - kafka-broker
       - postgis-server-nyc

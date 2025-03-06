@@ -76,7 +76,7 @@ public class AggregatorDataService {
                 isOK = true;
             } catch (Exception ex) {
                 retriesCount++;
-                logger.warning(String.format("%s", ex.getMessage()));
+                logger.warning(String.format("AggregatorDataService.persistWithRetries(..): %s", ex.getMessage()));
                 try {
                     Thread.sleep((long) (Math.random() * MAX_RETRY_TIME_IN_MS / 3));
                 } catch (InterruptedException e) { logException(ex, logger); }

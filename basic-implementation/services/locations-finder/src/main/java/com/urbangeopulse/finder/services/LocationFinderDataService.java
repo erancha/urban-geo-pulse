@@ -1,12 +1,16 @@
 package com.urbangeopulse.finder.services;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * data required by the service.
@@ -32,15 +36,40 @@ public class LocationFinderDataService {
         logger.finer(String.format("point: '%s', TABLE_NAME: '%s', srid: %d", pointGeom, TABLE_NAME, srid));
 
         final String query = String.format("select name from %s where ST_Intersects(ST_SetSrid(ST_GeomFromText('%s'),%d),geom);", TABLE_NAME, pointGeom, srid);
-        final List<String> locationNames = jdbcTemplate.queryForList(query).stream().map((Map<String, Object> locationRecord) -> (String)locationRecord.get("name")).collect(Collectors.toList());
-        if (locationNames.isEmpty() && !"neighborhood".equals(locationType)) logger.warning(String.format("0 %ss found for point %s", locationType, pointGeom)); // there're de-facto points outsides of any neighborhood..
-        else {
-            if (locationNames.size() > 10) logger.warning(String.format("%d %ss found for point %s", locationNames.size(), locationType, pointGeom));
-            locationNames.forEach(locationName -> {
-                if (locationName == null) logger.finer(String.format("NULL name returned for query: %s.", query)); // valid scenario, e.g.: select name from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(589785.1546829303 4521061.217850462)'),26918),geom);
-            });
+        
+        Connection connection = null;
+        List<String> locationNames = new ArrayList<>();
+        try {
+            connection = DataSourceUtils.getConnection(jdbcTemplate.getDataSource());
+            try (PreparedStatement stmt = connection.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    locationNames.add(rs.getString("name"));
+                }
+            }
+                
+            if (locationNames.isEmpty() && !"neighborhood".equals(locationType)) {
+                logger.warning(String.format("0 %ss found for point %s", locationType, pointGeom)); // there're de-facto points outsides of any neighborhood..
+            } else {
+                if (locationNames.size() > 10) logger.warning(String.format("%d %ss found for point %s", locationNames.size(), locationType, pointGeom));
+                locationNames.forEach(locationName -> {
+                    if (locationName == null) logger.finer(String.format("NULL name returned for query: %s.", query)); // valid scenario, e.g.: select name from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(589785.1546829303 4521061.217850462)'),26918),geom);
+                });
+            }
+            
+            return locationNames;
+        } catch (SQLException e) {
+            logger.severe(String.format("An error occurred while executing query: %s", query));
+            logger.severe(String.format("Error details: %s", e.getMessage()));
+            return locationNames;
+        } finally {
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
+            }
         }
-
-        return locationNames;
+    }
+    
+    private void logException(SQLException e, Logger logger) {
+        logger.severe(String.format("An error occurred while executing query: %s", e.getMessage()));
     }
 }

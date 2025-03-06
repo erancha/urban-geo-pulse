@@ -116,7 +116,7 @@ As can be seen in the diagram, the application comprises a few separate, indepen
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
-This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](mvp-level-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
+This architecture, in conjunction with a modern development platform (refer to [MVP-level JAVA Spring Boot implementation](basic-implementation/README.md)), will help create a **modern**, **robust**, **scalable**, **easy to maintain**, and **reliable** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
 
 ## Overall Architecture
 
@@ -205,7 +205,7 @@ The following tech stack was preferred, primarily **due to current experience of
 
 This architecture allows to easily scale services as needed:
 
-1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../mvp-level-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
+1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by any [Kafka UI](../basic-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
 2. For example, the [Mobilization-classifier](#mobilization-classifier-service) service is responsible only to sort geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
 3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing any lines of code or shutting down the system.
 
@@ -253,8 +253,8 @@ In addition, the development team should take into consideration best practices 
 ###### System level testing
 
 - Each service should be runnable **on its own**, with pre-prepared data, and have functionality to compare its output to the given input.
-- For example, the [Receiver](#receiver-service) service in the [mvp-level-implementation](../mvp-level-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
-- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (refer to ITERATIONS_TO_SIMULATE_FROM_BACKUP in [receiver/start-service.cmd](../mvp-level-implementation/services/receiver/start-service.cmd) above) during CI/CD.
+- For example, the [Receiver](#receiver-service) service in the [basic-implementation](../basic-implementation/README.md) is currently capable to execute on its own from a backup file: [receiver/start-service.cmd](../basic-implementation/services/receiver/start-service.cmd) - refer to the environment variables URL_TO_EXECUTE_AFTER_STARTUP and PEOPLE_GEO_LOCATIONS_CSV.
+- In addition, each such script should be enhanced to compare its output to the given input, allowing developers to verify the service execution under load (refer to ITERATIONS_TO_SIMULATE_FROM_BACKUP in [receiver/start-service.cmd](../basic-implementation/services/receiver/start-service.cmd) above) during CI/CD.
 
 #### Extensibility
 
@@ -276,20 +276,21 @@ In addition, the development team should take into consideration best practices 
 
 #### Role
 
-- To receive messages containing geospatial locations, e.g. from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
+- To **receive messages** containing geospatial locations, e.g. from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
   1. UUID (Universal Unique Identifier).
   2. Coordinates (geospatial point).
   3. Timestamp.
   4. City code (e.g. NYC). This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
-- To push (produce) these messages into a Kafka topic _people_geo_locations_ (from which they will be consumed and processed by the pipeline services).
+- To **normalize** and **produce** these messages into a Kafka topic _people_geo_locations_ (from which they will be consumed and processed by downstream pipeline services).
 
 #### Implementation Instructions
 
 - This service should contain as little code as possible. No logic should take place there, and its only task is to receive messages and produce them into kafka.
 
-#### APIs
+#### Postman API collections
 
-[postman-collection.json](../mvp-level-implementation/services/receiver/postman-collection.json)
+- [receiver-postman-collection.json](../basic-implementation/services/receiver/receiver-postman-collection.json)
+- [simulator-postman-collection.json](../basic-implementation/services/receiver/simulator-postman-collection.json)
 
 <hr>
 
@@ -317,7 +318,7 @@ In addition, the development team should take into consideration best practices 
 1. To consume from one of the following topics:
    1. _pedestrians_geo_locations_
    2. _mobilized_geo_locations_
-2. To find a street or neighborhood name by the consumed point on the street's or neighborhood's geometry. This step depends on loading the relevant maps into the database according to the city code contained in each message (refer to the [Receiver](#receiver-service) service for further details).
+2. To find a street or neighborhood name by locating the consumed point on the street's or neighborhood's geometry. This step depends on loading the relevant maps into the database according to the city code contained in each message (refer to the [Receiver](#receiver-service) service for further details).
 3. To produce the location (street or neighborhood) into one of the following topics:
    1. _pedestrians_streets_ - each message is a pedestrian and a street name.
    2. _pedestrians_neighborhoods_ - each message is a pedestrian and a neighborhood name.
@@ -331,7 +332,7 @@ Each instance of this service should handle one and only one combination of mobi
 #### Deployment Instructions
 
 The geospatial points are located within a geometries of streets and neighborhoods of the NYC database.
-For better [scalability](#scaling) it is advisable to configure **read-only replicas** of the NYC database, to isolate these queries from the database used for aggregations (by the [Activity-aggregator](#activity-aggregator-service) service).
+For better [scalability](#scaling) it is advisable to configure **read-only replicas** of the NYC database.
 
 <hr>
 
@@ -354,19 +355,20 @@ To process messages containing events that should be:
 
 #### Role
 
-1. To aggregate in-memory the number of pedestrians and mobilized per 1 minute.
+1. To aggregate **in-memory** the number of pedestrians and mobilized per duration (e.g. 1 minute).
 2. To periodically persist the aggregated data into the following [_MongoDB_](#_mongodb_) tables:
    1. _agg_streets_activity_
    2. _agg_neighborhoods_activity_.
 
 #### Implementation Instructions
 
-1. Each instance of this service should aggregate and persist data for one and only **one combination** of **Pedestrians**/**mobilized** and **streets**/**neighborhoods**.
-2. The combination should be configured by two environment variables, that together decide the input topic (one of the output topics of the [Locations-finder service](#locations-finder-service)). This will allow [scaling](#scalability) specific combinations according to the load, as explained in the [Implementation Instructions](#implementation-instructions-2) of the Locations-finder service.
-3. The persistence interval and number of records should be configurable by environment variables. This should provide a way to control the memory consumption and database persistence time.
-4. **Consumer groups rebalancing must be handled** properly by this service, otherwise messages aggregated in-memory might be lost when the service will attempt to commit the uncommitted offsets associated with these messages.
+- Each instance of this service should aggregate and persist data for one and only **one combination** of mobility type (**Pedestrians**/**mobilized**) and location type (**streets**/**neighborhoods**).
+- The combination should be configurable by environment variable(s).
+- This will allow [scaling](#scalability) specific combinations according to the load, similar to the [Locations-finder](#implementation-instructions-2) service.
+- The persistence interval and number of records should be configurable by environment variable(s). This will provide a way to control the memory consumption and database persistence time.
+- **Consumer groups rebalancing** must be handled properly by this service, otherwise messages aggregated in-memory might be lost when the service will attempt to commit the uncommitted offsets associated with these messages.
 
-Further details can be found in the [mvp-level implementation](../mvp-level-implementation/services/activity-aggregator/readme.md).
+Further details can be found in the [basic-implementation](../basic-implementation/services/activity-aggregator/readme.md).
 
 <hr>
 
@@ -381,7 +383,7 @@ Further details can be found in the [mvp-level implementation](../mvp-level-impl
 
 #### APIs:
 
-[postman-collection.json](../mvp-level-implementation/services/info/postman-collection.json)
+[postman-collection.json](../basic-implementation/services/info/postman-collection.json)
 
 <hr>
 
