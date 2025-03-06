@@ -2,7 +2,7 @@
 
 #### A Big Data Geospatial Application.
 
-**UrbanGeoPulse** is a Big-Data application built using a microservices architecture and containerization.
+**UrbanGeoPulse** is a Big Data application built using a microservices architecture and containerization.
 This serves as a **demonstration** of a **software architecture** definition process, with hypothetical requirements.
 
 ## Preface
