@@ -1,9 +1,9 @@
-## Basic implementation
+# Basic implementation
 
 This is a functional basic JAVA spring-boot implementation of the [**UrbanGeoPulse** software architect big-data showcase](../README.md).
 It serves as a starting point for building the UrbanGeoPulse application. The implementation includes the basic functionality required to identify messages from pedestrians or non-pedestrians (referred to as **mobilized** individuals) and retrieve information on streets and neighborhoods based on specified timeframes.
 
-### Development:
+## Development
 
 #### Setup:
 
@@ -27,13 +27,16 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
    - This simulation is expected to complete in few minutes.
 9. In addition, a Postman collection is available to initiate further simulation: [services/receiver/simulator-postman-collection.json](services/receiver/simulator-postman-collection.json).
 
-### Deployment:
+## Deployment
 
-The application is designed for deployment on AWS EC2 instances using pre-built Docker images.
+The folders [scripts/deployment-with-docker-desktop](scripts/deployment-with-docker-desktop) and [scripts/deployment](scripts/deployment) contain additional files for a fully containerized deployment.
+
+The application is designed for [deployment](scripts/deployment) on AWS EC2 instances using Docker images built in [scripts/deployment-with-docker-desktop](scripts/deployment-with-docker-desktop).
 
 #### Prerequisites
 
 1. An AWS EC2 instance with:
+
    - Amazon Linux 2 or Ubuntu 20.04
    - Docker installed and running
    - Sufficient permissions to run Docker commands
@@ -49,6 +52,7 @@ The application is designed for deployment on AWS EC2 instances using pre-built 
 #### Deployment Steps
 
 1. Set up the EC2 instance:
+
    ```bash
    cd basic-implementation/scripts/deployment/aws
    # Deploy infrastructure using CloudFormation
@@ -56,6 +60,7 @@ The application is designed for deployment on AWS EC2 instances using pre-built 
    ```
 
 2. Deploy services:
+
    ```bash
    cd ../
    # Deploy third-party services (PostgreSQL, Redis, etc.)
@@ -81,6 +86,7 @@ The application is designed for deployment on AWS EC2 instances using pre-built 
    ```
 
 3. Verify deployment:
+
    ```bash
    # Check service status
    docker service ls
@@ -90,10 +96,11 @@ The application is designed for deployment on AWS EC2 instances using pre-built 
    ```
 
 Note: Make sure to:
+
 - Configure security groups to allow access to required ports (8082 for pgAdmin, etc.)
 - Use the EC2 instance's public IP or DNS when accessing services
 
-## Contribution suggestions:
+## Contribution ideas:
 
 1. **Web App** for:
    1. Showing results from the [Info](services/info/readme.md) service, potentially with web-sockets to automatically refresh the UI when the order of higher concentration streets or neighborhood changes.
