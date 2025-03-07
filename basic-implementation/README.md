@@ -29,67 +29,40 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 
 ### Deployment:
 
-The folders [scripts/deployment-with-docker-desktop](scripts/deployment-with-docker-desktop) and [scripts/deployment](scripts/deployment) contain additional files for a fully containerized deployment.
+The application is designed for deployment on AWS EC2 instances using pre-built Docker images.
 
 #### Prerequisites
 
-- For WSL:
+1. An AWS EC2 instance with:
+   - Amazon Linux 2 or Ubuntu 20.04
+   - Docker installed and running
+   - Sufficient permissions to run Docker commands
 
-  1. Windows Subsystem for Linux:
-
-     ```powershell
-     # In PowerShell as Administrator
-     wsl --install
-     # Follow the prompts to create a user account
-     ```
-
-  2. Set up Docker:
-     ```bash
-     wsl -d Ubuntu
-     cd /mnt/c/Projects/IntelliJ/urban-geo-pulse/basic-implementation/scripts/deployment
-     sudo ./setup-docker-in-wsl.sh
-     # Follow the script's instructions to restart WSL when prompted
-     ```
-
-- For EC2:
-  1. Amazon Linux 2 or Ubuntu 20.04
-  2. Docker installed and running
-  3. Clone deployment scripts:
-     ```bash
-     # Only deployment scripts are needed, not the full source code
-     git clone --depth 1 --filter=blob:none --sparse <repository-url>
-     cd urban-geo-pulse
-     git sparse-checkout set basic-implementation/scripts/deployment
-     cd basic-implementation/scripts/deployment
-     ```
-
-#### Build (Development Environment)
-
-- Build and push Docker images:
-  ```bash
-  cd /mnt/c/Projects/IntelliJ/urban-geo-pulse/basic-implementation/scripts/deployment
-  ./build-and-push-a-service.sh
-  ```
-  This step must be done in the development environment where the source code is available.
-
-#### Common Deployment Steps
-
-1. Copy required SQL files:
-
+2. Clone deployment scripts:
    ```bash
-   mkdir -p sql
-   cp ../development/init.sql sql/
-   cp ../development/query-agg_activity.sql sql/
+   # Only deployment scripts are needed
+   git clone --depth 1 --filter=blob:none --sparse <repository-url>
+   cd urban-geo-pulse
+   git sparse-checkout set basic-implementation/scripts/deployment
    ```
 
-2. Deploy services and initialize database:
+#### Deployment Steps
 
+1. Set up the EC2 instance:
    ```bash
+   cd basic-implementation/scripts/deployment/aws
+   # Deploy infrastructure using CloudFormation
+   ./deploy-ec2-cloudformation.sh
+   ```
+
+2. Deploy services:
+   ```bash
+   cd ../
    # Deploy third-party services (PostgreSQL, Redis, etc.)
    ./deploy-3rdparty.sh
 
-   # Configure pgAdmin and restore data:
-   # 1. Access pgAdmin at http://localhost:8082
+   # Configure pgAdmin:
+   # 1. Access pgAdmin at http://<ec2-public-ip>:8082
    # 2. Login with:
    #    - Email: user@gmail.com
    #    - Password: pgadminpass
@@ -99,11 +72,8 @@ The folders [scripts/deployment-with-docker-desktop](scripts/deployment-with-doc
    #    - Database: nyc
    #    - Username: user
    #    - Password: pass
-   # 4. Download PostGIS workshop data from:
-   #    https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip
-   # 5. Right-click on nyc database and select Restore
 
-   # Initialize additional tables
+   # Initialize database tables
    ./init-sql.sh
 
    # Deploy application services
@@ -111,19 +81,16 @@ The folders [scripts/deployment-with-docker-desktop](scripts/deployment-with-doc
    ```
 
 3. Verify deployment:
-
    ```bash
    # Check service status
    docker service ls
-   # docker service logs urban-geo-pulse-app_receiver
 
    # Run a test query
    ./query-sql.sh query-agg_activity.sql
    ```
 
-Note: For EC2, make sure to:
-
-- Configure security groups to allow access to ports 8082 (pgAdmin) and 5433 (PostgreSQL)
+Note: Make sure to:
+- Configure security groups to allow access to required ports (8082 for pgAdmin, etc.)
 - Use the EC2 instance's public IP or DNS when accessing services
 
 ## Contribution suggestions:

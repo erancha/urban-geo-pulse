@@ -13,15 +13,27 @@ set +a  # stop automatically exporting
 # Deploy application services stack
 echo "Deploying application services..."
 
-# Create a temporary compose file with environment variables substituted
-export DOCKER_REGISTRY
-envsubst '${DOCKER_REGISTRY}' < docker-compose.yml > docker-compose.tmp.yml
+COMPOSE_FILES_DIR="./compose-files"
 
-# Deploy the stack
-docker stack deploy -c docker-compose.tmp.yml urban-geo-pulse-app
+# Deploy activity aggregator
+docker compose -f ${COMPOSE_FILES_DIR}/docker-compose-app-activity-aggregator.yml up -d
 
-# Clean up temporary file
-rm docker-compose.tmp.yml
+# Deploy delay manager
+docker compose -f ${COMPOSE_FILES_DIR}/docker-compose-app-delay-manager.yml up -d
+
+# Deploy locations finder
+docker compose -f ${COMPOSE_FILES_DIR}/docker-compose-app-locations-finder.yml up -d
+
+# Deploy mobilization classifier
+docker compose -f ${COMPOSE_FILES_DIR}/docker-compose-app-mobilization-classifier.yml up -d
+
+# Deploy web API
+docker compose -f ${COMPOSE_FILES_DIR}/docker-compose-app-web-api.yml up -d
+
+echo "All services deployed successfully"
+
+# Display running services
+docker service ls
 
 # Wait for services to be running
 echo "Waiting for services to start..."

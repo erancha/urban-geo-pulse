@@ -11,9 +11,11 @@ echo "Setting up data directories..."
 sudo mkdir -p /var/lib/postgresql/data
 sudo mkdir -p /var/lib/postgresql/backup
 
+COMPOSE_FILES_DIR="./compose-files"
+
 # Deploy 3rd party services stack
 echo "Deploying 3rd party services..."
-docker stack deploy -c docker-compose-3rd-party.yml urbangeopulse
+docker compose -f ${COMPOSE_FILES_DIR}/docker-compose-3rd-party.yml up -d
 
 # Wait for services to be running
 echo "Waiting for services to start..."
@@ -33,3 +35,6 @@ if ! docker stack ls | grep -q "urbangeopulse"; then
 fi
 
 echo -e "\n3rd party services deployed successfully!"
+
+# Display running services
+docker service ls
