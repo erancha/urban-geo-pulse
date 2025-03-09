@@ -1,5 +1,6 @@
 package com.urbangeopulse.receiver.controllers;
 
+import com.urbangeopulse.receiver.services.KafkaProducer;
 import com.urbangeopulse.receiver.services.SimulatorDataService;
 import com.urbangeopulse.receiver.services.Writer;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,9 @@ public class SimulatorController {
     @Value("${URL_TO_EXECUTE_AFTER_STARTUP:#{null}}")
     private String URL_TO_EXECUTE_AFTER_STARTUP;
 
+    @Value("${RECEIVER_THROTTLE_PRODUCING_THROUGHPUT:#{10000}}") // maximum throughput - produced messages per second
+    private int RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
+
     private final SimulatorDataService dataService;
 
     public SimulatorController(SimulatorDataService dataService) {
@@ -49,7 +53,8 @@ public class SimulatorController {
                                          @RequestParam(required = false) Short durationInMin,
                                          @RequestParam(required = false, defaultValue = "1") Integer iterationsCount,
                                          @RequestParam(required = false, defaultValue = "false") Boolean saveToBackup) throws InterruptedException {
-		if (!saveToBackup && threadsCount != null && threadsCount > 1) {
+        // Multithreaded execution
+        if (!saveToBackup && threadsCount != null && threadsCount > 1) {
             Runnable simulatorThread = () -> {
                 Instant startTime = Instant.now();
                 logger.info(String.format("Starting 'simulatorThread' ..  durationInMin = %d, iterationsCount = %d", durationInMin, iterationsCount));
@@ -57,6 +62,7 @@ public class SimulatorController {
                 final long elapsedTimeInMS = Duration.between(startTime, Instant.now()).toMillis();
                 logger.info(String.format("'simulatorThread' completed, in %,d ms (== %.1f minutes).", elapsedTimeInMS, (double)elapsedTimeInMS / 60000));
             };
+
             Instant startTime = Instant.now();
             ExecutorService threadPool = Executors.newFixedThreadPool(threadsCount);
             for (int i = 0; i < threadsCount; i++) threadPool.submit(simulatorThread);
@@ -64,22 +70,43 @@ public class SimulatorController {
             threadPool.awaitTermination(Optional.ofNullable(durationInMin).orElse(Short.MAX_VALUE), TimeUnit.MINUTES);
             final long elapsedTimeInMS = Duration.between(startTime, Instant.now()).toMillis();
             logger.info(String.format("All 'simulatorThread' completed, in %,d ms (== %.1f minutes).", elapsedTimeInMS, (double)elapsedTimeInMS / 60000));
-		} else if (durationInMin == null && iterationsCount == 1) dataService.simulatePointsForStreets(streetName, dataService.createWriter(saveToBackup));
-        else executeDurationOrIterations(streetName, durationInMin, iterationsCount, dataService.createWriter(saveToBackup));
+        }
+        // Single execution - run once
+        else if (durationInMin == null && iterationsCount == 1) {
+            dataService.simulatePointsForStreets(streetName, dataService.createWriter(saveToBackup), null);
+        }
+        // Run for duration or iterations
+        else {
+            executeDurationOrIterations(streetName, durationInMin, iterationsCount, dataService.createWriter(saveToBackup));
+        }
     }
 
     private void executeDurationOrIterations(String streetName, Short durationInMin, Integer iterationsCount, Writer writer) {
         assert (durationInMin != null || iterationsCount != null);
+
+        // Only initialize throttling parameters for KafkaProducer
+        boolean shouldThrottle = writer instanceof KafkaProducer;
+        float targetTimePerMessageMillis = shouldThrottle ? (float) 1000 / RECEIVER_THROTTLE_PRODUCING_THROUGHPUT : 0;
+        long throttleStartTimeMillis = shouldThrottle ? System.currentTimeMillis() : 0;
+        SimulatorDataService.ThrottlingContext throttlingContext = shouldThrottle ? new SimulatorDataService.ThrottlingContext(0, throttleStartTimeMillis, targetTimePerMessageMillis) : null;
+
+        // For duration-based execution
         if (durationInMin != null && durationInMin > 0) {
             Instant startTime = Instant.now();
             do {
-                dataService.simulatePointsForStreets(streetName, writer);
+                dataService.simulatePointsForStreets(streetName, writer, throttlingContext);
             } while (Duration.between(startTime, Instant.now()).toMinutes() < durationInMin);
-        } else {
+        }
+        // For iteration-based execution
+        else {
             final int LOG_PROGRESS_EVERY_N_ITERATIONS = Math.max(1, iterationsCount / 10);
             for (int i = 1; i <= iterationsCount; i++) {
-                dataService.simulatePointsForStreets(streetName, writer);
-                if (i % LOG_PROGRESS_EVERY_N_ITERATIONS == 0) logger.info(String.format("Executed %,-3d iterations (%s).", i, streetName != null ? String.format("street name: %s", streetName) : "all streets"));
+                dataService.simulatePointsForStreets(streetName, writer, throttlingContext);
+
+                if (i % LOG_PROGRESS_EVERY_N_ITERATIONS == 0) {
+                    logger.info(String.format("Executed %,-3d iterations (%s).", i,
+                            streetName != null ? String.format("street name: %s", streetName) : "all streets"));
+                }
             }
         }
     }

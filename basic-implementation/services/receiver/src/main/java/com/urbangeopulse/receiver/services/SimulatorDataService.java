@@ -36,7 +36,7 @@ public class SimulatorDataService {
     private String PEOPLE_GEO_LOCATIONS_TOPIC;
     private KafkaUtils.TopicConfig peopleGeoLocationsTopicConfig;
 
-    @Value("${PEOPLE_GEO_LOCATIONS_CSV:./NYC_people-geo-locations--Duffield_St.csv //TODO:REMOVE}")
+    @Value("${PEOPLE_GEO_LOCATIONS_CSV:./NYC_people-geo-locations--Duffield_St.csv}")
     private String PEOPLE_GEO_LOCATIONS_CSV;
 
     @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")
@@ -80,7 +80,7 @@ public class SimulatorDataService {
         if (peopleGeoLocationsTopicConfig == null) throw new IllegalStateException("Topic configuration is not initialized.");
         float targetTimePerMessageMillis = (float) 1000 / RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
         long throttleStartTimeMillis = System.currentTimeMillis();
-        long counter = 0;
+        long producedMessagesCount = 0;
         long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record
         for (int i = 0; i < iterationsCount; i++) {
             try (BufferedReader reader = new BufferedReader(new FileReader(PEOPLE_GEO_LOCATIONS_CSV))) {
@@ -100,14 +100,12 @@ public class SimulatorDataService {
                             else currEvent.put("eventTimeInMS", currEventTimeInMS + deltaFromCurrentTime);
 
                             KafkaUtils.send(peopleGeoLocationsTopicConfig.getTopicName(), JavaSerializer.write(currEvent), key);
-                            if (++counter % THROTTLE_COUNT_CHECK == 0) {
+                            if (++producedMessagesCount % THROTTLE_COUNT_CHECK == 0) {
                                 long remainingTimeMillis = (long) (THROTTLE_COUNT_CHECK * targetTimePerMessageMillis) - (System.currentTimeMillis() - throttleStartTimeMillis);
                                 if (remainingTimeMillis > 0) {
-                                    if (counter % 10000 == 0)
-                                        logger.info(String.format("Throttle: %,d messages produced to topic %s, delay %d ms for the recent %,d messages.", counter, peopleGeoLocationsTopicConfig.getTopicName(), remainingTimeMillis, THROTTLE_COUNT_CHECK));
+                                    if (producedMessagesCount % 10000 == 0) logger.info(String.format("Throttle: %,d messages produced to topic %s, delay %d ms for the recent %,d messages.", producedMessagesCount, peopleGeoLocationsTopicConfig.getTopicName(), remainingTimeMillis, THROTTLE_COUNT_CHECK));
                                     Thread.sleep(remainingTimeMillis);
-                                } else if (counter % 10000 == 0)
-                                    logger.info(String.format("%,d messages produced to topic %s.", counter, peopleGeoLocationsTopicConfig.getTopicName()));
+                                } else if (producedMessagesCount % 10000 == 0) logger.info(String.format("%,d messages produced to topic %s.", producedMessagesCount, peopleGeoLocationsTopicConfig.getTopicName()));
                                 throttleStartTimeMillis = System.currentTimeMillis();
                             }
                         } catch (InitializationException | ExecutionException | InterruptedException |
@@ -138,32 +136,82 @@ public class SimulatorDataService {
     }
 
     /**
+     * Simulates points for one or all streets and applies throttling as needed
+     *
      * @param streetName - street name for which to generate points. if null - generate for all streets.
      * @param writer     - writes a message into a target.
      */
-    public void simulatePointsForStreets(String streetName, Writer writer) {
+    public void simulatePointsForStreets(String streetName, Writer writer, ThrottlingContext throttlingContext) {
         Connection connection = null;
+
         try {
             connection = DataSourceUtils.getConnection(jdbcTemplate.getDataSource());
+
             if (streetName == null) {
+                // Read streets:
                 try (PreparedStatement stmt = connection.prepareStatement("select distinct name from nyc_streets;");
                      ResultSet rs = stmt.executeQuery()) {
                     List<String> streets = new ArrayList<>();
-                    while (rs.next()) {
-                        streets.add(rs.getString("name"));
-                    }
+                    while (rs.next()) streets.add(rs.getString("name"));
                     logger.fine(String.format("%,d streets returned by query", streets.size()));
-                    Connection finalConnection = connection;
-                    streets.forEach(currStreetName -> simulatePointsForOneStreet(currStreetName, writer, finalConnection));
+
+                    // Process the streets:
+                    for (String currStreetName : streets) simulatePointsForOneStreet(currStreetName, writer, connection, throttlingContext);
                 }
             } else {
-                simulatePointsForOneStreet(streetName, writer, connection);
+                simulatePointsForOneStreet(streetName, writer, connection, throttlingContext);
             }
         } catch (SQLException e) {
             logException(e, logger);
         } finally {
             if (connection != null) {
                 DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
+            }
+        }
+
+    }
+
+    /**
+     * Class to encapsulate throttling state information
+     */
+    public static class ThrottlingContext {
+        long messageCounter;
+        long startTimeMillis;
+        float targetTimePerMessageMillis;
+
+        public ThrottlingContext(long messageCounter, long startTimeMillis, float targetTimePerMessageMillis) {
+            this.messageCounter = messageCounter;
+            this.startTimeMillis = startTimeMillis;
+            this.targetTimePerMessageMillis = targetTimePerMessageMillis;
+        }
+    }
+
+    /**
+     * Apply throttling logic to control message production rate
+     *
+     * @param throttlingContext Current throttling state
+     * @param streetName        The name of the street being processed (for logging)
+     */
+    private void applyThrottling(ThrottlingContext throttlingContext, String streetName) {
+        throttlingContext.messageCounter++;
+
+        if (throttlingContext.messageCounter % THROTTLE_COUNT_CHECK == 0) {
+            try {
+                long remainingTimeMillis = (long) (THROTTLE_COUNT_CHECK * throttlingContext.targetTimePerMessageMillis) - (System.currentTimeMillis() - throttlingContext.startTimeMillis);
+
+                if (remainingTimeMillis > 0) {
+                    if (throttlingContext.messageCounter % 10000 == 0) {
+                        logger.info(String.format("Throttle: %,d messages produced for street '%s', delay %d ms for the recent %,d messages.",
+                                throttlingContext.messageCounter, streetName, remainingTimeMillis, THROTTLE_COUNT_CHECK));
+                    }
+                    Thread.sleep(remainingTimeMillis);
+                } else if (throttlingContext.messageCounter % 10000 == 0) {
+                    logger.info(String.format("%,d messages produced for street '%s'.", throttlingContext.messageCounter, streetName));
+                }
+                throttlingContext.startTimeMillis = System.currentTimeMillis();
+            } catch (InterruptedException e) {
+                logException(e, logger);
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -175,8 +223,9 @@ public class SimulatorDataService {
      * @param streetName - street name.
      * @param writer     - writes a message into a target.
      * @param connection - database connection to reuse
+     * @param throttlingContext - context for throttling (null if no throttling)
      */
-    private void simulatePointsForOneStreet(String streetName, Writer writer, Connection connection) {
+    private void simulatePointsForOneStreet(String streetName, Writer writer, Connection connection, ThrottlingContext throttlingContext) {
         // 'running' values for the 'points.forEach', changing every two points (explained in the method's comment).
         AtomicLong counter = new AtomicLong();
         AtomicReference<UUID>/*AtomicLong*/ runningUuid = new AtomicReference<>/*AtomicLong*/(); // AtomicLong - only for debugging
@@ -187,7 +236,7 @@ public class SimulatorDataService {
 
         final String query = "select *,ST_AsText((ST_DumpPoints(geom)).geom) as point_geom from nyc_streets where name=?;"; // order by geom - only for debugging
         Instant startTime = Instant.now();
-        
+
         List<Map<String, Object>> points = new ArrayList<>();
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, streetName);
@@ -202,11 +251,12 @@ public class SimulatorDataService {
             logException(e, logger);
             return;
         }
-        
-        logger.fine(String.format("%,d points returned by query: %s for: '%s' , in %d ms.", 
-            points.size(), query, streetName, Duration.between(startTime, Instant.now()).toMillis()));
-            
-        points.forEach(point -> {
+
+        logger.fine(String.format("%,d points returned by query: %s for: '%s' , in %d ms.",
+                points.size(), query, streetName, Duration.between(startTime, Instant.now()).toMillis()));
+
+        // Process each point
+        for (Map<String, Object> point : points) {
             String currPointAsText = (String) point.get("point_geom");
             String prevPointAsText = runningPointAsText.get();
             counter.incrementAndGet();
@@ -227,15 +277,16 @@ public class SimulatorDataService {
                 }
             }
 
-            // save an event:
+            // write an event, optionally with throttling:
             final String currUuid = runningUuid.get().toString()/*String.valueOf(runningUuid.get())*/;  // String.valueOf(runningUuid.get()) - only for debugging
             logger.finer(String.format("#%-3d: uuid = %s, currPointAsText = %s", counter.get(), currUuid, currPointAsText));
             Map<String, Object> geoLocationEvent = receiverDataService.prepareGeoPointEvent("NYC", currUuid, currPointAsText, runningEventTimeInMS.get());
             try {
                 writer.save(JavaSerializer.write(geoLocationEvent), currUuid);
+                if (throttlingContext != null) applyThrottling(throttlingContext, streetName);
             } catch (JsonException e) {
                 logException(e, logger);
             }
-        });
+        }
     }
 }

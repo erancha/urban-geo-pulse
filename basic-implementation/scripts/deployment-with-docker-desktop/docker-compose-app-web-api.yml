@@ -2,7 +2,7 @@ version: '3'
 
 services:
   receiver:
-    image: erancha/urbangeopulse:receiver-1.8
+    image: erancha/urbangeopulse:receiver-1.10
     ports:
       - "8080:8080"
     networks:

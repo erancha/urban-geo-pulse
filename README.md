@@ -23,9 +23,12 @@ This data will aid in **decision-making** for **immediate needs**, such as deplo
      ![Architecture diagram](https://lucid.app/publicSegments/view/e6d6bb91-8e6e-43b5-9f44-49935994172d/image.jpeg)
 
 2. [**Basic JAVA Spring Boot Implementation**](basic-implementation/README.md):
-   - A Basic implementation has been developed using JAVA and Spring Boot as a foundation for the UrbanGeoPulse application. This implementation includes essential features for identifying messages from pedestrians or mobilized individuals and retrieving street and neighborhood information based on specified timeframes.<br>
+   - A Basic implementation has been developed using JAVA and Spring Boot as a foundation for the UrbanGeoPulse application.
+   - The implementation includes essential features for identifying messages from pedestrians or mobilized individuals and retrieving street and neighborhood information based on specified timeframes.<br>
    - The design and implementation align with the [12-Factor App methodology](architecture/architecture-document-phase-1-REST.md#appendix-12-factor-app-methodology).
    - For more information about the basic implementation, please refer to this [README](basic-implementation/README.md) file.
+   - The basic implementation demonstrates using [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/) for monitoring and reporting:
+     ![Kafka metrics](https://erancha-misc-images.s3.eu-central-1.amazonaws.com/UGP-Grafana-sample.jpg)
 
 **Acknowledgments**: [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
 

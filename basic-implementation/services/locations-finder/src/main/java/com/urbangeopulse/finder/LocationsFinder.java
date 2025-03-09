@@ -81,7 +81,7 @@ public class LocationsFinder {
         final String FROM_MESSAGE = String.format("from topic '%s' to topic '%s' ..", inputTopicConfig.getTopicName(), outputTopicConfig.getTopicName());
         final Map<String, Object> CONSUMER_CONFIGS =
                 new HashMap<String, Object>() {{
-                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("locations-finder-%s-cg", inputTopicConfig.getTopicName()));
+                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("locations-finder-%s-%s-cg", inputTopicConfig.getTopicName(), outputTopicConfig.getTopicName()));
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, LOCATIONS_FINDER_AUTO_OFFSET_RESET_CONFIG);
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, LOCATIONS_FINDER_MAX_POLL_INTERVAL_MINUTES_CONFIG * 60000);
