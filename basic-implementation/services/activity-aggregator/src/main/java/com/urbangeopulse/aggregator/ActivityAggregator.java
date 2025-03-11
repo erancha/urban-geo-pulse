@@ -99,6 +99,7 @@ public class ActivityAggregator {
 
             final Map<String, Integer> minuteResolutionMap = new HashMap<>(); // string keys representing "<locationName>|time in minute resolution", and Integer values representing count.
             final Map<TopicPartition, OffsetAndMetadata> offsetsToCommit = new HashMap<>();
+            final long ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_MS = (long) ((ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC + Math.random() * 3) * 1000); //  + Math.random() to spread the threads across 3 seconds
 
             try {
                 try (KafkaConsumer<String, String> consumer = KafkaUtils.createConsumer(CONSUMER_CONFIGS)) {
@@ -139,10 +140,10 @@ public class ActivityAggregator {
                         ConsumerRecords<String, String> kafkaRecords = consumer.poll(Duration.ofMillis(pollIntervalInMS));
                         pollIntervalInMS = (short) (kafkaRecords.isEmpty() ? 1000 : Math.max(pollIntervalInMS / 2, 1));
 
-                        // Persist to database every ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC seconds.
+                        // Persist to database every ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_MS milliseconds.
                         // Lower values: More frequent commits, lower latency, but higher database load and transaction overhead
                         // Higher values: Better batching and throughput, but increased memory usage and potential data loss on crashes
-                        if (Duration.between(lastPersistenceTime, Instant.now()).toMillis() >= ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC * 1000) {
+                        if (Duration.between(lastPersistenceTime, Instant.now()).toMillis() >= ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_MS) {
                             logger.fine(!minuteResolutionMap.isEmpty()
                                     ? String.format("Persisting data collected since: %s .. offsetsToCommit.size() = %d, minuteResolutionMap.size() = %d", lastPersistenceTime.atZone(zoneId).format(formatter), offsetsToCommit.size(), minuteResolutionMap.size())
                                     : String.format("No data to persist since: %s .. offsetsToCommit.size() = %d, minuteResolutionMap.size() = %d", lastPersistenceTime.atZone(zoneId).format(formatter), offsetsToCommit.size(), minuteResolutionMap.size()));

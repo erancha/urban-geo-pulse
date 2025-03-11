@@ -179,7 +179,7 @@ The following tech stack was preferred, primarily **due to current experience of
 
 - The data pattern of the [Activity-aggregator](#activity-aggregator-service) service fits NoSQL well:
   - Time-series aggregated data
-  - No complex joins needed
+  - No complex joins needed (**TODO**: change existing joins in [InfoDataService](../basic-implementation/services/info/src/main/java/com/urbangeopulse/info/services/InfoDataService.java) to retrieve the required names for the relatively small amount of selected records)
   - No geospatial queries required for these specific tables
   - Write-heavy workload (periodic persistence of aggregations)
 

@@ -58,16 +58,21 @@ public class SimulatorDataService {
             logger.info(String.format("Creating output topic '%s' with %d partitions, if it does not exist yet ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
             KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
 
-            if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) {
-                logger.info(String.format("Starting %d ITERATIONS_TO_SIMULATE_FROM_BACKUP from '%s', with RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", ITERATIONS_TO_SIMULATE_FROM_BACKUP, PEOPLE_GEO_LOCATIONS_CSV, RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
-                final boolean isBackupFileExist = new File(PEOPLE_GEO_LOCATIONS_CSV).exists();
-                if (!isBackupFileExist)
-                    logger.severe(String.format("Backup file '%s' does not exist!", PEOPLE_GEO_LOCATIONS_CSV));
-                else simulatePointsFromBackup(ITERATIONS_TO_SIMULATE_FROM_BACKUP);
-            }
+            if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) simulateFromBackup(ITERATIONS_TO_SIMULATE_FROM_BACKUP);
         } catch (Exception ex) {
             logException(ex, logger);
         }
+    }
+
+    /**
+     * @param iterationsToSimulateFromBackup number of iterations to simulate from PEOPLE_GEO_LOCATIONS_CSV.
+     */
+    public void simulateFromBackup(Short iterationsToSimulateFromBackup) {
+        if (iterationsToSimulateFromBackup == null) iterationsToSimulateFromBackup = ITERATIONS_TO_SIMULATE_FROM_BACKUP;
+        logger.info(String.format("Starting %d iterations to simulate from '%s', with RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", iterationsToSimulateFromBackup, PEOPLE_GEO_LOCATIONS_CSV, RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
+        final boolean isBackupFileExist = new File(PEOPLE_GEO_LOCATIONS_CSV).exists();
+        if (!isBackupFileExist) logger.severe(String.format("Backup file '%s' does not exist!", PEOPLE_GEO_LOCATIONS_CSV));
+        else simulatePointsFromBackup(iterationsToSimulateFromBackup);
     }
 
     /**

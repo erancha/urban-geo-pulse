@@ -112,6 +112,15 @@ public class SimulatorController {
     }
 
     /**
+     * @param iterationsToSimulateFromBackup number of iterations to simulate from PEOPLE_GEO_LOCATIONS_CSV.
+     */
+    @GetMapping("/urbangeopulse/api/simulator")
+    public void simulateFromBackup(@RequestParam(required = false) Short iterationsToSimulateFromBackup) {
+        dataService.simulateFromBackup(iterationsToSimulateFromBackup);
+    }
+
+
+    /**
      * execute an url (URL_TO_EXECUTE_AFTER_STARTUP) as soon as the controller is ready to accept requests.
      * @param event
      */

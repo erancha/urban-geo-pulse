@@ -2,7 +2,7 @@ version: '3'
 
 services:
   activity-aggregator-pedestrians-streets:
-    image: erancha/urbangeopulse:activity-aggregator-1.2
+    image: erancha/urbangeopulse:activity-aggregator-1.3
     networks:
       - urbangeopulse-net
     env_file:
@@ -13,13 +13,13 @@ services:
       ACTIVITY_AGGREGATOR_INPUT_TOPIC: "%PEDESTRIANS_STREETS_TOPIC%"
       ACTIVITY_AGGREGATOR_MOBILITY_TYPE: pedestrians
       ACTIVITY_AGGREGATOR_LOCATION_TYPE: street
-      ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC: 20
+      ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC: 45
     depends_on:
       - kafka-broker
       - postgis-server-nyc
 
   activity-aggregator-pedestrians-neighborhoods:
-    image: erancha/urbangeopulse:activity-aggregator-1.2
+    image: erancha/urbangeopulse:activity-aggregator-1.3
     networks:
       - urbangeopulse-net
     env_file:
@@ -35,7 +35,7 @@ services:
       - postgis-server-nyc
 
   activity-aggregator-mobilized-streets:
-    image: erancha/urbangeopulse:activity-aggregator-1.2
+    image: erancha/urbangeopulse:activity-aggregator-1.3
     networks:
       - urbangeopulse-net
     env_file:
@@ -51,7 +51,7 @@ services:
       - postgis-server-nyc
 
   activity-aggregator-mobilized-neighborhoods:
-    image: erancha/urbangeopulse:activity-aggregator-1.2
+    image: erancha/urbangeopulse:activity-aggregator-1.3
     networks:
       - urbangeopulse-net
     env_file:

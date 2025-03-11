@@ -1,18 +1,18 @@
 {
 	"info": {
-		"_postman_id": "862d17c2-3ec2-46c3-845e-34e6b472c87a",
+		"_postman_id": "6b8d7ad6-98fd-4899-ad7d-49bef48ce223",
 		"name": "UrbanGeoPulse - simulator",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "9394726"
 	},
 	"item": [
 		{
-			"name": "simulatePointsForStreets (West%25 / Duffield St)",
+			"name": "simulatePointsForStreets",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/urbangeopulse/api/simulator/streets/points?streetName=Duffield St&durationInMin=2",
+					"raw": "http://localhost:8080/urbangeopulse/api/simulator/streets/points?streetName=Duffield St&durationInMin=1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -37,7 +37,7 @@
 						},
 						{
 							"key": "durationInMin",
-							"value": "2"
+							"value": "1"
 						},
 						{
 							"key": "iterationsCount",
@@ -46,8 +46,35 @@
 						},
 						{
 							"key": "saveToBackup",
-							"disabled": true,
-							"value": null
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "simulateFromBackup",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/urbangeopulse/api/simulator?iterationsToSimulateFromBackup=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"urbangeopulse",
+						"api",
+						"simulator"
+					],
+					"query": [
+						{
+							"key": "iterationsToSimulateFromBackup",
+							"value": "10"
 						}
 					]
 				}

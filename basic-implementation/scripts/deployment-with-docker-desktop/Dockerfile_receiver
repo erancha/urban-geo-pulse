@@ -2,5 +2,6 @@ FROM adoptopenjdk:11-jdk-hotspot
 WORKDIR /app
 COPY target/receiver-1.0.jar /app
 COPY NYC_people-geo-locations--Duffield_St.csv /app/NYC_people-geo-locations--Duffield_St.csv
+COPY NYC_people-geo-locations--all.csv /app/NYC_people-geo-locations--all.csv
 EXPOSE 8080
 CMD ["java", "-jar", "receiver-1.0.jar"]
