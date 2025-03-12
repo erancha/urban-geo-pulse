@@ -87,7 +87,7 @@ public class SimulatorDataService {
         long producedMessagesCount = 0;
         long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record
         for (int i = 0; i < iterationsCount; i++) {
-            final int CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT = RECEIVER_THROTTLE_PRODUCING_THROUGHPUT + (i / 10) * 50; // increase the throughput by 50 every 10 iterations
+            final int CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT = RECEIVER_THROTTLE_PRODUCING_THROUGHPUT + (i / 2) * 50; // increase the throughput by 50 every 2 iterations
             logger.info(String.format("Starting iteration #%d with CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", i+1, CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
             float targetTimePerMessageMillis = (float) 1000 / CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
             try (BufferedReader reader = new BufferedReader(new FileReader(PEOPLE_GEO_LOCATIONS_CSV))) {

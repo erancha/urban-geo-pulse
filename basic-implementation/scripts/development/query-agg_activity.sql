@@ -27,7 +27,7 @@ where
 
 
 --------------------------------------------------------------
--- N most populated streets/neighborhoods (in the time range):
+-- N most populated streets (in the time range):
 --------------------------------------------------------------
 with agg_streets_activity_sum as (
 	select 
@@ -151,7 +151,4 @@ WHERE
 ORDER BY 
     pg_total_relation_size(t.table_name::text) DESC;
  
-select count(*) as agg_streets_activity_total_count       from agg_streets_activity;
-select count(*) as agg_neighborhoods_activity_total_count from agg_neighborhoods_activity ;
-
    
