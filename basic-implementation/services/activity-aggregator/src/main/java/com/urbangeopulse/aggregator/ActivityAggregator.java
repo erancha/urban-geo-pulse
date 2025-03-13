@@ -97,7 +97,7 @@ public class ActivityAggregator {
             final Thread currentThread = Thread.currentThread();
             logger.fine(String.format("Starting '%s' of class '%s' ..", currentThread.getName(), currentThread.getStackTrace()[1].getClassName()));
 
-            final Map<String, Integer> minuteResolutionMap = new HashMap<>(); // string keys representing "<locationName>|time in minute resolution", and Integer values representing count.
+            final Map<String, Integer> minuteResolutionMap = new HashMap<>(); // string keys representing "location gid|time in minute resolution", and Integer values representing count.
             final Map<TopicPartition, OffsetAndMetadata> offsetsToCommit = new HashMap<>();
             final long ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_MS = (long) ((ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC + Math.random() * 3) * 1000); //  + Math.random() to spread the threads across 3 seconds
 
@@ -167,13 +167,13 @@ public class ActivityAggregator {
 
                                 final long currentTimeMillis = (long) currEvent.get("eventTimeInMS");
                                 final long minuteResolutionMillis = currentTimeMillis - (currentTimeMillis % (60 * 1000));
-                                final String locationName = (String) currEvent.get("location");
-                                if (locationName == null) logger.severe(String.format("NULL location in event: %s", currEvent));
+                                final String locationGid = (String) currEvent.get("location");
+                                if (locationGid == null) logger.severe(String.format("NULL location in event: %s", currEvent));
                                 else {
-                                    final String key = String.format("%s|%d", locationName, minuteResolutionMillis);
+                                    final String key = String.format("%s|%d", locationGid, minuteResolutionMillis);
                                     minuteResolutionMap.merge(key, 1, Integer::sum);
+                                    if (minuteResolutionMap.size() >= this.maxRecordsToAggregate.get()) persistUncommitted(consumer, offsetsToCommit, minuteResolutionMap);
                                 }
-                                if (minuteResolutionMap.size() >= this.maxRecordsToAggregate.get()) persistUncommitted(consumer, offsetsToCommit, minuteResolutionMap);
                             } catch (Exception ex) {
                                 logException(ex, logger);
                             }

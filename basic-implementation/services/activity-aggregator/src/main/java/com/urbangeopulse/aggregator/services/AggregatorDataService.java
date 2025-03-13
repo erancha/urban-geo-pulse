@@ -38,9 +38,9 @@ public class AggregatorDataService {
         if (!minuteResolutionMap.isEmpty()) {
             // persist:
             String upsertQuery = String.format("INSERT INTO agg_%ss_activity (" +
-                            "%s_gid,timestamp_in_sec,%s_count,insertTimestamp,lastUpdateTimestamp) VALUES ((select gid from nyc_%ss where name = ? limit 1), ?, ?, now(), now()) " +
+                            "%s_gid,timestamp_in_sec,%s_count,insertTimestamp,lastUpdateTimestamp) VALUES (?, ?, ?, now(), now()) " +
                             "ON CONFLICT (%s_gid,timestamp_in_sec) DO UPDATE SET %s_count = agg_%ss_activity.%s_count + ?, lastUpdateTimestamp=now()",
-                            locationType, locationType, mobilityType, locationType, locationType, mobilityType, locationType, mobilityType);
+                            locationType, locationType, mobilityType, locationType, mobilityType, locationType, mobilityType);
             logger.log(Level.FINE, String.format("%-,4d items to persist: %s", minuteResolutionMap.size(), upsertQuery));
             Instant startTime = Instant.now();
             for (Map.Entry<String, Integer> entry : minuteResolutionMap.entrySet()) {
@@ -48,12 +48,10 @@ public class AggregatorDataService {
                 Integer value = entry.getValue();
                 logger.finer(String.format("Key: '%20s', value: %-5d", key, value));
                 final String[] keyPair = key.split("\\|");
-                final String locationName = keyPair[0];
-                if (locationName == null)
-                    logger.warning(String.format("NULL location, key: '%s', value: %d", key, value));
+                final int locationGid = Integer.parseInt(keyPair[0]);
                 final Timestamp eventTimestamp = new Timestamp(Long.parseLong(keyPair[1]));
-                jdbcTemplate.update(upsertQuery, locationName, eventTimestamp, value, value);
-                logger.finer(String.format("(%s, %s) --> value: %-5d -- Done", locationName, eventTimestamp, value));
+                jdbcTemplate.update(upsertQuery, locationGid, eventTimestamp, value, value);
+                logger.finer(String.format("(%d, %s) --> value: %-5d -- Done", locationGid, eventTimestamp, value));
             }
             logger.log(Level.FINE, String.format("Persisted %,5d %11s %13ss, in %5.1f seconds",
                         minuteResolutionMap.size(), mobilityType, locationType, (double) Duration.between(startTime, Instant.now()).toMillis() / 1000));

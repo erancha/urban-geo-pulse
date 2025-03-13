@@ -125,12 +125,12 @@ public class LocationsFinder {
                                 final Map currEvent = JavaSerializer.read(currKafkaRecordValue, HashMap.class);
 
                                 // get all locations (streets or neighborhoods) for the event's point, and produce events into OUTPUT_TOPIC_NAME for each location.
-                                List<String> locationNames = dataService.findLocation((String) currEvent.get("point"), LOCATIONS_FINDER_LOCATION_TYPE, LOCATIONS_FINDER_INPUT_SRID);
-                                if (!locationNames.isEmpty()) {
+                                List<String> locationGids = dataService.findLocation((String) currEvent.get("point"), LOCATIONS_FINDER_LOCATION_TYPE, LOCATIONS_FINDER_INPUT_SRID);
+                                if (!locationGids.isEmpty()) {
                                     currEvent.remove("point"); // produced events will have the location instead of the point.
-                                    locationNames.forEach(locationName -> {
-                                        if (locationName != null) { // having a null name returned for a point is a valid scenario, e.g. for 'motorway_link' type:  select * from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(599559.4836523728 4507255.523744515)'),26918),geom);
-                                            currEvent.put("location", locationName);
+                                    locationGids.forEach(locationGid -> {
+                                        if (locationGid != null) { // having a null gid returned for a point is a valid scenario, e.g. for 'motorway_link' type:  select * from nyc_streets where ST_Intersects(ST_SetSrid(ST_GeomFromText('POINT(599559.4836523728 4507255.523744515)'),26918),geom);
+                                            currEvent.put("location", locationGid);
                                             try {
                                                 KafkaUtils.send(outputTopicConfig.getTopicName(), JavaSerializer.write(currEvent));
                                             } catch (InitializationException | ExecutionException | InterruptedException | JsonException ex) {

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   locations-finder-pedestrians-streets:
-    image: erancha/urbangeopulse:locations-finder-1.7
+    image: erancha/urbangeopulse:locations-finder-1.8
     networks:
       - urbangeopulse-net
     env_file:
@@ -20,7 +20,7 @@ services:
       - postgis-server-nyc
 
   locations-finder-pedestrians-neighborhoods:
-    image: erancha/urbangeopulse:locations-finder-1.7
+    image: erancha/urbangeopulse:locations-finder-1.8
     networks:
       - urbangeopulse-net
     env_file:
@@ -38,7 +38,7 @@ services:
       - postgis-server-nyc
 
   locations-finder-mobilized-streets:
-    image: erancha/urbangeopulse:locations-finder-1.7
+    image: erancha/urbangeopulse:locations-finder-1.8
     networks:
       - urbangeopulse-net
     env_file:
@@ -56,7 +56,7 @@ services:
       - postgis-server-nyc
 
   locations-finder-mobilized-neighborhoods:
-    image: erancha/urbangeopulse:locations-finder-1.7
+    image: erancha/urbangeopulse:locations-finder-1.8
     networks:
       - urbangeopulse-net
     env_file:

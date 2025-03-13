@@ -61,14 +61,14 @@ public class MobilizationClassifier {
 
     @PostConstruct
     void startBackgroundConsumers() {
-        logger.info(String.format("Configuring topics '%s', '%s' and '%s' ...", PEOPLE_GEO_LOCATIONS_TOPIC, PEDESTRIANS_GEO_LOCATIONS_TOPIC, MOBILIZED_GEO_LOCATIONS_TOPIC));
+        logger.info(String.format("Configuring input topic '%s' and output topics '%s' and '%s' ...", PEOPLE_GEO_LOCATIONS_TOPIC, PEDESTRIANS_GEO_LOCATIONS_TOPIC, MOBILIZED_GEO_LOCATIONS_TOPIC));
         peopleGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEOPLE_GEO_LOCATIONS_TOPIC);
         pedestriansGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEDESTRIANS_GEO_LOCATIONS_TOPIC);
         mobilizedGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(MOBILIZED_GEO_LOCATIONS_TOPIC);
 
         final Map<String, Object> CONSUMER_CONFIGS =
                 new HashMap<String, Object>() {{
-                    put(ConsumerConfig.GROUP_ID_CONFIG, "mobilization-classifier-cg");
+                    put(ConsumerConfig.GROUP_ID_CONFIG, String.format("mobilization-classifier-%s-cg", peopleGeoLocationsTopicConfig.getTopicName()));
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, MOBILIZATION_CLASSIFIER_AUTO_OFFSET_RESET_CONFIG);
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, MOBILIZATION_CLASSIFIER_MAX_POLL_INTERVAL_MINUTES_CONFIG * 60000);

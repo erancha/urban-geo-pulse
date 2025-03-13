@@ -6,11 +6,11 @@ from
 	agg_streets_activity
 ;
 
-	
 delete from agg_streets_activity
 	-- where
 	-- 	lastUpdateTimestamp between (now() AT TIME ZONE 'Israel' - interval '420 seconds') and now() AT TIME ZONE 'Israel'
 ;
+
 
 select
 	count(*),
