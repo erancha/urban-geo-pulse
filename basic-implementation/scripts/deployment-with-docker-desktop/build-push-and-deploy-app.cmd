@@ -14,12 +14,12 @@ if errorlevel 1 (
 )
 
 echo Building and pushing all services...
-call build-and-push-a-service receiver 					1.11
+call build-and-push-a-service receiver                  1.11
 call build-and-push-a-service mobilization-classifier   1.1
-call build-and-push-a-service locations-finder 			1.8
+call build-and-push-a-service locations-finder          1.8
 call build-and-push-a-service delay-manager             1.0
-call build-and-push-a-service activity-aggregator       1.4
-call build-and-push-a-service info                      1.1
+call build-and-push-a-service activity-aggregator       1.15 mongodb
+call build-and-push-a-service info                      1.11 mongodb
 
 echo.
 echo Deploying application services...

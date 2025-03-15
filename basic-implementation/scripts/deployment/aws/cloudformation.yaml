@@ -6,7 +6,7 @@ Parameters:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
-  
+
   InstanceType:
     Description: EC2 instance type
     Type: String
@@ -45,8 +45,8 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 8082
-          ToPort: 8082
+          FromPort: 8085
+          ToPort: 8085
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 5432
@@ -57,11 +57,11 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref InstanceType
-      SecurityGroupIds: 
+      SecurityGroupIds:
         - !Ref EC2SecurityGroup
       KeyName: !Ref KeyName
       SubnetId: !Ref SubnetId
-      ImageId: ami-0c7217cdde317cfec  # Amazon Linux 2023 AMI (us-east-1)
+      ImageId: ami-0c7217cdde317cfec # Amazon Linux 2023 AMI (us-east-1)
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe

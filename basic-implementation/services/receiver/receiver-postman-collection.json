@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/urbangeopulse/api/receiver/point?cityCode=NYC&uuid=4c9d55c2-e51f-4d3f-93e1-35412dffe35d&point=POINT(585836.5580994898 4505775.3274659)",
+					"raw": "http://localhost:8080/urbangeopulse/api/v1/receiver/point?cityCode=NYC&uuid=4c9d55c2-e51f-4d3f-93e1-35412dffe35d&point=POINT(585836.5580994898 4505775.3274659)",
 					"protocol": "http",
 					"host": [
 						"localhost"

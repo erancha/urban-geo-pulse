@@ -2,16 +2,17 @@
 -- totals (in the time range):
 ------------------------------
 select
-	count(*),
+	count(*) as rowsCount,
 	sum(pedestrians_count) as sum_streets_pedestrians_count,
 	sum(mobilized_count) as sum_streets_mobilized_count
+--	,sum(pedestrians_count) + sum(mobilized_count) as sum_streets_people_count
 from
 	agg_streets_activity
 where
-	lastUpdateTimestamp between
-		/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-		and now() AT TIME ZONE 'Israel'
-;
+	timestamp_in_sec between
+		(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+		-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
+	;
 
 select
 	count(*),
@@ -20,9 +21,9 @@ select
 from
 	agg_neighborhoods_activity
 where
-	lastUpdateTimestamp between
-		/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-		and now() AT TIME ZONE 'Israel'
+	timestamp_in_sec between
+		(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+		-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
 ;
 
 
@@ -39,9 +40,9 @@ with agg_streets_activity_sum as (
 	join nyc_streets ns on
 		asa.street_gid = ns.gid
 	where
-		lastUpdateTimestamp between
-			/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-			and now() AT TIME ZONE 'Israel'
+		timestamp_in_sec between
+			(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+			-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
 	group by 
 		name
 )
@@ -67,9 +68,9 @@ WITH agg_streets_activity_range_lastUpdateTimestamp AS (
 		lastUpdateTimestamp
 	from agg_streets_activity asa
 	where
-		lastUpdateTimestamp between
-			/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-			and now() AT TIME ZONE 'Israel'
+		timestamp_in_sec between
+			(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+			-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
 ), agg_streets_activity_range_desc AS (
     SELECT lastUpdateTimestamp as timestamp FROM agg_streets_activity_range_lastUpdateTimestamp ORDER BY lastUpdateTimestamp DESC
 ), agg_streets_activity_range_insertTimestamp AS (
@@ -79,8 +80,8 @@ WITH agg_streets_activity_range_lastUpdateTimestamp AS (
 	from agg_streets_activity asa
 	where
 		insertTimestamp between 
-			/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-			and now() AT TIME ZONE 'Israel'
+			(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+			-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
 ), agg_streets_activity_range_asc AS (
     SELECT insertTimestamp as timestamp FROM agg_streets_activity_range_insertTimestamp ORDER BY insertTimestamp
 )
@@ -108,9 +109,9 @@ from
 join nyc_streets ns on
 	asa.street_gid = ns.gid
 where
-	lastUpdateTimestamp between
-		/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-		and now() AT TIME ZONE 'Israel'
+	timestamp_in_sec between
+		(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+		-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
 order by
 	timestamp_in_sec desc,
 	name
@@ -128,9 +129,9 @@ from
 join nyc_neighborhoods nn
 	on ana.neighborhood_gid = nn.gid
 where
-	lastUpdateTimestamp between
-		/* (now() AT TIME ZONE 'Israel' - interval '300 seconds') */ '2025-03-05 15:30:00'
-		and now() AT TIME ZONE 'Israel'
+	timestamp_in_sec between
+		(now() AT TIME ZONE 'UTC' - interval '30 minutes') and (now() AT TIME ZONE 'UTC')
+		-- ('2025-03-15 12:00:00'::timestamp AT TIME ZONE 'UTC') and ('2025-03-15 12:30:00'::timestamp AT TIME ZONE 'UTC')  
 order by
 	timestamp_in_sec desc,
 	name

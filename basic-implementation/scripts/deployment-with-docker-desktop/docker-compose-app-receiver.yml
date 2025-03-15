@@ -8,28 +8,16 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./shared-env/pg-access-vars.env
+      - ./shared-env/postgres-access-vars.env
       - ./shared-env/pipeline-vars.env
       - ./shared-env/mobilization-classifier-vars.env
     environment:
       PEOPLE_GEO_LOCATIONS_CSV: /app/NYC_people-geo-locations--all.csv
       # PEOPLE_GEO_LOCATIONS_CSV: /app/NYC_people-geo-locations--Duffield_St.csv
-      ITERATIONS_TO_SIMULATE_FROM_BACKUP: 1
+      # ITERATIONS_TO_SIMULATE_FROM_BACKUP: 20
       RECEIVER_THROTTLE_PRODUCING_THROUGHPUT: 600
     depends_on:
       - kafka-broker
-      - postgis-server-nyc
-
-  info:
-    image: erancha/urbangeopulse:info-1.1
-    ports:
-      - "8081:8081"
-    networks:
-      - urbangeopulse-net
-    env_file:
-      - ./shared-env/pg-access-vars.env
-      - ./shared-env/pipeline-vars.env
-    depends_on:
       - postgis-server-nyc
 
 networks:

@@ -3,21 +3,26 @@ package com.urbangeopulse.info.controllers;
 import com.urbangeopulse.info.services.InfoDataService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 @RestController
+@RequestMapping("/urbangeopulse/api/v1/info")
 public class InfoController {
 
     private static final Logger logger = Logger.getLogger(InfoController.class.getName());
-
     private final InfoDataService dataService;
 
     public InfoController(InfoDataService dataService) {
@@ -25,36 +30,42 @@ public class InfoController {
     }
 
     /**
-     * @param startTimestamp - start time stamp.
-     * @param endTimestamp - end time stamp.
-     * @param minutesBack - (alternative to 'startTimestamp' and 'endTimestamp') minutes ago from the current time, until the current time.
-     * @param locationType - 'street' or 'neighborhood'.
-     * @param sortBy - 'pedestrians' or 'mobilized'.
-     * @param recordsCount - number of records to return.
-     * @return the first most active 'recordsCount' streets or neighborhoods (depending on 'locationType') between timestamps 'startTimestamp' and 'endTimestamp', sorted by 'sortBy'.
+     * @param startTimestampUTC - start time stamp (in UTC time).
+     * @param endTimestampUTC   - end time stamp (in UTC time).
+     * @param minutesBack    - (alternative to 'startTimestampUTC' and 'endTimestampUTC') minutes ago from the current time, until the current time.
+     * @param locationType   - 'street' or 'neighborhood'.
+     * @param sortBy         - 'pedestrians' or 'mobilized'.
+     * @param recordsCount   - number of records to return.
+     * @return the first most active 'recordsCount' streets or neighborhoods (depending on 'locationType') between timestamps 'startTimestampUTC' and 'endTimestampUTC', sorted by 'sortBy'.
      */
-    @GetMapping("/urbangeopulse/api/info/locations/activity")
+    @GetMapping("/locations/activity")
     public List<Map<String, Object>> getActiveLocations(
-            @RequestParam(required = false) Timestamp startTimestamp,
-            @RequestParam(required = false) Timestamp endTimestamp,
+            @RequestParam(required = false) Timestamp startTimestampUTC,
+            @RequestParam(required = false) Timestamp endTimestampUTC,
             @RequestParam(required = false) Short minutesBack,
             @RequestParam(required = false, defaultValue = "street") String locationType,
             @RequestParam(required = false, defaultValue = "pedestrians") String sortBy,
             @RequestParam(required = false, defaultValue = "10") Short recordsCount) {
-        if (startTimestamp == null || endTimestamp == null) {
-            if (minutesBack != null) {
-                // Calculate startTimestamp and endTimestamp based on minutesBack
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.MINUTE, -minutesBack);
-                startTimestamp = new Timestamp(cal.getTimeInMillis());
-                endTimestamp = new Timestamp(System.currentTimeMillis());
-            } else {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Either provide startTimestamp and endTimestamp, or minutesBack"
-                );
-            }
+
+        if (minutesBack != null) {
+            // Use UTC time for minutesBack calculation
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            Instant now = Instant.now();
+            endTimestampUTC = Timestamp.from(now);
+            startTimestampUTC = Timestamp.from(now.minusSeconds(minutesBack * 60L));
+        } else if (startTimestampUTC == null || endTimestampUTC == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Either provide startTimestampUTC and endTimestampUTC, or minutesBack"
+            );
         }
-        return dataService.getActiveLocations(startTimestamp, endTimestamp, locationType, sortBy, recordsCount);
+
+        logger.info(String.format("Getting active locations for type=%s, sortBy=%s, count=%d", locationType, sortBy, recordsCount));
+        return dataService.getActiveLocations(
+                startTimestampUTC,
+                endTimestampUTC,
+                locationType,
+                sortBy,
+                recordsCount);
     }
 }

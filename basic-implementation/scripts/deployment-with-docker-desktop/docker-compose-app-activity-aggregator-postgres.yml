@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  activity-aggregator-pedestrians-streets:
+    image: erancha/urbangeopulse:activity-aggregator-postgres
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./shared-env/postgres-access-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/activity-aggregator-vars.env
+    environment:
+      ACTIVITY_AGGREGATOR_INPUT_TOPIC: "%PEDESTRIANS_STREETS_TOPIC%"
+      ACTIVITY_AGGREGATOR_MOBILITY_TYPE: pedestrians
+      ACTIVITY_AGGREGATOR_LOCATION_TYPE: street
+      ACTIVITY_AGGREGATOR_PERSISTENCE_INTERVAL_SEC: 45
+    depends_on:
+      - kafka-broker
+      - postgis-server-nyc
+
+  activity-aggregator-pedestrians-neighborhoods:
+    image: erancha/urbangeopulse:activity-aggregator-postgres
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./shared-env/postgres-access-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/activity-aggregator-vars.env
+    environment:
+      ACTIVITY_AGGREGATOR_INPUT_TOPIC: "%PEDESTRIANS_NEIGHBORHOODS_TOPIC%"
+      ACTIVITY_AGGREGATOR_MOBILITY_TYPE: pedestrians
+      ACTIVITY_AGGREGATOR_LOCATION_TYPE: neighborhood
+    depends_on:
+      - kafka-broker
+      - postgis-server-nyc
+
+  activity-aggregator-mobilized-streets:
+    image: erancha/urbangeopulse:activity-aggregator-postgres
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./shared-env/postgres-access-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/activity-aggregator-vars.env
+    environment:
+      ACTIVITY_AGGREGATOR_INPUT_TOPIC: "%MOBILIZED_STREETS_TOPIC%"
+      ACTIVITY_AGGREGATOR_MOBILITY_TYPE: mobilized
+      ACTIVITY_AGGREGATOR_LOCATION_TYPE: street
+    depends_on:
+      - kafka-broker
+      - postgis-server-nyc
+
+  activity-aggregator-mobilized-neighborhoods:
+    image: erancha/urbangeopulse:activity-aggregator-postgres
+    networks:
+      - urbangeopulse-net
+    env_file:
+      - ./shared-env/postgres-access-vars.env
+      - ./shared-env/pipeline-vars.env
+      - ./shared-env/activity-aggregator-vars.env
+    environment:
+      ACTIVITY_AGGREGATOR_INPUT_TOPIC: "%MOBILIZED_NEIGHBORHOODS_TOPIC%"
+      ACTIVITY_AGGREGATOR_MOBILITY_TYPE: mobilized
+      ACTIVITY_AGGREGATOR_LOCATION_TYPE: neighborhood
+    depends_on:
+      - kafka-broker
+      - postgis-server-nyc
+
+networks:
+  urbangeopulse-net:
+    external: true

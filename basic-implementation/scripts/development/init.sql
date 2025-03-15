@@ -11,7 +11,7 @@ CREATE TABLE agg_streets_activity (
 	insertTimestamp timestamp NOT NULL,
 	lastUpdateTimestamp timestamp NOT NULL,
 	CONSTRAINT agg_streets_activity_pkey PRIMARY KEY (id),
-	CONSTRAINT agg_streets_activity_un_by_street_gid_and_time UNIQUE (street_gid,timestamp_in_sec),
+	CONSTRAINT agg_streets_activity_unq_by_street_gid_and_time UNIQUE (street_gid,timestamp_in_sec),
 	CONSTRAINT agg_streets_activity_fk FOREIGN KEY (street_gid) REFERENCES nyc_streets(gid) ON DELETE CASCADE ON UPDATE CASCADE
 );
 create INDEX agg_streets_activity_timestamp_in_sec_idx on agg_streets_activity (timestamp_in_sec);

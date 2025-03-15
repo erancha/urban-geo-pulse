@@ -1,16 +1,19 @@
 version: '3'
 
 services:
-  delay-manager:
-    image: erancha/urbangeopulse:delay-manager-1.0
+  info:
+    image: erancha/urbangeopulse:info-mongodb
+    ports:
+      - "8081:8081"
     networks:
       - urbangeopulse-net
     env_file:
+      - ./shared-env/mongodb-access-vars.env
       - ./shared-env/postgres-access-vars.env
       - ./shared-env/pipeline-vars.env
-      - ./shared-env/delay-manager-vars.env
     depends_on:
-      - kafka-broker
+      - mongodb-server
+      - postgis-server-nyc
 
 networks:
   urbangeopulse-net:

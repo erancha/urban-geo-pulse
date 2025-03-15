@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +28,7 @@ import java.util.logging.Logger;
 import static com.urbangeopulse.utils.misc.Logger.logException;
 
 @RestController
+@RequestMapping("/urbangeopulse/api/v1/simulator")
 public class SimulatorController {
 
     private static final Logger logger = Logger.getLogger(SimulatorController.class.getName());
@@ -47,7 +49,7 @@ public class SimulatorController {
      * @param streetName - street name for which to generate points. if null - generate for all streets.
      * @param saveToBackup - if true, simulated messages will be produced into a backup file, instead of into a kafka topic.
      */
-    @GetMapping("/urbangeopulse/api/simulator/streets/points")
+    @GetMapping("/streets/points")
     public void simulatePointsForStreets(@RequestParam(required = false) String streetName,
                                          @RequestParam(required = false) Short threadsCount,
                                          @RequestParam(required = false) Short durationInMin,
@@ -114,7 +116,7 @@ public class SimulatorController {
     /**
      * @param iterationsToSimulateFromBackup number of iterations to simulate from PEOPLE_GEO_LOCATIONS_CSV.
      */
-    @GetMapping("/urbangeopulse/api/simulator")
+    @GetMapping("")
     public void simulateFromBackup(@RequestParam(required = false) Short iterationsToSimulateFromBackup) {
         dataService.simulateFromBackup(iterationsToSimulateFromBackup);
     }

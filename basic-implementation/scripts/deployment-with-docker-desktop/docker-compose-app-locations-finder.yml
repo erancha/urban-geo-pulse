@@ -6,7 +6,7 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./shared-env/pg-access-vars.env
+      - ./shared-env/postgres-access-vars.env
       - ./shared-env/pipeline-vars.env
       - ./shared-env/locations-finder-vars.env
       - ./shared-env/delay-manager-vars.env
@@ -24,7 +24,7 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./shared-env/pg-access-vars.env
+      - ./shared-env/postgres-access-vars.env
       - ./shared-env/pipeline-vars.env
       - ./shared-env/locations-finder-vars.env
       - ./shared-env/delay-manager-vars.env
@@ -42,7 +42,7 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./shared-env/pg-access-vars.env
+      - ./shared-env/postgres-access-vars.env
       - ./shared-env/pipeline-vars.env
       - ./shared-env/locations-finder-vars.env
       - ./shared-env/delay-manager-vars.env
@@ -60,7 +60,7 @@ services:
     networks:
       - urbangeopulse-net
     env_file:
-      - ./shared-env/pg-access-vars.env
+      - ./shared-env/postgres-access-vars.env
       - ./shared-env/pipeline-vars.env
       - ./shared-env/locations-finder-vars.env
       - ./shared-env/delay-manager-vars.env

@@ -69,6 +69,7 @@ public class ActivityAggregator {
     private final AtomicLong counter = new AtomicLong();
     private final AtomicInteger maxRecordsToAggregate = new AtomicInteger();
 
+    // Data service implementation selected via spring.profiles.active in resources\application.properties
     private final AggregatorDataService dataService;
 
     public ActivityAggregator(AggregatorDataService dataService) {
@@ -194,7 +195,7 @@ public class ActivityAggregator {
         //        };
 
         try {
-            logger.info(String.format("Creating input topic '%s' (%d partitions), if it does not exist yet ...", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount()));
+            logger.info(String.format("Creating (if needed) input topic '%s' (%d partitions) ...", inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount()));
             KafkaUtils.checkAndCreateTopic(inputTopicConfig.getTopicName(), inputTopicConfig.getPartitionsCount());
 
             // start consumers: (ensure at least one partition per consumer)

@@ -28,7 +28,7 @@ public class ReceiverDataService {
     private void initialize() {
         try {
             peopleGeoLocationsTopicConfig = KafkaUtils.TopicConfig.from(PEOPLE_GEO_LOCATIONS_TOPIC);
-            logger.info(String.format("Creating output topic '%s' with %d partitions, if it does not exist yet ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
+            logger.info(String.format("Creating (if needed) output topic '%s' with %d partitions ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
             KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
         } catch (Exception ex) {
             logException(ex, logger);

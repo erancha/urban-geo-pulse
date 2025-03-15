@@ -8,7 +8,8 @@ from
 
 delete from agg_streets_activity
 	-- where
-	-- 	lastUpdateTimestamp between (now() AT TIME ZONE 'Israel' - interval '420 seconds') and now() AT TIME ZONE 'Israel'
+		-- 	timestamp_in_sec between (now() AT TIME ZONE 'UTC' - interval '420 seconds') 
+		--  and /* now() AT TIME ZONE 'UTC' */ '2025-03-15 12:00:00'
 ;
 
 
@@ -22,5 +23,6 @@ from
 
 delete from agg_neighborhoods_activity
 	-- where
-	-- 	lastUpdateTimestamp between (now() AT TIME ZONE 'Israel' - interval '420 seconds') and now() AT TIME ZONE 'Israel'
+		-- 	timestamp_in_sec between (now() AT TIME ZONE 'UTC' - interval '420 seconds') 
+		--  and /* now() AT TIME ZONE 'UTC' */ '2025-03-15 12:00:00'
 ;

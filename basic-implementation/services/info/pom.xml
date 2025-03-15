@@ -68,6 +68,32 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- MongoDB Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!-- MongoDB Java Driver - version aligned with Spring Boot -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+
+        <!-- MongoDB Core - needed for internal logging -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-core</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+
+        <!-- MongoDB BSON - needed for document handling -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>4.1.2</version>
+        </dependency>
 
         <!-- AspectJ dependencies -->
         <dependency>

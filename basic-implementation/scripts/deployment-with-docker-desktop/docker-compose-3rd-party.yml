@@ -2,7 +2,7 @@
 
 services:
   kafka-zookeeper:
-    image: confluentinc/cp-zookeeper:6.0.14
+    image: confluentinc/cp-zookeeper:latest
     hostname: kafka-zookeeper
     ports:
       - "2181:2181"
@@ -13,7 +13,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka-broker:
-    image: confluentinc/cp-kafka:6.0.14
+    image: confluentinc/cp-kafka:latest
     hostname: kafka-broker
     depends_on:
       - kafka-zookeeper
@@ -31,7 +31,7 @@ services:
       KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:333eae24759aaa7b3fc14e5e7dea232200c13dcd
+    image: provectuslabs/kafka-ui:latest
     depends_on:
       - kafka-broker
       - kafka-zookeeper
@@ -46,6 +46,8 @@ services:
       LOGGING_LEVEL_ROOT: error
       LOGGING_LEVEL_COM_PROVECTUS: error
     restart: unless-stopped
+    # netstat -ano | findstr :7070
+    # tasklist /fi "pid eq 99999" /fo list
 
   redis-server:
     image: redis:7.0-alpine
@@ -71,7 +73,7 @@ services:
   pgadmin-server:
     image: dpage/pgadmin4
     ports:
-      - 8082:80
+      - 8085:80
     networks:
       - urbangeopulse-net
     volumes:
@@ -80,6 +82,34 @@ services:
       - PGADMIN_DEFAULT_EMAIL=user@gmail.com
       - PGADMIN_DEFAULT_PASSWORD=pgadminpass
 
+  mongodb-server:
+    image: mongo:6.0
+    ports:
+      - 27017:27017
+    networks:
+      - urbangeopulse-net
+    volumes:
+      - ${LOCALAPPDATA}\Temp\mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+
+  mongo-express:
+    image: mongo-express:1.0.0-alpha.4
+    ports:
+      - 8083:8081
+    networks:
+      - urbangeopulse-net
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=user
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_MONGODB_URL=mongodb://user:pass@mongodb-server:27017/
+    depends_on:
+      - mongodb-server
+  
+  # Access Mongo Express at http://localhost:8083
+  # Username: user
+  # Password: pass
 
   # metrics/
   # ├── prometheus.yml

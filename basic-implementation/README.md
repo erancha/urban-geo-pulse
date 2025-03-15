@@ -9,7 +9,7 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 
 1. Start `Docker Desktop`.
 2. Execute [scripts/development/start-3rd-party-stack.cmd](scripts/development/start-3rd-party-stack.cmd) to start 3rd-party infrastucture services (Kafka, Postgres, Redis, etc .. [scripts/development/docker-compose.yml](scripts/development/docker-compose.yml)).
-3. Start PGAdmin (http://localhost:8082: Username = `user@gmail.com`, Password = `pgadminpass`, add a new server : Host name/address = `postgis-server-nyc`, Username = `user`, Password = `pass`), right click on the `nyc` database, and [download](https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip) + [`Restore`](https://postgis.net/workshops/postgis-intro/loading_data.html) the data bundle the of the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
+3. Start [PGAdmin](http://localhost:8085): Username = `user@gmail.com`, Password = `pgadminpass`, add a new server : Host name/address = `postgis-server-nyc`, Username = `user`, Password = `pass`), right click on the `nyc` database, and [download](https://s3.amazonaws.com/s3.cleverelephant.ca/postgis-workshop-2020.zip) + [`Restore`](https://postgis.net/workshops/postgis-intro/loading_data.html) the data bundle the of the [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
 4. Copy the container id of `development` \ `postgis-server-nyc-1` from `Docker Desktop` into the environment variable `PG_CONTAINER_ID` in [scripts/development/set-sql-env.cmd](scripts/development/set-sql-env.cmd).
 5. Execute [scripts/development/init-sql.cmd](scripts/development/init-sql.cmd) to create additional tables for the UrbanGeoPulse application.
 6. Maven build [workspace/pom.xml](workspace/pom.xml) (from an IDE or from command line : [scripts/development/build-maven.cmd](scripts/development/build-maven.cmd)).
@@ -23,7 +23,7 @@ It serves as a starting point for building the UrbanGeoPulse application. The im
 8. The [Receiver](services) service can be set to simulate messages on startup by setting an environment variable `PEOPLE_GEO_LOCATIONS_CSV` in [services/receiver/start-service.cmd](services/receiver/start-service.cmd).
    - Each two adjacent points from the CSV file are associated with the same person (i.e. have the same uuid), to simulate a movement of that person.
    - The receiver is set by default to simulate messages from [services/receiver/NYC_people-geo-locations--Duffield_St.csv](services/receiver/NYC_people-geo-locations--Duffield_St.csv).
-   - Progress can be monitored in [Grafana](http://localhost:3000/d/kafka-monitoring/kafka-monitoring) (Username = `admin`, Password = `admin`) or [Kafka-UI](http://localhost:7070/ui/clusters/kafka-broker/consumer-groups) , and by querying Postgres: [scripts/development/query-sql.cmd](scripts/development/query-sql.cmd).
+   - Progress can be monitored in [Grafana](http://localhost:3000/d/kafka-monitoring/kafka-monitoring) (Username = `admin`, Password = `admin`) or [Kafka-UI](http://localhost:7070/ui/clusters/kafka-broker/consumer-groups) , and by querying Postgres (e.g. [scripts/development/query-sql.cmd](scripts/development/query-sql.cmd)) and [Mongo Express](http://localhost:8083)
    - This simulation is expected to complete in few minutes.
 9. In addition, a Postman collection is available to initiate further simulation: [services/receiver/simulator-postman-collection.json](services/receiver/simulator-postman-collection.json).
 
@@ -67,7 +67,7 @@ The application is designed for [deployment](scripts/deployment) on AWS EC2 inst
    ./deploy-3rdparty.sh
 
    # Configure pgAdmin:
-   # 1. Access pgAdmin at http://<ec2-public-ip>:8082
+   # 1. Access pgAdmin at http://<ec2-public-ip>:8085
    # 2. Login with:
    #    - Email: user@gmail.com
    #    - Password: pgadminpass
@@ -97,7 +97,7 @@ The application is designed for [deployment](scripts/deployment) on AWS EC2 inst
 
 Note: Make sure to:
 
-- Configure security groups to allow access to required ports (8082 for pgAdmin, etc.)
+- Configure security groups to allow access to required ports (8085 for pgAdmin, etc.)
 - Use the EC2 instance's public IP or DNS when accessing services
 
 ## Contribution ideas:
