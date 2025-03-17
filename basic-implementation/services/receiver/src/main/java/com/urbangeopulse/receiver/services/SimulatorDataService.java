@@ -39,12 +39,18 @@ public class SimulatorDataService {
     @Value("${PEOPLE_GEO_LOCATIONS_CSV:./NYC_people-geo-locations--Duffield_St.csv}")
     private String PEOPLE_GEO_LOCATIONS_CSV;
 
-    @Value("${ITERATIONS_TO_SIMULATE_FROM_BACKUP:#{1}}")
-    private short ITERATIONS_TO_SIMULATE_FROM_BACKUP;
+    @Value("${SIMULATOR_ITERATIONS_FROM_BACKUP:#{1}}")
+    private short SIMULATOR_ITERATIONS_FROM_BACKUP;
 
-    @Value("${RECEIVER_THROTTLE_PRODUCING_THROUGHPUT:#{10000}}") // maximum throughput - produced messages per second
-    private int RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
+    @Value("${SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING:#{10000}}") // throughput limit for produced messages per second
+    private int SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING;
     public static final int THROTTLE_COUNT_CHECK = 1000; // check throttling every N messages.
+
+    @Value("${SIMULATOR_INCREMENT_EACH_N_ITERATIONS:#{5}}") // increment the throughput limit by SIMULATOR_INCREMENT_VALUE every SIMULATOR_INCREMENT_EACH_N_ITERATIONS 
+    private int SIMULATOR_INCREMENT_EACH_N_ITERATIONS;
+
+    @Value("${SIMULATOR_INCREMENT_VALUE:#{200}}") // increment the throughput limit by SIMULATOR_INCREMENT_VALUE every SIMULATOR_INCREMENT_EACH_N_ITERATIONS 
+    private int SIMULATOR_INCREMENT_VALUE;
 
     public SimulatorDataService(ReceiverDataService receiverDataService, JdbcTemplate jdbcTemplate) {
         this.receiverDataService = receiverDataService;
@@ -58,7 +64,7 @@ public class SimulatorDataService {
             logger.info(String.format("Creating (if needed) output topic '%s' with %d partitions ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
             KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
 
-            if (ITERATIONS_TO_SIMULATE_FROM_BACKUP > 0) simulateFromBackup(ITERATIONS_TO_SIMULATE_FROM_BACKUP);
+            if (SIMULATOR_ITERATIONS_FROM_BACKUP > 0) simulateFromBackup(SIMULATOR_ITERATIONS_FROM_BACKUP);
         } catch (Exception ex) {
             logException(ex, logger);
         }
@@ -68,8 +74,8 @@ public class SimulatorDataService {
      * @param iterationsToSimulateFromBackup number of iterations to simulate from PEOPLE_GEO_LOCATIONS_CSV.
      */
     public void simulateFromBackup(Short iterationsToSimulateFromBackup) {
-        if (iterationsToSimulateFromBackup == null) iterationsToSimulateFromBackup = ITERATIONS_TO_SIMULATE_FROM_BACKUP;
-        logger.info(String.format("Starting %d iterations to simulate from '%s', with RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", iterationsToSimulateFromBackup, PEOPLE_GEO_LOCATIONS_CSV, RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
+        if (iterationsToSimulateFromBackup == null) iterationsToSimulateFromBackup = SIMULATOR_ITERATIONS_FROM_BACKUP;
+        logger.info(String.format("Starting %d iterations to simulate from '%s', with SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING %d + SIMULATOR_INCREMENT_EACH_N_ITERATIONS %d * SIMULATOR_INCREMENT_VALUE %d", iterationsToSimulateFromBackup, PEOPLE_GEO_LOCATIONS_CSV, SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING, SIMULATOR_INCREMENT_EACH_N_ITERATIONS, SIMULATOR_INCREMENT_VALUE));
         final boolean isBackupFileExist = new File(PEOPLE_GEO_LOCATIONS_CSV).exists();
         if (!isBackupFileExist) logger.severe(String.format("Backup file '%s' does not exist!", PEOPLE_GEO_LOCATIONS_CSV));
         else simulatePointsFromBackup(iterationsToSimulateFromBackup);
@@ -85,9 +91,9 @@ public class SimulatorDataService {
         if (peopleGeoLocationsTopicConfig == null) throw new IllegalStateException("Topic configuration is not initialized.");
         long throttleStartTimeMillis = System.currentTimeMillis();
         long producedMessagesCount = 0;
-        long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record
         for (int i = 0; i < iterationsCount; i++) {
-            final int CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT = RECEIVER_THROTTLE_PRODUCING_THROUGHPUT + (i / 5) * 100; // increase the throughput by 100 every 5 iterations
+            long deltaFromCurrentTime = 0; // the delta between the current timestamp and the timestamp of the 1st record
+            final int CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT = SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING + (i / SIMULATOR_INCREMENT_EACH_N_ITERATIONS) * SIMULATOR_INCREMENT_VALUE;
             logger.info(String.format("Starting iteration #%d with CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT %d", i+1, CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT));
             float targetTimePerMessageMillis = (float) 1000 / CURRENT_RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
             try (BufferedReader reader = new BufferedReader(new FileReader(PEOPLE_GEO_LOCATIONS_CSV))) {

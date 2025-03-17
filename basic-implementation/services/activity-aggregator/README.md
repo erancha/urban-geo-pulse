@@ -2,7 +2,7 @@
 
 Refer to the [Architecture Document](../../../architecture/architecture-document-phase-1-REST.md#activity-aggregator-service).
 
-#### Implementation Instructions
+### Implementation Instructions
 
 - Each instance of this service aggregates and persists data for one and only **one of the following combinations**:
   1.  **Pedestrians** activity in **streets**.
@@ -17,3 +17,16 @@ Refer to the [Architecture Document](../../../architecture/architecture-document
   - Higher values: Better batching and throughput, but increased memory usage and potential data loss on crashes.
 - Each service instance further allows spawning a few consumer threads using an environment variable **ACTIVITY_AGGREGATOR_CONSUMER_THREADS_COUNT**.
 - **Consumer groups rebalancing** are handled properly by this service, to ensure that messages aggregated in-memory aren't lost when the service attempts to commit uncommitted offsets associated with these messages.
+
+### **MongoDB** vs **PostgreSQL** aggregation
+
+- The data pattern of the [Activity-aggregator](#activity-aggregator-service) service fits NoSQL well:
+
+  - Time-series aggregated data
+  - No complex joins needed (existing joins in [InfoDataService](../basic-implementation/services/info/src/main/java/com/urbangeopulse/info/services/InfoDataService.java) were easily modified to retrieve from postgres only the required names for the relatively small amount of selected records)
+  - No geospatial queries required for these specific tables
+  - Write-heavy workload (periodic persistence of aggregations)
+
+- In the screen capture below, the bottom chart represents the **MongoDB** aggregation on the left and the **Postgres** aggregation on the right.
+
+![Lucid](https://erancha-misc-images.s3.eu-central-1.amazonaws.com/UGP-Grafana-mongodb-vs-postgres-aggregation.jpg 'UGP-Grafana-mongodb-vs-postgres-aggregation')

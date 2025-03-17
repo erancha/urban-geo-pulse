@@ -2,7 +2,7 @@ version: '3'
 
 services:
   delay-manager:
-    image: erancha/urbangeopulse:delay-manager-1.0
+    image: erancha/urbangeopulse:delay-manager-latest
     networks:
       - urbangeopulse-net
     env_file:

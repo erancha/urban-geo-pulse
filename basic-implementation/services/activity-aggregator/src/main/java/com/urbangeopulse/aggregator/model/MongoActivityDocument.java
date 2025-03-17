@@ -67,10 +67,7 @@ import java.sql.Timestamp;
         {  
             locationType: 'street',
             mobilityType: 'pedestrians',
-            count: {$gt: 1}
-        }
- * 
-        {
+            count: {$gt: 1},
             "timestampInSec": {
                 "$gte": ISODate("2025-03-15T07:30:00Z")
             }

@@ -60,12 +60,14 @@ public class InfoController {
             );
         }
 
-        logger.info(String.format("Getting active locations for type=%s, sortBy=%s, count=%d", locationType, sortBy, recordsCount));
-        return dataService.getActiveLocations(
+        logger.info(String.format("Getting active locations for type=%s, between UTC times %s and %s, sortBy=%s, count=%d ...", locationType, startTimestampUTC, endTimestampUTC, sortBy, recordsCount));
+        var results = dataService.getActiveLocations(
                 startTimestampUTC,
                 endTimestampUTC,
                 locationType,
                 sortBy,
                 recordsCount);
+        logger.info(String.format("Found %d active locations", results.size()));
+        return results;
     }
 }

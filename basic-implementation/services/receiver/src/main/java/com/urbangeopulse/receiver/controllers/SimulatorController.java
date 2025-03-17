@@ -36,8 +36,8 @@ public class SimulatorController {
     @Value("${URL_TO_EXECUTE_AFTER_STARTUP:#{null}}")
     private String URL_TO_EXECUTE_AFTER_STARTUP;
 
-    @Value("${RECEIVER_THROTTLE_PRODUCING_THROUGHPUT:#{10000}}") // maximum throughput - produced messages per second
-    private int RECEIVER_THROTTLE_PRODUCING_THROUGHPUT;
+    @Value("${SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING:#{10000}}") // maximum throughput - produced messages per second
+    private int SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING;
 
     private final SimulatorDataService dataService;
 
@@ -88,7 +88,7 @@ public class SimulatorController {
 
         // Only initialize throttling parameters for KafkaProducer
         boolean shouldThrottle = writer instanceof KafkaProducer;
-        float targetTimePerMessageMillis = shouldThrottle ? (float) 1000 / RECEIVER_THROTTLE_PRODUCING_THROUGHPUT : 0;
+        float targetTimePerMessageMillis = shouldThrottle ? (float) 1000 / SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING : 0;
         long throttleStartTimeMillis = shouldThrottle ? System.currentTimeMillis() : 0;
         SimulatorDataService.ThrottlingContext throttlingContext = shouldThrottle ? new SimulatorDataService.ThrottlingContext(0, throttleStartTimeMillis, targetTimePerMessageMillis) : null;
 
