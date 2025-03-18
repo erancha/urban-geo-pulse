@@ -69,7 +69,8 @@ import java.sql.Timestamp;
             mobilityType: 'pedestrians',
             count: {$gt: 1},
             "timestampInSec": {
-                "$gte": ISODate("2025-03-15T07:30:00Z")
+                "$gte": ISODate("2025-03-15T07:00:00Z"),
+                "$lte": ISODate("2025-03-15T07:30:00Z")
             }
         }
  */

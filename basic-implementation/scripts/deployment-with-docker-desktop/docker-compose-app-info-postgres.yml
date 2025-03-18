@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  info:
+  info-postgres:
     image: erancha/urbangeopulse:info-postgres
     ports:
-      - "8081:8081"
+      - "8082:8081"
     networks:
       - urbangeopulse-net
     env_file:

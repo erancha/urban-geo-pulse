@@ -61,8 +61,10 @@ if %errorlevel% equ 0 (
 ) else (
     echo Deploying 'Info' service...
     set COMPOSE_FILE=docker-compose-app-info-mongodb.yml
-    @REM set COMPOSE_FILE=docker-compose-app-info-postgres.yml
     echo Using compose file: !COMPOSE_FILE!
+    docker stack deploy --compose-file=!COMPOSE_FILE! --with-registry-auth app
+
+    set COMPOSE_FILE=docker-compose-app-info-postgres.yml
     docker stack deploy --compose-file=!COMPOSE_FILE! --with-registry-auth app
 )
 

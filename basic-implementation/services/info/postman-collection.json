@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8081/urbangeopulse/api/v1/info/locations/activity?recordsCount=10&minutesBack=30",
+					"raw": "http://localhost:8081/urbangeopulse/api/v1/info/locations/activity?recordsCount=10&minutesBack=10",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -45,7 +45,7 @@
 						},
 						{
 							"key": "minutesBack",
-							"value": "30",
+							"value": "10",
 							"description": "Minutes ago from the current time, until the current time."
 						},
 						{
