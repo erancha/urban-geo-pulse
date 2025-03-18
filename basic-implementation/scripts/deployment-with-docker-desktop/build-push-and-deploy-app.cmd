@@ -18,8 +18,8 @@ call build-and-push-a-service receiver                  1.0  latest
 call build-and-push-a-service mobilization-classifier   1.0  latest
 call build-and-push-a-service locations-finder          1.0  latest
 call build-and-push-a-service delay-manager             1.0  latest
-call build-and-push-a-service activity-aggregator       1.1  postgres
-call build-and-push-a-service info                      1.1  postgres
+call build-and-push-a-service activity-aggregator       1.0  mongodb
+call build-and-push-a-service info                      1.0  mongodb
 
 echo.
 echo Deploying application services...

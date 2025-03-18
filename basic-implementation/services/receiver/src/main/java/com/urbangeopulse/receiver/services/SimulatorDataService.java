@@ -44,12 +44,10 @@ public class SimulatorDataService {
     private int SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING;
     public static final int THROTTLE_COUNT_CHECK = 1000; // check throttling every N messages.
 
-    @Value("${SIMULATOR_INCREMENT_EACH_N_ITERATIONS:#{5}}")
-    // increment the throughput limit by SIMULATOR_INCREMENT_VALUE every SIMULATOR_INCREMENT_EACH_N_ITERATIONS
-    private int SIMULATOR_INCREMENT_EACH_N_ITERATIONS;
+    @Value("${SIMULATOR_INCREMENT_EVERY_N_ITERATIONS:#{5}}") // increment the throughput limit by SIMULATOR_INCREMENT_VALUE every SIMULATOR_INCREMENT_EVERY_N_ITERATIONS
+    private int SIMULATOR_INCREMENT_EVERY_N_ITERATIONS;
 
-    @Value("${SIMULATOR_INCREMENT_VALUE:#{200}}")
-    // increment the throughput limit by SIMULATOR_INCREMENT_VALUE every SIMULATOR_INCREMENT_EACH_N_ITERATIONS
+    @Value("${SIMULATOR_INCREMENT_VALUE:#{200}}") // increment the throughput limit by SIMULATOR_INCREMENT_VALUE every SIMULATOR_INCREMENT_EVERY_N_ITERATIONS
     private int SIMULATOR_INCREMENT_VALUE;
 
     private static final String QUERY_ALL_POINTS_OF_ONE_STREET = "select ST_AsText((ST_DumpPoints(geom)).geom) as point_geom from nyc_streets where name=?;";
@@ -66,7 +64,7 @@ public class SimulatorDataService {
             logger.info(String.format("Creating (if needed) output topic '%s' with %d partitions ...", peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount()));
             KafkaUtils.checkAndCreateTopic(peopleGeoLocationsTopicConfig.getTopicName(), peopleGeoLocationsTopicConfig.getPartitionsCount());
 
-            if (SIMULATOR_ITERATIONS_FROM_BACKUP > 0) simulateFromBackup(SIMULATOR_ITERATIONS_FROM_BACKUP, SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING, SIMULATOR_INCREMENT_EACH_N_ITERATIONS, SIMULATOR_INCREMENT_VALUE);
+            if (SIMULATOR_ITERATIONS_FROM_BACKUP > 0) simulateFromBackup(SIMULATOR_ITERATIONS_FROM_BACKUP, SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING, SIMULATOR_INCREMENT_EVERY_N_ITERATIONS, SIMULATOR_INCREMENT_VALUE);
         } catch (Exception ex) {
             logException(ex, logger);
         }
@@ -181,12 +179,12 @@ public class SimulatorDataService {
     /**
      * @param iterationsCount number of iterations to simulate from PEOPLE_GEO_LOCATIONS_CSV.
      * @param throttleThroughput throughput limit for produced messages per second
-     * @param incrementEachNIterations increment the throughput limit every N iterations
+     * @param incrementEveryNIterations increment the throughput limit every N iterations
      * @param incrementValue amount to increment the throughput by
      */
-    public void simulateFromBackup(Short iterationsCount, int throttleThroughput, int incrementEachNIterations, int incrementValue) {
+    public void simulateFromBackup(Short iterationsCount, int throttleThroughput, int incrementEveryNIterations, int incrementValue) {
         if (iterationsCount == null) iterationsCount = SIMULATOR_ITERATIONS_FROM_BACKUP;
-        logger.info(String.format("Starting %d iterations to simulate from '%s', with throttleThroughput %d + incrementEachNIterations %d * incrementValue %d", iterationsCount, PEOPLE_GEO_LOCATIONS_CSV, throttleThroughput, incrementEachNIterations, incrementValue));
+        logger.info(String.format("Starting %d iterations to simulate from '%s', with throttleThroughput %d + incrementEveryNIterations %d * incrementValue %d", iterationsCount, PEOPLE_GEO_LOCATIONS_CSV, throttleThroughput, incrementEveryNIterations, incrementValue));
         final boolean isBackupFileExist = new File(PEOPLE_GEO_LOCATIONS_CSV).exists();
         if (!isBackupFileExist)
             logger.severe(String.format("Backup file '%s' does not exist!", PEOPLE_GEO_LOCATIONS_CSV));
@@ -196,7 +194,7 @@ public class SimulatorDataService {
             long throttleStartTimeMillis = System.currentTimeMillis();
             long producedMessagesCount = 0;
             for (int i = 0; i < iterationsCount; i++) {
-                final int currentThrottleThroughput = throttleThroughput + (i / incrementEachNIterations) * incrementValue;
+                final int currentThrottleThroughput = throttleThroughput + (i / incrementEveryNIterations) * incrementValue;
                 logger.info(String.format("Starting iteration #%d with throttle throughput %d", i + 1, currentThrottleThroughput));
                 float targetTimePerMessageMillis = (float) 1000 / currentThrottleThroughput;
                 final long iterationStartTime = System.currentTimeMillis();
@@ -213,9 +211,9 @@ public class SimulatorDataService {
                                 final long currEventAlignedTimeInMS = currEventTimeInMS + iterationStartTime; // aligns event time to the simulation start time
                                 currEvent.put("eventTimeInMS", currEventAlignedTimeInMS);
 
-                                // Check if event time is more than 1 hour ahead of current time
+                                // Check if the event time is more than 5.5 minutes ahead of the current time:
                                 long currentTimeInMS = System.currentTimeMillis();
-                                if (currEventAlignedTimeInMS > currentTimeInMS + Duration.ofMinutes(5).toMillis()) logger.warning(String.format("Event time %d (%s) is more than 5 minutes ahead of current time %d (%s)", currEventAlignedTimeInMS, Instant.ofEpochMilli(currEventAlignedTimeInMS), currentTimeInMS, Instant.ofEpochMilli(currentTimeInMS)));
+                                if (currEventAlignedTimeInMS > currentTimeInMS + Duration.ofMinutes(5).plusSeconds(30).toMillis()) logger.warning(String.format("Event time %d (%s) is more than 5 minutes ahead of current time %d (%s)", currEventAlignedTimeInMS, Instant.ofEpochMilli(currEventAlignedTimeInMS), currentTimeInMS, Instant.ofEpochMilli(currentTimeInMS)));
 
                                 KafkaUtils.send(peopleGeoLocationsTopicConfig.getTopicName(), JavaSerializer.write(currEvent), key);
                                 if (++producedMessagesCount % THROTTLE_COUNT_CHECK == 0) {

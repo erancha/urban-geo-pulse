@@ -40,8 +40,8 @@ public class SimulatorController {
     @Value("${SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING:#{10000}}")
     private int SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING;
 
-    @Value("${SIMULATOR_INCREMENT_EACH_N_ITERATIONS:#{5}}")
-    private int SIMULATOR_INCREMENT_EACH_N_ITERATIONS;
+    @Value("${SIMULATOR_INCREMENT_EVERY_N_ITERATIONS:#{5}}")
+    private int SIMULATOR_INCREMENT_EVERY_N_ITERATIONS;
 
     @Value("${SIMULATOR_INCREMENT_VALUE:#{200}}")
     private int SIMULATOR_INCREMENT_VALUE;
@@ -76,12 +76,12 @@ public class SimulatorController {
     public void simulateFromBackup(
             @RequestParam(required = false) Short iterationsCount,
             @RequestParam(required = false) Integer throttleThroughput,
-            @RequestParam(required = false) Integer incrementEachNIterations,
+            @RequestParam(required = false) Integer incrementEveryNIterations,
             @RequestParam(required = false) Integer incrementValue) {
         dataService.simulateFromBackup(
             iterationsCount,
             throttleThroughput != null ? throttleThroughput : SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING,
-            incrementEachNIterations != null ? incrementEachNIterations : SIMULATOR_INCREMENT_EACH_N_ITERATIONS,
+            incrementEveryNIterations != null ? incrementEveryNIterations : SIMULATOR_INCREMENT_EVERY_N_ITERATIONS,
             incrementValue != null ? incrementValue : SIMULATOR_INCREMENT_VALUE
         );
     }

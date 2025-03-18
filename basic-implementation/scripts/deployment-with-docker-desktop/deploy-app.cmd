@@ -26,7 +26,7 @@ if %errorlevel% equ 0 (
     docker stack deploy --compose-file=docker-compose-app-mobilization-classifier.yml --with-registry-auth app
 )
 
-@REM Deploy Locations Finder service
+echo ------------------------------------------------------------
 echo ,%SKIP_SERVICES%, | findstr /I ",locations-finder," >nul
 if %errorlevel% equ 0 (
     echo Skipping 'Locations Finder' service...
@@ -40,35 +40,30 @@ if %errorlevel% equ 0 (
 @REM @REM TODO: Missing manifest in the jar file ..?!
 @REM @REM docker stack deploy --compose-file=docker-compose-app-delay-manager.yml --with-registry-auth app
 
-@REM Deploy Activity Aggregator service
+echo ------------------------------------------------------------
+set DB_TYPE=mongodb
+@REM set DB_TYPE=postgres
 echo ,%SKIP_SERVICES%, | findstr /I ",activity-aggregator," >nul
 if %errorlevel% equ 0 (
     echo Skipping 'Activity Aggregator' service...
 ) else (
-    echo Deploying 'Activity Aggregator' service...
-    set COMPOSE_FILE=docker-compose-app-activity-aggregator-mongodb.yml
-    @REM set COMPOSE_FILE=docker-compose-app-activity-aggregator-postgres.yml
-    echo Using compose file: !COMPOSE_FILE!
-    powershell -Command "(Get-Content !COMPOSE_FILE!) | ForEach-Object { [Environment]::ExpandEnvironmentVariables($_) } | Set-Content docker-compose-app-activity-aggregator.tmp.yml"
+    echo Deploying 'Activity Aggregator' service with !DB_TYPE! database...
+    powershell -Command "(Get-Content docker-compose-app-activity-aggregator-!DB_TYPE!.yml) | ForEach-Object { [Environment]::ExpandEnvironmentVariables($_) } | Set-Content docker-compose-app-activity-aggregator.tmp.yml"
     docker stack deploy --compose-file=docker-compose-app-activity-aggregator.tmp.yml --with-registry-auth app
     del docker-compose-app-activity-aggregator.tmp.yml
 )
 
-@REM Deploy Info service
+echo ------------------------------------------------------------
 echo ,%SKIP_SERVICES%, | findstr /I ",info," >nul
 if %errorlevel% equ 0 (
     echo Skipping 'Info' service...
 ) else (
     echo Deploying 'Info' service...
-    set COMPOSE_FILE=docker-compose-app-info-mongodb.yml
-    echo Using compose file: !COMPOSE_FILE!
-    docker stack deploy --compose-file=!COMPOSE_FILE! --with-registry-auth app
-
-    set COMPOSE_FILE=docker-compose-app-info-postgres.yml
-    docker stack deploy --compose-file=!COMPOSE_FILE! --with-registry-auth app
+    docker stack deploy --compose-file=docker-compose-app-info-mongodb.yml --with-registry-auth app
+    @REM docker stack deploy --compose-file=docker-compose-app-info-postgres.yml --with-registry-auth app
 )
 
-@REM Deploy Receiver service
+echo ------------------------------------------------------------
 echo ,%SKIP_SERVICES%, | findstr /I ",receiver," >nul
 if %errorlevel% equ 0 (
     echo Skipping 'Receiver' service...

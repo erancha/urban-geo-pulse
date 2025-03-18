@@ -39,7 +39,7 @@ public class InfoController {
      * @return the first most active 'recordsCount' streets or neighborhoods (depending on 'locationType') between timestamps 'startTimestampUTC' and 'endTimestampUTC', sorted by 'sortBy'.
      */
     @GetMapping("/locations/activity")
-    public List<Map<String, Object>> getActiveLocations(
+    public Map<String, Object> getActiveLocations(
             @RequestParam(required = false) Timestamp startTimestampUTC,
             @RequestParam(required = false) Timestamp endTimestampUTC,
             @RequestParam(required = false) Short minutesBack,
@@ -60,14 +60,26 @@ public class InfoController {
             );
         }
 
-        logger.info(String.format("Getting active locations for type=%s, between UTC times %s and %s, sortBy=%s, count=%d ...", locationType, startTimestampUTC, endTimestampUTC, sortBy, recordsCount));
+        String requestInfo = String.format("Getting active locations for type=%s, between UTC times %s and %s, sortBy=%s, count=%d ...", 
+                                            locationType, startTimestampUTC, endTimestampUTC, sortBy, recordsCount);
+        logger.info(requestInfo);
+        
         var results = dataService.getActiveLocations(
                 startTimestampUTC,
                 endTimestampUTC,
                 locationType,
                 sortBy,
                 recordsCount);
-        logger.info(String.format("Found %d active locations", results.size()));
-        return results;
+                
+        String resultsInfo = String.format("%d most active locations", results.size());
+        logger.info(resultsInfo);
+        
+        Map<String, Object> response = Map.of(
+            "requestInfo", requestInfo,
+            "resultsInfo", resultsInfo,
+            "data", results
+        );
+        
+        return response;
     }
 }

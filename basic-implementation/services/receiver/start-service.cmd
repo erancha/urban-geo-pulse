@@ -14,13 +14,13 @@ set EXECUTION_COMMAND=java -Xms128M -jar target\receiver-1.0.jar
 @REM set URL_TO_EXECUTE_AFTER_STARTUP="http://localhost:8080/urbangeopulse/api/v1/simulator/streets/points?streetName=Duffield St&iterationsCount=10&saveToBackup=true"
 
 set PEOPLE_GEO_LOCATIONS_CSV=NYC_people-geo-locations--Duffield_St.csv
-@REM set SIMULATOR_ITERATIONS_FROM_BACKUP=10
+set SIMULATOR_ITERATIONS_FROM_BACKUP=10
 set TIME_TO_WAIT_BEFORE_SQL_QUERY_IN_SEC=180
 
 @REM set URL_TO_EXECUTE_AFTER_STARTUP="http://localhost:8080/urbangeopulse/api/v1/simulator/streets/points?saveToBackup=true"
 
 @REM set PEOPLE_GEO_LOCATIONS_CSV=NYC_people-geo-locations--all.csv
-set SIMULATOR_ITERATIONS_FROM_BACKUP=1
+@REM set SIMULATOR_ITERATIONS_FROM_BACKUP=1
 @REM set TIME_TO_WAIT_BEFORE_SQL_QUERY_IN_SEC=420
 
 set SIMULATOR_THROTTLE_THROUGHPUT_PRODUCING=500
