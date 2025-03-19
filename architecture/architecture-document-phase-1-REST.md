@@ -4,67 +4,64 @@
 
 # Architecture Document
 
-<small>Note: This document is based on an Architecture Document template provided as part of “The complete guide to becoming a great Software Architect” course, by Memi Lavi.
-The template is a copyrighted material by Memi Lavi (www.memilavi.com, memi@memilavi.com).</small>
-
 ### Table Of Content
 
 <!-- toc -->
 
 - [Background](#background)
 - [Requirements](#requirements)
-  * [Functional Requirements](#functional-requirements)
-  * [Non-Functional Requirements](#non-functional-requirements)
+  - [Functional Requirements](#functional-requirements)
+  - [Non-Functional Requirements](#non-functional-requirements)
 - [Executive Summary](#executive-summary)
 - [Overall Architecture](#overall-architecture)
-  * [Detailed diagram](#detailed-diagram)
-  * [Services](#services)
-  * [Messaging](#messaging)
-  * [Technology Stack](#technology-stack)
-    + [JAVA _Spring Boot_](#java-_spring-boot_)
-    + [_Kafka_](#_kafka_)
-    + [_PostgreSQL_](#_postgresql_)
-    + [_MongoDB_](#_mongodb_)
-    + [_Redis_](#_redis_)
-    + [_React_](#_react_)
-  * [Non-Functional Attributes](#non-functional-attributes)
-    + [High-Performance:](#high-performance)
+  - [Detailed diagram](#detailed-diagram)
+  - [Services](#services)
+  - [Messaging](#messaging)
+  - [Technology Stack](#technology-stack)
+    - [JAVA _Spring Boot_](#java-_spring-boot_)
+    - [_Kafka_](#_kafka_)
+    - [_PostgreSQL_](#_postgresql_)
+    - [_MongoDB_](#_mongodb_)
+    - [_Redis_](#_redis_)
+    - [_React_](#_react_)
+  - [Non-Functional Attributes](#non-functional-attributes)
+    - [High-Performance:](#high-performance)
       - [Performance](#performance)
       - [Scalability](#scalability)
-    + [Resiliency:](#resiliency)
+    - [Resiliency:](#resiliency)
       - [High Availability](#high-availability)
       - [Fault Tolerance](#fault-tolerance)
-    + [Security:](#security)
-    + [Maintainability:](#maintainability)
+    - [Security:](#security)
+    - [Maintainability:](#maintainability)
       - [Testability:](#testability)
-        * [Logging](#logging)
-        * [System level testing](#system-level-testing)
-    + [Extensibility](#extensibility)
+        - [Logging](#logging)
+        - [System level testing](#system-level-testing)
+    - [Extensibility](#extensibility)
 - [Services Drill Down](#services-drill-down)
-  * [Mobile application](#mobile-application)
-    + [Role](#role)
-  * [Receiver service](#receiver-service)
-    + [Role](#role-1)
-    + [Implementation Instructions](#implementation-instructions)
-    + [Postman API collections](#postman-api-collections)
-  * [Mobilization-classifier service](#mobilization-classifier-service)
-    + [Role](#role-2)
-    + [Implementation Instructions](#implementation-instructions-1)
-  * [Locations-finder service](#locations-finder-service)
-    + [Role](#role-3)
-    + [Implementation Instructions](#implementation-instructions-2)
-    + [Deployment Instructions](#deployment-instructions)
-  * [Delay service](#delay-service)
-    + [Role](#role-4)
-    + [Diagram](#diagram)
-  * [Activity-aggregator service](#activity-aggregator-service)
-    + [Role](#role-5)
-    + [Implementation Instructions](#implementation-instructions-3)
-  * [Info service](#info-service)
-    + [Role](#role-6)
-    + [APIs:](#apis)
+  - [Mobile application](#mobile-application)
+    - [Role](#role)
+  - [Receiver service](#receiver-service)
+    - [Role](#role-1)
+    - [Implementation Instructions](#implementation-instructions)
+    - [Postman API collections](#postman-api-collections)
+  - [Mobilization-classifier service](#mobilization-classifier-service)
+    - [Role](#role-2)
+    - [Implementation Instructions](#implementation-instructions-1)
+  - [Locations-finder service](#locations-finder-service)
+    - [Role](#role-3)
+    - [Implementation Instructions](#implementation-instructions-2)
+    - [Deployment Instructions](#deployment-instructions)
+  - [Delay service](#delay-service)
+    - [Role](#role-4)
+    - [Diagram](#diagram)
+  - [Activity-aggregator service](#activity-aggregator-service)
+    - [Role](#role-5)
+    - [Implementation Instructions](#implementation-instructions-3)
+  - [Info service](#info-service)
+    - [Role](#role-6)
+    - [APIs:](#apis)
 - [Appendix: 12-Factor App methodology](#appendix-12-factor-app-methodology)
-  * [Conclusion](#conclusion)
+  - [Conclusion](#conclusion)
 
 <!-- tocstop -->
 
@@ -84,7 +81,7 @@ It’s extremely important for the development team to closely follow the archit
 
 ### Functional Requirements
 
-1. [Receive](#receiver-service) messages containing **geospatial locations**, e.g. from cell phones of **pedestrians** and **mobilized** individuals.
+1. [Receive](#receiver-service) messages containing **geospatial locations** from cell phones of **pedestrians** and **mobilized** individuals.
 
 2. [Identify](#mobilization-classifier-service) each message's source (**pedestrian** or **mobilized** individual) based on the speed calculated between the last two messages sent from the same device.
 
@@ -116,7 +113,7 @@ As can be seen in the diagram, the application comprises a few separate, indepen
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
-This architecture, in conjunction with a modern development platform (refer to [basic JAVA Spring Boot implementation](../basic-implementation/README.md)), will help create a modern, **scalable**, **reliable**, and **easy to maintain** system, that can serve NYC successfully for years to come, and help achieve its financial goals.
+This architecture, in conjunction with a modern development platform (refer to [basic JAVA Spring Boot implementation](../basic-implementation/README.md)) will ensure a modern, **scalable**, **reliable**, and **easy to maintain** system, that can serve NYC successfully for years to come, and help achieve its goals.
 
 ## Overall Architecture
 
@@ -132,7 +129,7 @@ The architecture comprises the following services:
 
 - [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
-- [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Reciver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
+- [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Receiver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
 - [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point using geospatial queries, and produce the location (street or neighborhood) into one of the following topics:
@@ -197,17 +194,34 @@ The following tech stack was preferred, primarily **due to current experience of
 
 #### High-Performance:
 
-##### Performance
+The system's performance is maintained through several key mechanisms:
+
+1. Efficient Data Processing
+
+   - Event-driven in-memory aggregation
+   - Minute-resolution state persistence
+
+2. Optimized Storage and Concurrency
+   - Thread-safe operations
+   - Time-based data consolidation
+   - Minimized storage footprint (e.g., high-frequency events consolidated to minute-level statistics)
 
 ##### Scalability
 
 `Definition: The software should be able to handle increased demands and growth without significant performance degradation. It should be designed to scale both vertically (adding more resources to a single machine) and horizontally (adding more machines to the system)`
 
-This architecture allows to easily scale services as needed:
+The system's architecture enables seamless scaling through:
 
-1. Each service has a specific, single task, and can be scaled independently, either automatically (by container orchestration systems such as Kubernetes) or manually (according to consumer groups lags, which can be viewed by a [Kafka UI](../basic-implementation/scripts/deployment/docker-compose-3rd-party.yml)).
-2. For example, the [Mobilization-classifier](#mobilization-classifier-service) service is responsible only to classify geospatial points to either pedestrians or mobilized points - other services are responsible to find streets/neighborhoods and to aggregate the data.
-3. The services’ inner code is 100% stateless, allowing scaling to be performed on a live system, without changing the code or shutting down the system.
+1. Service Isolation
+
+   - Single-responsibility services
+   - Independent scaling boundaries
+   - Stateless processing model
+
+2. Resource Management
+   - Container orchestration
+   - Event-based scaling
+   - Distributed processing
 
 #### Resiliency:
 
@@ -215,14 +229,50 @@ This architecture allows to easily scale services as needed:
 
 ##### High Availability
 
+The system ensures continuous operation through:
+
+1. Service Architecture
+
+   - Independent service scaling
+   - Event-driven processing
+   - Resource optimization
+
+2. Data Resilience
+   - Message persistence
+   - State recovery
+   - Event replay capability
+
 ##### Fault Tolerance
 
-As explained in the [Messaging](#messaging) section, Kafka adds a layer of Fault Tolerance (all messages are persisted in Kafka logs, and can be consumed and re-consumed in case of failures).
-Note: **Consumer groups rebalancing** must be handled properly (refer specifically to the note in the [Activity-aggregator](#activity-aggregator-service) service).
+The system maintains reliability through:
+
+1. Message Handling
+
+   - Durable event storage
+   - Guaranteed message delivery
+   - Consumer group coordination
+
+2. State Management
+   - In-memory aggregation
+   - Message-based recovery
+   - Minute-resolution persistence
 
 #### Security:
 
 `Definition: The software should have robust security measures in place to protect sensitive data, prevent unauthorized access, and mitigate any potential security vulnerabilities.`
+
+The system should implement a delegated security model:
+
+1. Authentication Flow
+
+   - Third-party identity providers
+   - Token-based authentication
+   - Stateless security model
+
+2. Authorization Strategy
+   - Service-level authorization
+   - Secure token management
+   - Resource-based access control
 
 The services [Mobile application](#mobile-application), [Receiver](#receiver-service) and [Info](#info-service) should support the [OAuth2](https://oauth.net/2/) (Open Authorization 2.0) and [JWT](https://jwt.io/) (JSON Web Tokens) authentication protocols.
 Users should be able to authenticate using their Gmail account, for example, i.e. the system should not introduce a self made User Management component.
@@ -238,12 +288,34 @@ Users should be able to authenticate using their Gmail account, for example, i.e
 
 `Definition: The software should be designed in a way that makes it easy to understand, modify, and maintain over time. This includes considerations for code readability, proper documentation, and adherence to coding best practices.`
 
-As mentioned above, each service should hav a specific, single task. This is an important step in making the system easy to understand.
-In addition, the development team should take into consideration best practices for code readability and proper documentation, preferring clear, modular and properly named software components rather than over-documenting.
+The architecture promotes maintainability through:
+
+1. System Design
+
+   - Service boundaries
+   - Event-driven interfaces
+   - Modular components
+
+2. Operational Visibility
+   - Centralized monitoring
+   - Service-level metrics
+   - Independent testing capabilities
 
 ##### Testability:
 
 `Definition: The software should be designed in a way that facilitates easy testing, both at unit and system levels. It should have proper logging and debugging mechanisms in place to aid in identifying and resolving issues.`
+
+The system ensures testability through:
+
+1. Service Isolation
+
+   - Independent testing of microservices
+   - Clear interfaces and APIs
+
+2. Operational Support
+   - Centralized logging
+   - System-wide monitoring
+   - Independent service testing
 
 ###### Logging
 
@@ -260,13 +332,26 @@ In addition, the development team should take into consideration best practices 
 
 `Definition: The software should be designed in a way that facilitates adding new features without modifying the existing system`.
 
+The system's architecture enables feature growth through:
+
+1. Service Composition
+
+   - Event-driven integration
+   - Loose service coupling
+   - Independent deployment
+
+2. Interface Design
+   - Message-based contracts
+   - Version-tolerant APIs
+   - Pluggable components
+
 ## Services Drill Down
 
 ### Mobile application
 
 #### Role
 
-- To **collect geospatial locations**, e.g. from cell phones, and send messages to the [Receiver](#receiver-service) service.
+- To **collect geospatial locations** from cell phones, and send messages to the [Receiver](#receiver-service) service.
 - Each message contains a geospatial **point** of the location in which the data was collected.
 - Each message also contains a city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 
@@ -276,7 +361,7 @@ In addition, the development team should take into consideration best practices 
 
 #### Role
 
-- To **receive messages** containing geospatial locations, e.g. from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
+- To **receive messages** containing geospatial locations from cell phones of **pedestrians** and **mobilized** individuals. <br>Each message will include the following details:
   1. UUID (Universal Unique Identifier).
   2. Coordinates (geospatial point).
   3. Timestamp.
@@ -356,7 +441,7 @@ To process messages containing events that should be:
 #### Role
 
 1. To aggregate **in-memory** the number of pedestrians and mobilized per duration (e.g. 1 minute).
-2. To periodically persist the aggregated data into the following [_MongoDB_](#_mongodb_) tables:
+2. To periodically persist the aggregated data into the following [_MongoDB_](#mongodb) tables:
    1. _agg_streets_activity_
    2. _agg_neighborhoods_activity_.
 
