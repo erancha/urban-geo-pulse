@@ -41,7 +41,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/urbangeopulse/api/v1/simulator/execute-from-backup?iterationsCount=10",
+					"raw": "http://localhost:8080/urbangeopulse/api/v1/simulator/execute-from-backup?iterationsCount=10&throttleThroughput=1000&incrementEveryNIterations=5&incrementValue=100",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -58,6 +58,18 @@
 						{
 							"key": "iterationsCount",
 							"value": "10"
+						},
+						{
+							"key": "throttleThroughput",
+							"value": "1000"
+						},
+						{
+							"key": "incrementEveryNIterations",
+							"value": "5"
+						},
+						{
+							"key": "incrementValue",
+							"value": "100"
 						}
 					]
 				}
