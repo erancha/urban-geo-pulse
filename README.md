@@ -33,4 +33,6 @@ This data will aid in **decision-making** for **immediate needs**, such as deplo
 
 **Acknowledgments**: [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
 
+**License**: This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You can view the full license [here](https://creativecommons.org/licenses/by-nc/4.0/).
+
 **Contact Information**: http://www.linkedin.com/in/eran-hachmon.
