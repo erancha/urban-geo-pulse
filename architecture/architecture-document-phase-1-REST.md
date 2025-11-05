@@ -26,7 +26,6 @@
     - [_React_](#_react_)
   - [Non-Functional Attributes](#non-functional-attributes)
     - [High-Performance:](#high-performance)
-      - [Performance](#performance)
       - [Scalability](#scalability)
     - [Resiliency:](#resiliency)
       - [High Availability](#high-availability)
@@ -108,7 +107,7 @@ When designing the architecture, a strong emphasis was put on the following qual
 <p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring performance and high-availability.</p>
 
 Here is a high-level overview of the architecture:
-![Lucid](https://lucid.app/publicSegments/view/e6d6bb91-8e6e-43b5-9f44-49935994172d/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/6f4a521d-b3f7-48f9-8f81-a7e2874ef736/image.jpeg 'System diagram')
 As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
@@ -119,7 +118,7 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 ### [Detailed diagram](https://lucid.app/publicSegments/view/1146cc57-0419-4bd8-a5ec-75b76874425d/image.jpeg)
 
-![Lucid](https://lucid.app/publicSegments/view/e6d6bb91-8e6e-43b5-9f44-49935994172d/image.jpeg 'System diagram')
+![Lucid](https://lucid.app/publicSegments/view/6f4a521d-b3f7-48f9-8f81-a7e2874ef736/image.jpeg 'System diagram')
 
 - The architecture follows the [**12-Factor App methodology**](https://12factor.net).
 
