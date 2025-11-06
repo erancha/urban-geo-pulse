@@ -61,6 +61,7 @@
     - [APIs:](#apis)
 - [Appendix: 12-Factor App methodology](#appendix-12-factor-app-methodology)
   - [Conclusion](#conclusion)
+- [Appendix: Why manual producers/consumers (not Kafka Streams)](#appendix-why-manual-producersconsumers-not-kafka-streams)
 
 <!-- tocstop -->
 
@@ -527,3 +528,19 @@ To assess whether the **UrbanGeoPulse** architecture adheres to the 12-Factor Ap
 ### Conclusion
 
 Overall, the **UrbanGeoPulse** architecture demonstrates a strong alignment with many of the 12 factors, particularly in service independence, configuration management, and statelessness. However, there are areas where details could be clearer or more explicitly defined, particularly regarding the build/release/run separation and admin processes.
+
+## Appendix: Why manual producers/consumers (not Kafka Streams)
+
+Short answer: Kafka Streams brings stateful runtime complexity (state stores, RocksDB, changelogs, upgrade/migration concerns) but doesn't materially simplify our core work: per-event spatial enrichment + minute-level counts by street/neighborhood.
+
+- Geospatial enrichment relies on PostGIS/DB lookups. Embedding heavy DB/geospatial logic inside Streams tasks increases coupling and operational risk.
+- We need different scaling per mobility×location type; simple consumer groups + partition-by-locationId is a clearer, lower-risk scaling model than Streams' task-to-thread mapping.
+- Streams adds operational overhead (state management, migrations, exactly-once tuning) while our aggregations are simple in-memory minute buckets persisted idempotently to MongoDB.
+
+Notes and quick recommendations:
+
+- Events are real-time single geo-points (not batches). Keep message key = city:locationId so aggregators partition by location.
+- Continue with one process per mobility×locationType, aggregate per-minute in memory, flush to MongoDB with idempotent keys (city,locationType,locationId,minute).
+- Reconsider Kafka Streams only if you later require complex windowed joins, centralized Kafka state queries, or Kafka-native interactive queries.
+
+This keeps the pipeline simple, debuggable, and operationally light while meeting the real-time spatial-aggregation requirements.
