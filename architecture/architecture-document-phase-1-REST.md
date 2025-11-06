@@ -110,7 +110,7 @@ Here is a high-level overview of the architecture:
 
 ![Lucid](https://lucid.app/publicSegments/view/6f4a521d-b3f7-48f9-8f81-a7e2874ef736/image.jpeg 'System diagram')
 
-As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**. Each service has its own dedicated data store or read replica (for read-heavy operations), ensuring data isolation and optimized performance. The services communicate through Kafka using manual producers and consumers (not Kafka Streams) for simpler, more predictable processing and easier debugging. This approach keeps the pipeline straightforward while maintaining loose coupling and enabling reliable asynchronous data flow between components.
+As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**. Each service has its own dedicated data store, and for services performing heavy read operations (like the Locations-finder service which executes complex geospatial queries), PostgreSQL read replicas are used to prevent overloading the primary database. The services communicate through Kafka using manual producers and consumers (not Kafka Streams) for simpler, more predictable processing and easier debugging. This approach keeps the pipeline straightforward while maintaining loose coupling and enabling reliable asynchronous data flow between components.
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
@@ -127,7 +127,7 @@ The architecture comprises the following services:
 - [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Receiver's output topic, determine whether a message is from a pedestrian or mobilized individual by using Redis to temporarily store and retrieve points for speed calculation (thus avoiding unnecessary load on PostgreSQL), and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
-- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point using geospatial queries, and produce the location (street or neighborhood) into one of the following topics:
+- [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point using complex geospatial queries (utilizing PostgreSQL read replicas to handle the heavy read load without impacting the primary database), and produce the location (street or neighborhood) into one of the following topics:
   - _pedestrians_streets_
   - _pedestrians_neighborhoods_
   - _mobilized_streets_
