@@ -14,7 +14,6 @@
   - [Non-Functional Requirements](#non-functional-requirements)
 - [Executive Summary](#executive-summary)
 - [Overall Architecture](#overall-architecture)
-  - [Detailed diagram](#detailed-diagram)
   - [Services](#services)
   - [Messaging](#messaging)
   - [Technology Stack](#technology-stack)
@@ -73,9 +72,9 @@ This document describes the **UrbanGeoPulse**'s architecture, a system requested
 NYC requires **real-time** information on the streets and neighborhoods with the highest concentration of **pedestrians** and **non-pedestrians** (referred to as **mobilized** individuals) at any requested timeframe within the last 24 hours.<br>
 This information will be used to **make decisions** regarding **real-time** needs such as the deployment of police resources and traffic control, as well as **long-term** considerations like transportation budgets, timing of municipal construction work, and advertising fees.
 
-The architecture comprises technology and modeling decisions that will ensure the final product will be fast, reliable and easy to maintain.
-The document outlines the thought process for every aspect of the architecture, and explains why specific decisions were made.
-It’s extremely important for the development team to closely follow the architecture depicted in this document. In any case of doubt please consult the Software Architect.
+We've made some careful choices about technology and design patterns to make sure the end product hits all the marks - it'll be fast, reliable, and easy to maintain.
+Throughout this document, we'll walk you through our thinking process and explain the reasoning behind each decision we made.
+This document is the blueprint for the dev team. Make sure to stick to these guidelines closely. If anything seems unclear, don't hesitate to reach out to the Software Architect.
 
 ## Requirements
 
@@ -100,16 +99,18 @@ It’s extremely important for the development team to closely follow the archit
 
 ## Executive Summary
 
-This document describes the architecture of the **UrbanGeoPulse** application, as described in the [Background](#background) section. <br><br>
-When designing the architecture, a strong emphasis was put on the following qualities:
+Let's dive into the architecture of **UrbanGeoPulse**, which we introduced in the [Background](#background) section. <br><br>
+The following qualities were given higher priority:
 
-- The application should be fast (to support real-time needs such as the deployment of police resources and traffic control).
-- The application should be reliable and support very high load (to support the population of NYC, specifically the number of active mobile devices during rush hours).
+- Speed is crucial - we need this app to be fast, especially for real-time decisions like deploying police resources and managing traffic control.
+- Rock-solid reliability and high load handling - after all, we're talking about NYC here, with millions of mobile devices hitting the system during rush hours.
 <p>To achieve these qualities, the architecture is based on the most up-to-date best practices and methodologies, ensuring performance and high-availability.</p>
 
 Here is a high-level overview of the architecture:
+
 ![Lucid](https://lucid.app/publicSegments/view/6f4a521d-b3f7-48f9-8f81-a7e2874ef736/image.jpeg 'System diagram')
-As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**, each has its own task, and each communicates with the other services using standard protocols.
+
+As can be seen in the diagram, the application comprises a few separate, independent, loosely-coupled **microservices**. Each service has its own dedicated data store or read replica (for read-heavy operations), ensuring data isolation and optimized performance. The services communicate through Kafka using manual producers and consumers (not Kafka Streams) for simpler, more predictable processing and easier debugging. This approach keeps the pipeline straightforward while maintaining loose coupling and enabling reliable asynchronous data flow between components.
 
 All the services are stateless, allowing them to **[scale](#scalability)** easily and seamlessly. In addition, the architecture is **[resilient](#resiliency)** - no data is lost if any service suddenly shuts down. The only places for data in the application are Kafka and the data store (PostgreSQL and MongoDB), all of them persist the data to the disk, thus protecting data from cases of shutdown.
 
@@ -117,19 +118,13 @@ This architecture, in conjunction with a modern development platform (refer to [
 
 ## Overall Architecture
 
-### [Detailed diagram](https://lucid.app/publicSegments/view/1146cc57-0419-4bd8-a5ec-75b76874425d/image.jpeg)
-
-![Lucid](https://lucid.app/publicSegments/view/6f4a521d-b3f7-48f9-8f81-a7e2874ef736/image.jpeg 'System diagram')
-
-- The architecture follows the [**12-Factor App methodology**](https://12factor.net).
-
 ### Services
 
 The architecture comprises the following services:
 
 - [Mobile application](#mobile-application) - will collect geospatial locations and send messages to the [Receiver service](#receiver-service). Each message should also contain the city code, e.g. NYC. This will be used by the backend to load the required geospatial into the database, thus allowing the system to be generic, suitable for any city providing the maps.
 - [Receiver](#receiver-service) service - will receive messages containing geospatial locations and produce them **immediately** into a Kafka topic _people_geo_locations_ (without any handling, to ensure the high throughput required in the [Non-Functional Requirements](#non-functional-requirements)).
-- [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Receiver's output topic, determine **in-memory** whether a message is from a pedestrian or mobilized individual based on the speed calculated between the last two points with the same UUID, and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
+- [Mobilization-classifier](#mobilization-classifier-service) service - each service instance will consume geospatial messages from the Receiver's output topic, determine whether a message is from a pedestrian or mobilized individual by using Redis to temporarily store and retrieve points for speed calculation (thus avoiding unnecessary load on PostgreSQL), and produce one message for each 2nd consumed message with the same UUID into one of the following topics:
   - _pedestrians_geo_locations_
   - _mobilized_geo_locations_
 - [Locations-finder](#locations-finder-service) service - each service instance will consume points from one of the Mobilization-classifier's output topics, find the street or neighborhood name of the consumed point using geospatial queries, and produce the location (street or neighborhood) into one of the following topics:
