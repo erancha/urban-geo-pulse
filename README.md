@@ -19,16 +19,15 @@ This data will aid in **decision-making** for **immediate needs**, such as deplo
 
 1. [**Architecture Document**](architecture/architecture-document-phase-1-REST.md):
 
-   - An architecture document has been created to outline the proposed system's structure. It includes an overview of the system components, their interactions, and the technologies used. The document can be accessed **[here](architecture/architecture-document-phase-1-REST.md)**.
+   - An overview of the system components, their interactions, and the technologies used. The document can be accessed **[here](architecture/architecture-document-phase-1-REST.md)**.
 
      <img src="https://lucid.app/publicSegments/view/6f4a521d-b3f7-48f9-8f81-a7e2874ef736/image.jpeg" alt="Architecture diagram" width="80%" height="80%">
 
 2. [**Basic JAVA Spring Boot Implementation**](basic-implementation/README.md):
-   - A Basic implementation has been developed using JAVA and Spring Boot as a foundation for the UrbanGeoPulse application.
-   - The implementation includes essential features for classifying messages from pedestrians or mobilized individuals and retrieving streets and neighborhoods activity data for required timeframes.<br>
-   - The design and implementation align with the [12-Factor App methodology](architecture/architecture-document-phase-1-REST.md#appendix-12-factor-app-methodology).
+   - Basic implementation developed using JAVA and Spring Boot, covering the backend services.
    - The implementation demonstrates using [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/) for monitoring and reporting, e.g. for [Kafka](https://kafka.apache.org/) metrics:  
      <img src="https://erancha-misc-images.s3.eu-central-1.amazonaws.com/UGP-Grafana-sample.jpg" alt="Kafka metrics" width="80%" height="80%">
+   - The design and implementation align with the [12-Factor App methodology](architecture/architecture-document-phase-1-REST.md#appendix-12-factor-app-methodology).
    - For more information about the basic implementation, please refer to this [README](basic-implementation/README.md) file.
 
 **Acknowledgments**: [Introduction to PostGIS](https://postgis.net/workshops/postgis-intro) workshop.
